@@ -1,10 +1,3 @@
-authors,publication_year,employed_percent,number_of_participants, rob_2_domain_1, rob_2_domain_2, rob_2_domain_3, rob_2_domain_4, rob_2_domain_5, moderators,female_percentage,addmore stuff...
-,,,,,,,,,,,
-,,,,,,,,,,,
-,,,,,,,,,,,
-,,,,,,,,,,,
-,,,,,,,,,,,
-,,,,,,,,,,,
-,,,,,,,,,,,
-,,,,,,,,,,,
-,,,,,,,,,,,
+study_id,author,year,doi,country,country_income_level,study_design,setting_fep,setting_community,setting_inpatient,n_total_baseline,n_total_fu,perc_attrition,follow_up_years,rob_selection,rob_performance,rob_detection,rob_attrition,rob_reporting,rob_other,rob_overall,mean_age,sd_age,perc_female,perc_minority,mean_edu_years,sd_edu_years,perc_high_edu,dup_weeks_mean,dup_weeks_sd,illness_duration_years_mean,illness_duration_years_sd,perc_on_meds_baseline,perc_adherent_baseline,perc_employed_baseline,symptom_scale_positive,symptoms_positive_mean,symptoms_positive_sd,symptom_scale_negative,symptoms_negative_mean,symptoms_negative_sd,symptom_scale_general,symptoms_general_mean,symptoms_general_sd,neurocog_scale,neurocog_mean,neurocog_sd,intervention_type,intervention_name,n_employed_fu,definition_employment,n_competitive_fu,n_sheltered_fu,n_education_training_fu,job_tenure_weeks_mean,job_tenure_weeks_sd,perc_on_meds_fu,perc_adherent_fu,perc_in_relationship_fu
+ajnakina2021,Ajnakina O,2021,10.1016/j.schres.2021.03.013,United Kingdom,High,Longitudinal cohort,1,NA,NA,2336,2336,0,9,NA,NA,NA,NA,NA,NA,NA,28.8,NA,39.1,41.1,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,Observational,NA,759,"any paid employment",NA,NA,NA,NA,NA,NA,NA,NA
+sturup2022,Stūrup AE,2022,10.1017/S0033291722002021,Denmark,High,Longitudinal cohort,1,1,1,26402,20821,21.1,6,NA,NA,NA,NA,NA,NA,NA,31.6,NA,44.8,14.2,NA,NA,46.4,NA,NA,6,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,Observational,NA,2949,"work as primary income source or registered student",NA,NA,NA,NA,NA,NA,NA,38.7
