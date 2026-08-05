@@ -294,7 +294,10 @@ build_primary_pool <- function(dat, cfg, horizon = cfg$horizons$primary) {
   d <- merge(dat$outcomes, dat$cohorts, by = "cohort_id", all.x = TRUE)
   d <- merge(d, dat$arms[c("cohort_id", "arm_id", "arm_type")],
              by = c("cohort_id", "arm_id"), all.x = TRUE)
-  d <- merge(d, dat$reports[c("report_id", "eligibility_status")],
+  # `year` is carried through because the result-selection rule uses it as the
+  # final tiebreak. Without it the tiebreak silently referenced a column that
+  # did not exist.
+  d <- merge(d, dat$reports[c("report_id", "eligibility_status", "year")],
              by = "report_id", all.x = TRUE)
 
   log <- data.frame(clause = character(), removed = integer(),
