@@ -1,0 +1,289 @@
+# =============================================================================
+# analysis.yml
+#
+# Every analysis-defining choice for the employment meta-analysis. Scientific
+# constants live here, not scattered through R, so a reviewer can see and change
+# them in one place. This file is hashed into the analysis identifier, so the
+# commit that pins these values provably predates the fits that use them.
+#
+# The logit scale is the working scale throughout. Proportions are produced by
+# draw-wise back-transformation, never by transforming a summary.
+#
+# The prose justification for each choice is in docs/statistical_analysis_plan.md.
+# Changing a value here without changing that document leaves the two
+# disagreeing, and the plan is the authority.
+# =============================================================================
+
+seed: 20260805
+
+inputs:
+  reports:  {path: data/extraction_reports.csv,  required: true}
+  cohorts:  {path: data/extraction_cohorts.csv,  required: true}
+  arms:     {path: data/extraction_arms.csv,     required: true}
+  outcomes: {path: data/extraction_outcomes.csv, required: true}
+  rob:      {path: data/extraction_rob.csv,      required: false}
+  manifest: {path: data/inclusion_manifest.csv,  required: true}
+
+# --- provenance --------------------------------------------------------------
+# The pilot is a purposive engineering sample. Every output table carries this
+# label so a number cannot be lifted from a CSV without the caveat travelling
+# with it. Set to `full` only when the frozen complete dataset is in use.
+sample_status: "PURPOSIVE PILOT - NOT FOR INFERENCE"
+
+# --- the primary prevalence pool ---------------------------------------------
+# Observational cohorts only. Trial arms are excluded because eligibility for a
+# vocational trial typically requires being unemployed and wanting to work, so
+# an arm-level rate is conditioned on that selection and does not estimate
+# employment in the underlying population. See SAP section 2.1.
+pool:
+  designs: [prospective_cohort, retrospective_cohort, register_cohort]
+  arm_types: [cohort]
+  ascertainment: [point_prevalence]
+  outcome_construct: [paid_any, paid_competitive, paid_supported_sheltered]
+  diagnosis_groups: [fep, schizophrenia, psychosis_mixed]
+  min_perc_qualifying_diagnosis: 50
+  denominator: n_outcome_observed
+  one_result_per_cohort: true
+  # Applied in order when several reports describe one cohort at one horizon.
+  result_selection_order: [largest_analysis_population, closest_construct, earliest_publication]
+
+# --- follow-up horizons ------------------------------------------------------
+# A landmark fixes the horizon so the pooled estimate has one meaning. Taking
+# each cohort's longest follow-up would mix 12 months with 20 years and would
+# select on which cohorts published long-term results. See SAP section 4.
+horizons:
+  primary: t12m
+  bands:
+    t12m:  {label: "12 months",       min_months: 9,   max_months: 18}
+    t24m:  {label: "24 months",       min_months: 18,  max_months: 30}
+    t60m:  {label: "5 years",         min_months: 48,  max_months: 78}
+    t120m: {label: "10 years or more", min_months: 108, max_months: 100000}
+
+# --- moderators --------------------------------------------------------------
+# Scaling is fixed here in clinical units and is NEVER recomputed from whichever
+# cohorts are in a given fit. Recentring on the pilot and again on the full data
+# would silently change what a coefficient means and what its prior implies.
+#
+# `nominal_contrast` anchors both the prior and any threshold. The fitted
+# coefficient is per `unit`, so:
+#   nominal_span       = diff(nominal_contrast) / unit
+#   prior_beta_unit_sd = prior_beta_full_sd / nominal_span
+moderators:
+  horizon:
+    label: "Follow-up (per doubling of months from 12)"
+    kind: continuous
+    tier: confirmatory
+    unit: 1
+    centre: 12
+    transform: log2_months_over_12
+    nominal_contrast: [0, 3]
+  diagnosis_group:
+    label: "Diagnosis group"
+    kind: categorical
+    tier: confirmatory
+    reference: fep
+  country_income_level:
+    label: "Country income level"
+    kind: categorical
+    tier: confirmatory
+    reference: high
+  outcome_construct:
+    label: "Employment construct"
+    kind: categorical
+    tier: confirmatory
+    reference: paid_any
+  mean_age:
+    label: "Mean age (per 10 years)"
+    kind: continuous
+    tier: exploratory
+    unit: 10
+    centre: 30
+    nominal_contrast: [25, 35]
+  perc_female:
+    label: "Female (per 10 percentage points)"
+    kind: continuous
+    tier: exploratory
+    unit: 10
+    centre: 40
+    nominal_contrast: [30, 50]
+  perc_post_secondary:
+    label: "Post-secondary education (per 10 percentage points)"
+    kind: continuous
+    tier: exploratory
+    unit: 10
+    centre: 30
+    nominal_contrast: [20, 50]
+  perc_employed_baseline:
+    label: "Employed at baseline (per 10 percentage points)"
+    kind: continuous
+    tier: exploratory
+    unit: 10
+    centre: 20
+    nominal_contrast: [10, 40]
+  region:
+    label: "Region"
+    kind: categorical
+    tier: exploratory
+    reference: europe_north
+  setting:
+    label: "Setting"
+    kind: categorical
+    tier: exploratory
+    reference: eip
+  rob_overall:
+    label: "Risk of bias"
+    kind: categorical
+    tier: exploratory
+    reference: low
+
+# Cochrane Handbook chapter 10: meta-regression should generally not be
+# considered with fewer than ten studies, with roughly ten per characteristic.
+# A moderator below threshold is reported with status "not reported" and blank
+# estimates, so its absence is visible rather than silent.
+reportability:
+  min_cohorts_continuous: 10
+  min_cohorts_per_level: 10
+
+# --- priors ------------------------------------------------------------------
+# Intercept: plogis(-1.1) = 0.25, mid-range of the 10 to 40 per cent reported in
+# this field. SD 0.8 implies a 95 per cent prior interval on the pooled
+# proportion of 0.065 to 0.615, so nothing plausible is excluded and the prior
+# cannot by itself produce the estimate. normal(0, 10) on a logit is NOT
+# uninformative for a proportion: it piles mass at 0 and 1.
+#
+# Ajnakina et al.'s 32.5 per cent is a prior predictive plausibility anchor
+# ONLY, never a prior mean: its 74 studies overlap this review's search window,
+# so using it informatively would double-count the same primary studies.
+#
+# tau: half-normal(0.5). Median 0.34 implies true cohort proportions of 0.15 to
+# 0.39 at a pooled 0.25; 95 per cent of the prior lies below 0.98. Ajnakina
+# reported I-squared near 96 per cent, so a prior concentrated below 0.2 would
+# be indefensible. Rover et al. (2021).
+priors:
+  primary:
+    intercept_mean: -1.1
+    intercept_sd: 0.8
+    tau_sd: 0.5
+    beta_full_sd: 0.5
+    treatment_lor_sd: 0.7
+  grid:
+    intercept_mean: [-1.4, -1.1, -0.8]
+    intercept_sd:   [0.5, 0.8, 1.5]
+    tau_sd:         [0.25, 0.5, 1.0]
+    beta_full_sd:   [0.25, 0.5, 1.0]
+  weak:
+    intercept_mean: 0.0
+    intercept_sd: 5.0
+    tau_sd: 2.0
+    beta_full_sd: 2.0
+    treatment_lor_sd: 2.0
+
+# --- prior predictive check --------------------------------------------------
+# PRESPECIFIED. The requirement is COVERAGE, not agreement: a proportion has no
+# null of zero, so a directional criterion would be meaningless. A criterion
+# chosen after seeing the prior predictive is unfalsifiable, so a failure here
+# is reported as a failure and the priors are revised in a dated amendment.
+prior_predictive:
+  anchors_p: [0.10, 0.325, 0.45]
+  anchor_interval_prob: 0.95
+  new_cohort_interval: [0.01, 0.90]
+  new_cohort_min_mass: 0.90
+  obs_median_range: [0.10, 0.45]
+  obs_max_mass_above: {threshold: 0.80, max_mass: 0.05}
+  # Denominators the check is run across, in addition to the observed ones, so
+  # the priors are shown to behave for small cohorts and zero-event cases.
+  extra_denominators: [20, 50, 100]
+
+# --- reporting ---------------------------------------------------------------
+# Estimation is primary (Dienes 2021). A decision is an additional statement
+# about a posterior, never a substitute for reporting it.
+#
+# One headline interval. Reporting both an equal-tailed and a highest-density
+# interval adds complexity without changing the conclusion; the HDI is computed
+# only where the posterior is visibly asymmetric, and then on the proportion
+# draws, because the HDI is not invariant under back-transformation.
+#
+# No ROPE on the pooled proportion: no defensible threshold for an acceptable
+# employment rate exists, and inventing one to obtain a categorical verdict is
+# not justified. lib_config.R fails at load if this is set true.
+reporting:
+  primary_interval: equal_tailed
+  interval_prob: 0.95
+  hdi_when_asymmetric: true
+  rope_on_pooled_proportion: false
+  # Populated ONLY if an external clinical or policy rationale is written into
+  # the statistical analysis plan first. Empty means none is reported.
+  directional_thresholds: []
+  slope_sesoi_grid: {from: 0.05, to: 0.50, by: 0.05}
+
+# --- frequentist comparison --------------------------------------------------
+# A DIAGNOSTIC, not a gate. Different likelihood approximations and priors can
+# legitimately differ, and there is no theorem requiring tau_bayes >= tau_freq.
+# No agreement tolerance is imposed on real data and no run fails on a
+# discrepancy; equivalence is tested on simulated data where the expected
+# behaviour is known.
+#
+# `model` is deliberately absent: it is not relevant for measure PLO, warns as
+# such, and returns identical estimates for UM.FS and UM.RS.
+frequentist:
+  measure: PLO
+  method: ML
+  approximate_secondary: {measure: PLO, method: REML, test: knha}
+  treat_as_gate: false
+
+# --- sampling ----------------------------------------------------------------
+sampling:
+  chains: 4
+  iter_warmup: 2000
+  iter_sampling: 3000
+  adapt_delta: 0.95
+  max_treedepth: 12
+  adapt_delta_ladder: [0.95, 0.99, 0.999]
+
+# Applied to posterior fits only. Prior predictive draws are not put through
+# posterior convergence gates: they are checked against the criteria above.
+diagnostics:
+  max_rhat: 1.01
+  min_ess_bulk: 400
+  min_ess_tail: 400
+  max_divergent: 0
+  max_treedepth_hits: 0
+  min_ebfmi: 0.2
+
+# --- simulation --------------------------------------------------------------
+# Coverage validation, not a smoke test. Benchmark cost before raising
+# n_replicates: the runner records elapsed time per scenario.
+simulation:
+  n_replicates: 200
+  report_monte_carlo_interval: true
+  scenarios:
+    - {name: central,        p: 0.30, tau: 0.45, k: 40, size: pilot_resample}
+    - {name: low_prevalence, p: 0.10, tau: 0.45, k: 40, size: pilot_resample}
+    - {name: high_tau,       p: 0.30, tau: 0.90, k: 40, size: pilot_resample}
+    - {name: zero_tau,       p: 0.30, tau: 0.00, k: 40, size: pilot_resample}
+    - {name: small_k,        p: 0.30, tau: 0.45, k: 12, size: pilot_resample}
+    - {name: size_imbalance, p: 0.30, tau: 0.45, k: 40, size: extreme_imbalance}
+    - {name: zero_events,    p: 0.03, tau: 0.45, k: 40, size: small_only}
+  # Bias in the pooled proportion is gated; tau coverage is REPORTED, not gated,
+  # because the half-normal deliberately regularises tau at small k and
+  # undercoverage there is the prior working as designed.
+  max_abs_bias_proportion: 0.02
+  gate_tau_coverage: false
+
+sensitivity:
+  prior_grid: true
+  leave_one_cohort_out: true
+  include_trial_control_arms: true
+  include_period_prevalence: true
+  exclude_register_cohorts: true
+  construct_competitive_only: true
+  missing_outcome_bounds: true
+  attrition_moderator: true
+  priorsense: true
+
+# Predictive assessment leaves out whole cohorts. Observation-level LOO is
+# misleading when each observation carries a near-unique random effect and the
+# target is prediction for a new cohort.
+cross_validation:
+  method: leave_one_cohort_out
+  k_fold_groups: cohort_id

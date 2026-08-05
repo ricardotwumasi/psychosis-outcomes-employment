@@ -1,0 +1,1 @@
+result_id,report_id,cohort_id,arm_id,followup_months,outcome_construct,outcome_verbatim,ascertainment,n_employed,n_outcome_observed,n_assessed,n_alive_eligible,n_entered,denominator_basis,missing_data_method,source_locator,adjusted_measure,adjusted_effect,adjusted_se,mean_age,perc_female,perc_post_secondary,perc_employed_baseline,notes

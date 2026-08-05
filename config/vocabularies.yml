@@ -1,0 +1,138 @@
+# =============================================================================
+# vocabularies.yml
+#
+# The single definition of every controlled vocabulary in the extraction
+# schema. R/lib_data.R validates against this file and config/codebook.md
+# documents it, so there is one source of truth and the two cannot drift.
+#
+# A value outside its vocabulary stops the run. It is never coerced to NA,
+# because a silently dropped value looks identical to a value the paper did not
+# report, and those are different things.
+# =============================================================================
+
+# --- extraction_reports ------------------------------------------------------
+eligibility_status:
+  include: Meets all eligibility criteria and contributes at least one result
+  exclude: Assessed and does not meet criteria; exclusion_reason required
+  linked_report: Eligible participants, but the result used comes from another report of the same cohort
+  supplement_only: Supplementary material for another report, not an article
+  duplicate: The same article present more than once in the source folder
+  pending: Not yet adjudicated
+
+exclusion_reason:
+  wrong_population: Fewer than half the sample has a qualifying psychosis diagnosis and no subgroup is extractable
+  wrong_outcome: No employment outcome, or none at twelve months or later
+  wrong_design: Review, commentary, case study, or no original data
+  no_extractable_data: Employment reported but no recoverable numerator and denominator
+  secondary_psychosis: Psychosis secondary to a medical condition
+  duplicate_report: Same participants reported elsewhere and that report was selected
+  not_applicable: Used when eligibility_status is not `exclude`
+
+# --- extraction_cohorts ------------------------------------------------------
+design:
+  prospective_cohort: Participants identified and followed forward, not a trial
+  retrospective_cohort: Cohort assembled from existing records and followed forward in time
+  register_cohort: Whole-population administrative or national register linkage
+  rct: Individually randomised controlled trial
+  cluster_rct: Randomised by site, team or cluster rather than by participant
+  non_randomised_trial: Interventional but not randomised, including quasi-experimental
+  cross_sectional: Single assessment with no follow-up
+  other: Anything else; describe in notes
+
+diagnosis_group:
+  fep: First-episode psychosis, diagnostically confirmed
+  schizophrenia: Established schizophrenia or schizophrenia spectrum disorder
+  psychosis_mixed: Mixed psychotic disorders including affective psychosis
+  chr: Clinical high risk or ultra high risk. Never enters the primary pool
+  smi_mixed: Mixed severe mental illness. Enters only if a psychosis subgroup is separately extractable
+
+setting:
+  eip: Early intervention in psychosis service
+  community_smh: Community secondary mental health service
+  inpatient: Inpatient or hospital-based
+  registry: Administrative or national register, no clinical service defined
+  forensic: Forensic or secure setting
+  mixed_unclear: More than one of the above, or not determinable
+
+region:
+  europe_north: Nordic countries, Baltic states
+  europe_west: United Kingdom, Ireland, France, Benelux, Germany, Austria, Switzerland
+  europe_south: Iberia, Italy, Greece, Malta, Cyprus
+  europe_east: Central and eastern Europe, Balkans, Russia
+  north_america: United States, Canada
+  latin_america_caribbean: Mexico, Central and South America, Caribbean
+  africa: All of Africa
+  asia_east: China, Japan, Korea, Taiwan, Hong Kong, Mongolia
+  asia_south: India, Pakistan, Bangladesh, Sri Lanka, Nepal
+  asia_west_central: Middle East, Turkey, Central Asia
+  oceania: Australia, New Zealand, Pacific islands
+  multi: Multinational, no single region
+
+country_income_level:
+  high: World Bank high income
+  upper_middle: World Bank upper-middle income
+  lower_middle: World Bank lower-middle income
+  low: World Bank low income
+
+# --- extraction_arms ---------------------------------------------------------
+arm_type:
+  cohort: The whole observational cohort, no allocation. The only type in the primary pool
+  control_tau: Trial arm receiving treatment as usual or no active vocational component
+  control_active: Trial arm receiving an active comparator, which may itself be vocational
+  intervention: Trial arm receiving the intervention under test
+  subgroup: A non-randomised subgroup of a cohort reported separately
+
+cluster_randomised:
+  "yes": Allocation was by site, team or cluster. An adjusted estimate is required
+  "no": Allocation was by participant, or the study is not a trial
+  unclear: Cannot be determined from the report
+
+# --- extraction_outcomes -----------------------------------------------------
+# The primary construct is paid_any. Education is recorded but is NOT counted as
+# employment in the primary estimate, because a composite of work and education
+# tracks the age structure and education system of a cohort rather than
+# labour-market participation. See docs/statistical_analysis_plan.md section 3.
+outcome_construct:
+  paid_any: Any work for pay, competitive supported or sheltered. THE PRIMARY CONSTRUCT
+  paid_competitive: Open labour market, at or above minimum wage, not set aside for disability
+  paid_supported_sheltered: Supported or sheltered employment only
+  paid_or_education: Paid work OR enrolment in education or training. Secondary outcome
+  vocational_activity: Any vocational activity including unpaid and voluntary
+  education_only: Education or training only
+  unclear: The report does not define what it counted
+
+ascertainment:
+  point_prevalence: Employed AT the timepoint. The only type in the primary pool
+  period_prevalence: Employed during a defined window, for example a tax year
+  any_time_during_followup: Ever employed at any point across follow-up
+  unclear: Cannot be determined from the report
+
+denominator_basis:
+  outcome_observed: Those whose employment status was actually observed
+  alive_eligible: All alive and still eligible, whether or not assessed
+  entered: All randomised or entering the cohort
+  unclear: The report does not say which
+
+missing_data_method:
+  complete_case: Analysis restricted to those with observed status
+  last_observation_carried_forward: LOCF or similar carry-forward
+  multiple_imputation: Imputed
+  register_complete: Register linkage with effectively complete ascertainment
+  not_stated: The report does not say
+  not_applicable: No missing data arises
+
+# --- extraction_rob ----------------------------------------------------------
+# Instruments are matched to the design and estimand of each result. RoB 2
+# assesses the effect of assignment in a randomised trial and has no applicable
+# domains for a prevalence estimate, so it is not used for the primary estimand.
+rob_tool:
+  jbi_prevalence: JBI critical appraisal checklist for studies reporting prevalence data
+  rob2: Cochrane RoB 2, for effect estimates from randomised comparisons
+  robins_i: ROBINS-I, for effect estimates from non-randomised intervention studies
+
+# Judgements are validated against the tool. Categories are never collapsed
+# into a shared numeric scale.
+rob_judgement:
+  jbi_prevalence: ["yes", "no", unclear, not_applicable]
+  rob2: [low, some_concerns, high]
+  robins_i: [low, moderate, serious, critical, no_information]
