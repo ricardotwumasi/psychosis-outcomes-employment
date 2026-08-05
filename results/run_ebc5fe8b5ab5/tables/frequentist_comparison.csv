@@ -1,0 +1,4 @@
+"model","pooled_proportion","ci_lo","ci_hi","tau_logit","i2","k","note","n_cohorts_continuity_corrected","comparison_is_a_gate","sample_status"
+"brms binomial-logit (primary)",0.40605454420214,0.201207784453717,0.619107133200916,0.722663,NA,NA,"",0,FALSE,"PURPOSIVE PILOT - NOT FOR INFERENCE"
+"rma.glmm exact binomial-normal (comparator to the Bayesian model)",0.488301656067,0.230148719371285,0.752849488225935,0.809600000182297,93.5245208709038,2,"",0,FALSE,"PURPOSIVE PILOT - NOT FOR INFERENCE"
+"rma on logit-transformed proportions (approximate secondary)",0.491181319198527,2.54200704428703e-05,0.999972721633783,1.15436265491843,96.7064935733427,2,"",0,FALSE,"PURPOSIVE PILOT - NOT FOR INFERENCE"

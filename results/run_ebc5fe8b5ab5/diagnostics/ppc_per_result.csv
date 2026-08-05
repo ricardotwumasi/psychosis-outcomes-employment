@@ -1,0 +1,5 @@
+"form","cohort_id","result_id","observed","lower","upper","inside","bayes_p"
+"conditional","kaisyuan_taiwan","chen2023_cohort_t12m_paidany",0.692307692307692,0.492307692307692,0.815384615384615,TRUE,0.378333333333333
+"conditional","croatia_rlai","mihaljevicpeles2016_cohort_t12m_paidcomp_abstract",0.299610894941634,0.229571984435798,0.385214007782101,TRUE,0.556083333333333
+"new_cohort","kaisyuan_taiwan","chen2023_cohort_t12m_paidany",0.692307692307692,0.0769230769230769,0.830769230769231,TRUE,0.102
+"new_cohort","croatia_rlai","mihaljevicpeles2016_cohort_t12m_paidcomp_abstract",0.299610894941634,0.0817120622568093,0.797665369649806,TRUE,0.716416666666667

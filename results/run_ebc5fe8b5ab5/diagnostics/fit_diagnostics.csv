@@ -1,0 +1,2 @@
+"fit_id","n_variables_audited","max_rhat","worst_rhat_variable","min_ess_bulk","worst_ess_bulk_variable","min_ess_tail","max_mcse_mean","num_divergent","num_max_treedepth","min_ebfmi","escalations","pass","failure_reason","sample_status"
+"prevalence_t12m",6,1.00225324846513,"lp__",3701.1800634785,"lp__",4134.83765227177,0.0261284610644257,0,0,0.889474077012858,0,TRUE,"","PURPOSIVE PILOT - NOT FOR INFERENCE"

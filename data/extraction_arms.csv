@@ -1,1 +1,27 @@
 cohort_id,arm_id,arm_type,intervention_name,intervention_description,cluster_randomised,n_clusters,icc_reported,baseline_unemployed_required,baseline_wants_work_required,n_entered
+opus_1998,cohort,cohort,,Both OPUS randomised arms merged into a single cohort at long-term follow-up because the aims were unrelated to treatment assignment,no,,,no,no,578
+nfbc1966,cohort,cohort,,Whole birth cohort psychosis cases identified from national registers; no allocation,no,,,no,no,
+nfbc1966,dp_psychiatric,subgroup,,Cohort members with schizophrenia or other psychosis who had been on a disability pension for a psychiatric reason,no,,,yes,no,
+carstairs_1992,cohort,cohort,,Whole population detained in the high secure State Hospital between 25 Aug 1992 and 13 Aug 1993,no,,,no,no,241
+carstairs_1992,sz,subgroup,,Subgroup with definite or probable schizophrenia by Feighner criteria,no,,,no,no,169
+isrep_rct,srt,intervention,Social Recovery Therapy plus treatment as usual,Cognitive behavioural social recovery therapy targeting activity and personal goals added to TAU,no,,,no,no,35
+isrep_rct,tau,control_tau,,Treatment as usual: case management from a secondary mental health care team; no psychological therapy,no,,,no,no,42
+isrep_rct,srt_nonaff,subgroup,Social Recovery Therapy plus treatment as usual,Non-affective psychosis subgroup of the SRT arm,no,,,no,no,
+isrep_rct,tau_nonaff,subgroup,,Non-affective psychosis subgroup of the TAU arm,no,,,no,no,
+isrep_rct,srt_aff,subgroup,Social Recovery Therapy plus treatment as usual,Affective psychosis subgroup of the SRT arm,no,,,no,no,
+isrep_rct,tau_aff,subgroup,,Affective psychosis subgroup of the TAU arm,no,,,no,no,
+ips_denmark_rct,ips,intervention,Individual Placement and Support,Rapid individualised search for competitive employment or education integrated with mental health services,no,,,yes,yes,243
+ips_denmark_rct,ipse,intervention,IPS with enhancements (IPSE),IPS plus computerised cognitive remediation and work-focused social skills training,no,,,yes,yes,238
+ips_denmark_rct,sau,control_active,Service as usual,Best available vocational rehabilitation provided by the Danish national job centres,no,,,yes,yes,239
+nz_idi,cohort,cohort,,Whole national FEP cohort; no intervention beyond routine services,no,,,no,no,2193
+nz_idi,maori,subgroup,,Maori (Indigenous) members of the FEP cohort,no,,,no,no,918
+nz_idi,non_maori,subgroup,,Non-Maori members of the FEP cohort,no,,,no,no,1275
+dk_registers_1998,cohort,cohort,,Whole register cohort; antipsychotic exposure modelled as a time-varying within-person variable rather than as arms,no,,,no,no,65630
+bologna_fep,cohort,cohort,,"All FEP patients presenting to Bologna West CMHCs; care included a first-episode programme with at-risk, early intervention and post-acute psychosocial components",no,,,no,no,163
+bologna_fep,interrupted,subgroup,,Patients who suspended work or study activity at illness onset (denominator for the return-to-activity outcome),no,,,yes,no,36
+croatia_rlai,cohort,cohort,,All patients switched to risperidone long-acting injection under naturalistic conditions at clinician discretion,no,,,no,no,362
+croatia_rlai,unemployed_baseline,subgroup,,Patients not employed at baseline among those with 12-month employment data (Table 6),no,,,yes,no,154
+nhsl_colombo,fec,subgroup,,First episode cohort: first presentation to mental health services with DUP under 12 months and under 2 weeks of antipsychotic exposure,no,,,no,no,122
+nhsl_colombo,rec,subgroup,,Recurrent/relapsing episode cohort: prior diagnosis of schizophrenia presenting with a new episode or relapse,no,,,no,no,118
+kaisyuan_taiwan,cohort,cohort,,"Whole sample was in vocational training by design (supported employment, sheltered employment or unpaid job training), first placement of under 3 months at entry",no,,,no,yes,65
+pp1m_asiapac,pp1m,intervention,Paliperidone palmitate once-monthly (PP1M),Single-arm open-label PP1M: 150 mg eq. day 1 then 100 mg eq. day 8 then flexible monthly maintenance doses of 50-150 mg eq. for 18 months,no,,,no,no,474

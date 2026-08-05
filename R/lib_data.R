@@ -144,10 +144,17 @@ validate_extraction <- function(dat, cfg) {
 
   ## outcomes
   o <- dat$outcomes
+  # n_employed and n_outcome_observed are deliberately NOT required. The
+  # codebook instructs an extractor to leave a count blank rather than
+  # back-calculate it from a percentage, and such a row is real data: it
+  # records that a result exists and cannot be used, which is what the
+  # missing-evidence assessment is built from. build_primary_pool() drops
+  # these rows and counts them, so they are excluded visibly rather than
+  # rejected at the door.
   check_required(o, "extraction_outcomes",
                  c("result_id", "report_id", "cohort_id", "arm_id",
                    "followup_months", "outcome_construct", "ascertainment",
-                   "n_employed", "n_outcome_observed", "source_locator"))
+                   "source_locator"))
   check_unique_key(o, "extraction_outcomes", "result_id")
   check_foreign_key(o, "extraction_outcomes", "report_id", r$report_id, "report_id")
   check_foreign_key(o, "extraction_outcomes", "cohort_id", co$cohort_id, "cohort_id")

@@ -82,7 +82,11 @@ main <- function(root = getwd(), out_dir = NULL) {
   invisible(list(cfg = cfg, dat = dat, pool = pool))
 }
 
-if (identical(environment(), globalenv()) && !interactive()) {
+# sys.nframe() is 0 only at top level. source() from another script creates a
+# frame, so this block runs when the file is invoked as a script and not when
+# 00_run_all.R sources it for its functions. The previous guard tested
+# globalenv(), which is also true under source() and made the runner quit here.
+if (sys.nframe() == 0L && !interactive()) {
   args <- commandArgs(trailingOnly = TRUE)
   root <- if (length(args) >= 1L) args[1] else getwd()
   out <- if (length(args) >= 2L) args[2] else NULL

@@ -1,0 +1,4 @@
+"cohort_id","kept_result_id","kept_report_id","dropped_result_id","dropped_report_id","reason"
+"kaisyuan_taiwan","chen2023_cohort_t12m_paidany","chen2023","chen2023_cohort_t12m_paidcomp","chen2023","same cohort, one result selected per prespecified order"
+"kaisyuan_taiwan","chen2023_cohort_t12m_paidany","chen2023","chen2023_cohort_t12m_paidshelt","chen2023","same cohort, one result selected per prespecified order"
+"croatia_rlai","mihaljevicpeles2016_cohort_t12m_paidcomp_abstract","mihaljevicpeles2016","mihaljevicpeles2016_cohort_t12m_paidcomp_results","mihaljevicpeles2016","same cohort, one result selected per prespecified order"

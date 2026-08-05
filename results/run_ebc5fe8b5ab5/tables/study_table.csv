@@ -1,0 +1,3 @@
+"cohort_id","report_id","result_id","n_employed","n_outcome_observed","proportion","followup_months","outcome_construct","design","country_iso3","ci_lo","ci_hi","sample_status"
+"croatia_rlai","mihaljevicpeles2016","mihaljevicpeles2016_cohort_t12m_paidcomp_abstract",77,257,0.299610894941634,12,"paid_competitive","prospective_cohort","HRV",0.24689229782625,0.358231824444499,"PURPOSIVE PILOT - NOT FOR INFERENCE"
+"kaisyuan_taiwan","chen2023","chen2023_cohort_t12m_paidany",45,65,0.692307692307692,12,"paid_any","prospective_cohort","TWN",0.572023570852727,0.79112968633079,"PURPOSIVE PILOT - NOT FOR INFERENCE"

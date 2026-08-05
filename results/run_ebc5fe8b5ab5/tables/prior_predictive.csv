@@ -1,0 +1,7 @@
+"criterion","value","bound","pass","sample_status"
+"anchor 0.100 inside the central 95% prior interval",0.1,"[0.067, 0.619]",TRUE,"PURPOSIVE PILOT - NOT FOR INFERENCE"
+"anchor 0.325 inside the central 95% prior interval",0.325,"[0.067, 0.619]",TRUE,"PURPOSIVE PILOT - NOT FOR INFERENCE"
+"anchor 0.450 inside the central 95% prior interval",0.45,"[0.067, 0.619]",TRUE,"PURPOSIVE PILOT - NOT FOR INFERENCE"
+"at least 90% of new-cohort prior mass in [0.01, 0.90]",0.997916666666667,"0.9",TRUE,"PURPOSIVE PILOT - NOT FOR INFERENCE"
+"median simulated observed proportion in [0.10, 0.45]",0.25,"[0.10, 0.45]",TRUE,"PURPOSIVE PILOT - NOT FOR INFERENCE"
+"at most 5% of simulated mass above 0.80",0.00651666666666667,"0.05",TRUE,"PURPOSIVE PILOT - NOT FOR INFERENCE"
