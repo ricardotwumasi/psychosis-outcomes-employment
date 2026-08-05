@@ -1,0 +1,37 @@
+# Source material: study and screening PDFs, theses, applications, screening
+# images, methodological reference papers. This repository is public and most of
+# this material is copyright, so none of it belongs in version control.
+dissertation_shared_folder/
+methods/
+*.pdf
+*.docx
+*.xlsx
+*.png
+*.jpg
+*.jpeg
+
+# Derived figures are deliberately not versioned. The figure-generating code and
+# the machine-readable tables behind each figure are the artefacts of record, so
+# a reader reproduces a figure rather than trusting a committed image.
+
+# Fitted models and compiled Stan artefacts. The .stan and .R sources are the
+# artefacts; the binaries are machine-specific and large.
+.cache/
+*.rds
+*.o
+*.so
+*.dylib
+
+# R session detritus. The renv lockfile is committed; the library is not.
+.Rhistory
+.RData
+.Rproj.user/
+renv/library/
+renv/local/
+renv/python/
+renv/sandbox/
+renv/staging/
+
+# Platform noise.
+.DS_Store
+*~
