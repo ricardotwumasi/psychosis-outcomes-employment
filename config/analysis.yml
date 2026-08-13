@@ -23,41 +23,129 @@ inputs:
   outcomes: {path: data/extraction_outcomes.csv, required: true}
   rob:      {path: data/extraction_rob.csv,      required: false}
   manifest: {path: data/inclusion_manifest.csv,  required: true}
+  # A report may describe more than one independently recruited cohort, which a
+  # single cohort_id column on extraction_reports.csv cannot express. This table
+  # is the authority for the report-to-cohort relation, and batches are formed
+  # from its connected components so that every report bearing on one
+  # result-selection decision is read together.
+  report_cohort_map: {path: data/report_cohort_map.csv, required: false}
+  # Field-level provenance for every value capable of moving a result into or
+  # out of the primary pool, and the ledger the independent human verification
+  # writes into.
+  provenance:   {path: data/extraction_provenance.csv, required: false}
+  # Batch id, prompt and model versions, extractor, timestamps, seeds and the
+  # hashes of both the source PDFs and the produced shard. Frozen once a batch
+  # is marked complete, so a row can be traced to the exact inputs that made it.
+  batch_ledger: {path: data/batch_ledger.csv, required: false}
 
 # --- provenance --------------------------------------------------------------
-# The pilot is a purposive engineering sample. Every output table carries this
-# label so a number cannot be lifted from a CSV without the caveat travelling
-# with it. Set to `full` only when the frozen complete dataset is in use.
-sample_status: "PURPOSIVE PILOT - NOT FOR INFERENCE"
+# Every output table carries this label so a number cannot be lifted from a CSV
+# without the caveat travelling with it.
+#
+# It becomes `full` ONLY after all of: the governance gate closes (the search is
+# complete and the universe frozen, SAP v0.2 ratified, PROSPERO amendment
+# submitted; only the clean frozen commit is outstanding), the
+# author-response cycle reaches its closure date, independent human verification
+# of every pool-determining field is complete, final validation passes, and a
+# clean tagged release pins data, code, config, prompts, environment and PDF
+# hashes. Until then it says so.
+sample_status: "DEFINITIVE EXTRACTION IN PROGRESS - NOT FOR INFERENCE"
 
 # --- the primary prevalence pool ---------------------------------------------
-# Observational cohorts only. Trial arms are excluded because eligibility for a
-# vocational trial typically requires being unemployed and wanting to work, so
-# an arm-level rate is conditioned on that selection and does not estimate
-# employment in the underlying population. See SAP section 2.1.
+# The gate is EMPLOYMENT-RELATED SELECTION, not parent study design. See
+# docs/methods_deviations.md D9 and SAP section 2.1.
+#
+# Parent design is an unreliable proxy for the population being estimated. The
+# pilot showed the error in both directions: an observational cohort recruited
+# through a vocational placement was admitted, while the merged OPUS trial
+# cohort was excluded despite having no employment-related recruitment
+# criterion. A random-effects distribution cannot convert a rate conditioned on
+# factors that determine employment into a marginal prevalence.
 pool:
-  designs: [prospective_cohort, retrospective_cohort, register_cohort]
+  # Only cohorts with no employment-related selection. `unclear` is admitted
+  # solely in the named sensitivity analysis below; silence in a thin methods
+  # section is `unclear`, never `none`.
+  employment_selection: [none]
   arm_types: [cohort]
   ascertainment: [point_prevalence]
-  outcome_construct: [paid_any, paid_competitive, paid_supported_sheltered]
+  # paid_any ONLY. paid_competitive and paid_sheltered_noncompetitive are
+  # separate outcome families, not looser versions of the primary construct: a
+  # competitive-only numerator answers a different question while keeping the
+  # primary label. Likewise period_prevalence above.
+  outcome_construct: [paid_any]
   diagnosis_groups: [fep, schizophrenia, psychosis_mixed]
+  # Admitted when min_perc_qualifying_diagnosis is met. Subgroup extractability
+  # is NOT an additional requirement: SAP section 7 as clarified on 12 August
+  # 2026 (D13) makes the 50 per cent rule sufficient on its own for a whole
+  # recruited cohort. `chr` is absent from both lists and excluded
+  # unconditionally.
+  #
+  # Without this, carstairs_1992 could not contribute at all: barring
+  # `smi_mixed` by label excluded the 241-patient hospital cohort that is 70 per
+  # cent schizophrenia, and the diagnostically pure 169 could not substitute
+  # because a nested subgroup is not a whole recruited cohort. That contradicted
+  # the prespecified 50 per cent rule, so the rule wins and the label yields.
+  #
+  # Below 50 per cent, an extractable subgroup is retained for a separately
+  # labelled subgroup analysis only. It never enters this pool, for the same
+  # reason: a subgroup arm is not a whole recruited cohort.
+  diagnosis_groups_conditional: [smi_mixed]
   min_perc_qualifying_diagnosis: 50
   denominator: n_outcome_observed
+  # A trial-derived whole cohort must satisfy every safeguard. Each is a column
+  # in extraction_arms.csv; the required value is given here so the rule lives
+  # in configuration rather than in R.
+  trial_safeguards:
+    all_original_arms_included: ["yes", not_applicable]
+    post_randomisation_selection: ["no", not_applicable]
+    employment_targeted_intervention: ["no", not_applicable]
+    common_construct_across_arms: ["yes", not_applicable]
+    selective_reweighting: ["no", not_applicable]
   one_result_per_cohort: true
-  # Applied in order when several reports describe one cohort at one horizon.
-  result_selection_order: [largest_analysis_population, closest_construct, earliest_publication]
+  # Applied in order when several results survive for one cohort at one horizon.
+  # Proximity to the landmark comes FIRST because SAP section 4 defines the
+  # estimate as "the reported timepoint closest to 12 months within the window";
+  # the SAP section 5 order then breaks remaining ties.
+  result_selection_order: [closest_to_landmark, largest_analysis_population, closest_construct, earliest_publication]
 
 # --- follow-up horizons ------------------------------------------------------
 # A landmark fixes the horizon so the pooled estimate has one meaning. Taking
 # each cohort's longest follow-up would mix 12 months with 20 years and would
 # select on which cohorts published long-term results. See SAP section 4.
+#
+# Bands are inclusive ranges, and 18 months falls in BOTH t12m and t24m. That
+# overlap is resolved prospectively, before any count was seen: a result is
+# assigned to the band whose landmark is nearest, and an exact tie goes to the
+# LONGER horizon. So 18 months is t24m. Previously the first band listed simply
+# won, which is an artefact of ordering rather than a rule.
 horizons:
   primary: t12m
+  tie_break: longer_horizon
   bands:
-    t12m:  {label: "12 months",       min_months: 9,   max_months: 18}
-    t24m:  {label: "24 months",       min_months: 18,  max_months: 30}
-    t60m:  {label: "5 years",         min_months: 48,  max_months: 78}
-    t120m: {label: "10 years or more", min_months: 108, max_months: 100000}
+    t12m:  {label: "12 months",        landmark_months: 12,  min_months: 9,   max_months: 18}
+    t24m:  {label: "24 months",        landmark_months: 24,  min_months: 18,  max_months: 30}
+    t60m:  {label: "5 years",          landmark_months: 60,  min_months: 48,  max_months: 78}
+    t120m: {label: "10 years or more", landmark_months: 120, min_months: 108, max_months: 100000}
+
+# --- sparse data -------------------------------------------------------------
+# Prespecified BEFORE any definitive count was seen, so that a thin pool is
+# reported rather than negotiated. Counted in DISTINCT COHORTS, not result rows:
+# ten results from one cohort are one cohort's worth of evidence.
+#
+# If a horizon falls below threshold the primary fit for that horizon stops.
+# Extraction, the other horizons, the secondary estimands and the rest of the
+# review continue, and no prespecified rule is relaxed.
+sparse_data:
+  min_cohorts_for_model: 2
+  zero_cohorts: no_estimate
+  one_cohort: descriptive_interval_only
+  # A single cohort gets an exact binomial interval, labelled as one cohort's
+  # observed proportion and explicitly NOT a meta-analysis.
+  one_cohort_method: exact_binomial
+  # At 2 to 9 cohorts the model is fitted but the half-normal prior on tau does
+  # much of the work, so prior sensitivity is reported alongside, prominently.
+  small_k_threshold: 10
+  small_k_requires_prior_sensitivity: true
 
 # --- moderators --------------------------------------------------------------
 # Scaling is fixed here in clinical units and is NEVER recomputed from whichever
@@ -130,11 +218,22 @@ moderators:
     kind: categorical
     tier: exploratory
     reference: eip
-  rob_overall:
-    label: "Risk of bias"
-    kind: categorical
-    tier: exploratory
-    reference: low
+  # rob_overall is SUSPENDED, not deleted. It was listed as an exploratory
+  # moderator, which means an overall risk-of-bias rating would enter an
+  # analysis, but nothing anywhere defines how to derive one from JBI's nine
+  # items, RoB 2's five domains or ROBINS-I's seven. Inventing a rule now (for
+  # instance banding a count of JBI "no" answers) would manufacture a composite
+  # with no standing in any of the three instruments, and the three scales are
+  # explicitly never collapsed onto a shared scale.
+  #
+  # It is reinstated only if the authorship group prespecifies a per-instrument
+  # derivation rule, which then goes here and in the SAP. See
+  # docs/methods_deviations.md D10.
+  # rob_overall:
+  #   label: "Risk of bias"
+  #   kind: categorical
+  #   tier: exploratory
+  #   reference: low
 
 # Cochrane Handbook chapter 10: meta-regression should generally not be
 # considered with fewer than ten studies, with roughly ten per characteristic.
@@ -271,15 +370,41 @@ simulation:
   gate_tau_coverage: false
 
 sensitivity:
-  prior_grid: true
-  leave_one_cohort_out: true
-  include_trial_control_arms: true
-  include_period_prevalence: true
-  exclude_register_cohorts: true
-  construct_competitive_only: true
-  missing_outcome_bounds: true
-  attrition_moderator: true
-  priorsense: true
+  # IMPLEMENTED. Each entry overrides one key of `pool:` and is executed by
+  # build_primary_pool(); R/01_validate_data.R reports each resulting cohort set
+  # against the primary. These are the two analyses SAP section 2.1 names, and
+  # they are here as executable specifications because a configuration flag that
+  # no code reads is not a sensitivity analysis.
+  implemented:
+    unclear_selection_included:
+      label: "Cohorts with unclear employment selection admitted"
+      pool_override: {employment_selection: [none, unclear]}
+    trial_derived_excluded:
+      label: "All trial-derived cohorts excluded"
+      pool_override: {exclude_parent_designs: [rct, cluster_rct, non_randomised_trial]}
+
+  # DECLARED BUT NOT YET IMPLEMENTED. No code reads these. They are listed
+  # separately so the gap is visible, rather than sitting beside the implemented
+  # ones and looking like analyses that run. Each belongs to the modelling stage
+  # and must be implemented or explicitly deferred before any definitive fit.
+  declared_not_yet_implemented:
+    prior_grid: true
+    leave_one_cohort_out: true
+    missing_outcome_bounds: true
+    attrition_moderator: true
+    priorsense: true
+
+  # NOT sensitivity analyses, recorded here to prevent them being mistaken for
+  # some. Period prevalence, cumulative attainment, competitive-only and
+  # sheltered-only results are SEPARATE OUTCOME FAMILIES with their own
+  # estimands and their own syntheses. Adding them to the primary pool would
+  # change what is being estimated, not test the robustness of the estimate.
+  separate_outcome_families_not_sensitivities:
+    - period_prevalence
+    - any_time_during_followup
+    - paid_competitive
+    - paid_sheltered_noncompetitive
+    - paid_or_education_or_training
 
 # Predictive assessment leaves out whole cohorts. Observation-level LOO is
 # misleading when each observation carries a near-unique random effect and the

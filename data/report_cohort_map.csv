@@ -1,0 +1,17 @@
+report_id,cohort_id,relationship,contributes_results,notes
+hansen2024,opus_1998,describes,yes,
+hansen2024b,opus_1998,describes,yes,
+rautio2016,nfbc1966,describes,yes,
+majuri2021,nfbc1966,describes,yes,
+thomson2023,carstairs_1992,describes,yes,
+darjee2017,carstairs_1992,describes,yes,
+fowler2019,isrep_rct,describes,yes,
+christensen2019,ips_denmark_rct,describes,yes,
+cunningham2025,nz_idi,describes,yes,
+twumasi2026,dk_registers_1998,describes,yes,
+tarricone2017,bologna_fep,describes,yes,
+mihaljevicpeles2016,croatia_rlai,describes,yes,
+dayabandara2026,nhsl_colombo_fep,describes,yes,
+chen2023,kaisyuan_taiwan,describes,yes,
+lin2026,pp1m_asiapac,describes,yes,
+dayabandara2026,nhsl_colombo_rec,describes,yes,second of two parallel samples in one report

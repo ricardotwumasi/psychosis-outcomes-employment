@@ -12,12 +12,24 @@
 
 # --- extraction_reports ------------------------------------------------------
 eligibility_status:
-  include: Meets all eligibility criteria and contributes at least one result
+  include: Meets all eligibility criteria. May or may not yield a usable count; see report_quantifiable
   exclude: Assessed and does not meet criteria; exclusion_reason required
   linked_report: Eligible participants, but the result used comes from another report of the same cohort
   supplement_only: Supplementary material for another report, not an article
   duplicate: The same article present more than once in the source folder
+  not_in_screening_set: Staged in the folder but never on the DATA_EXTRACTION_FINAL.xlsx screening list. NOT an eligibility decision and NOT counted in the PRISMA eligibility flow; the row exists only to keep the audit trail
   pending: Not yet adjudicated
+
+# Whether a usable numerator and denominator can be recovered from the report.
+# This is deliberately SEPARATE from eligibility. A report that meets every
+# criterion but prints only a percentage is eligible evidence that the review
+# could not use, and it must stay visible as such: its loss belongs at the
+# numerator/denominator gate and in the missing-evidence assessment, not at the
+# report filter where it would disappear from the eligible count entirely.
+report_quantifiable:
+  "yes": A numerator and denominator are recoverable without back-calculation
+  "no": Employment is reported but no count is recoverable; an author request is the only route
+  unclear: Not yet determined
 
 exclusion_reason:
   wrong_population: Fewer than half the sample has a qualifying psychosis diagnosis and no subgroup is extractable
@@ -74,9 +86,59 @@ country_income_level:
   lower_middle: World Bank lower-middle income
   low: World Bank low income
 
+# The primary prevalence gate, replacing the superseded design-based rule. See
+# docs/methods_deviations.md D9 and docs/statistical_analysis_plan.md section
+# 2.1. Parent design is an unreliable proxy for the population being estimated:
+# the pilot showed both directions of error, admitting an observational cohort
+# recruited through a vocational placement while excluding a merged trial cohort
+# with no employment-related criterion.
+#
+# Classified from ELIGIBILITY information, before looking at the employment
+# proportion, and never from whether the observed rate looks unusual.
+employment_selection_status:
+  none: Eligibility, enrolment and the analysed denominator carry no employment-related restriction, established from sufficiently complete reporting. The ONLY value admitted to the primary pool
+  selected: Restricted on employment-related criteria. Remains eligible for the review, for intervention-effect synthesis and for a separately labelled selected-population analysis
+  unclear: Reporting is not complete enough to establish absence of selection. Excluded from the primary pool; admitted only in a named sensitivity analysis. Silence is NOT evidence of absence
+
+employment_selection_reason:
+  baseline_employment_status: Eligibility conditional on being employed or unemployed at baseline
+  work_intention_or_readiness: Wanting to work, readiness to work, or a stated employment goal
+  vocational_service_entry: Eligibility for, referral to, or participation in a vocational service
+  current_placement: Already in a vocational placement or supported job at entry
+  prior_employment_failure: Previous failure to obtain or keep employment
+  analytic_restriction: The analysed denominator, not recruitment, is restricted on employment
+  other: Some other employment-related restriction; describe in employment_selection_verbatim
+  incomplete_reporting: Used with status `unclear`. The methods do not say enough to decide
+  not_applicable: Used with status `none`
+
+# Shared four-value scale for the trial-derived whole-cohort safeguards. The
+# existing cluster_randomised key has no not_applicable, which an observational
+# cohort needs, so these do not share a vocabulary.
+yes_no_na_unclear:
+  "yes": Established from the report
+  "no": Established from the report
+  not_applicable: The question does not arise, e.g. an observational cohort
+  unclear: Cannot be determined from the report
+
+# --- report_cohort_map -------------------------------------------------------
+# How a report relates to a cohort. Many-to-many in both directions: one cohort
+# generates many publications (OPUS, AESOP, the Nordic registers), and one
+# publication can describe several independently recruited cohorts.
+relationship:
+  describes: The report presents data collected on this cohort
+  secondary_analysis: A further analysis of a cohort reported in full elsewhere
+  validation_sample: The cohort was used to validate a model developed elsewhere. Its figures must not be pooled alongside the cohort's own report
+  overlaps_with: Participants are shared with this cohort but the report is not about it
+
 # --- extraction_arms ---------------------------------------------------------
 arm_type:
-  cohort: The whole observational cohort, no allocation. The only type in the primary pool
+  cohort: >-
+    The whole recruited cohort. The only type in the primary pool. Since D9 this
+    no longer implies an observational parent design. A trial-derived whole
+    cohort qualifies when every original allocation group is represented,
+    construct and ascertainment are common across groups, no post-randomisation
+    subgroup is selected, and the intervention was not intended to change
+    employment
   control_tau: Trial arm receiving treatment as usual or no active vocational component
   control_active: Trial arm receiving an active comparator, which may itself be vocational
   intervention: Trial arm receiving the intervention under test
@@ -88,18 +150,104 @@ cluster_randomised:
   unclear: Cannot be determined from the report
 
 # --- extraction_outcomes -----------------------------------------------------
-# The primary construct is paid_any. Education is recorded but is NOT counted as
-# employment in the primary estimate, because a composite of work and education
-# tracks the age structure and education system of a cohort rather than
-# labour-market participation. See docs/statistical_analysis_plan.md section 3.
+# paid_any is the ONLY primary construct. Education and training are registered
+# outcomes and are recorded, but they are not paid employment: a composite of
+# work and education tracks the age structure and education system of a cohort
+# rather than labour-market participation, so two cohorts with identical paid
+# rates can have materially different composite rates. Each construct below is
+# analysed within its own outcome family and never merged into the primary
+# numerator. See docs/statistical_analysis_plan.md section 3.
+#
+# Supported and sheltered are NOT synonyms. Code by the nature of the job, not
+# by the support attached to it: a mainstream paid job obtained with IPS or
+# job-coaching support is paid_competitive, while a reserved or segregated paid
+# placement is paid_sheltered_noncompetitive. Where the report does not
+# establish the labour-market setting or the remuneration, use `unclear` and
+# preserve its wording. The superseded label `paid_supported_sheltered`
+# conflated the two properties, which is why it is gone.
 outcome_construct:
-  paid_any: Any work for pay, competitive supported or sheltered. THE PRIMARY CONSTRUCT
-  paid_competitive: Open labour market, at or above minimum wage, not set aside for disability
-  paid_supported_sheltered: Supported or sheltered employment only
-  paid_or_education: Paid work OR enrolment in education or training. Secondary outcome
-  vocational_activity: Any vocational activity including unpaid and voluntary
-  education_only: Education or training only
+  paid_any: Any current work for wages or salary, including competitive and paid sheltered work. THE ONLY PRIMARY CONSTRUCT
+  paid_competitive: Paid work in the open labour market. An IPS-supported mainstream job is competitive; support does not make it sheltered
+  paid_sheltered_noncompetitive: Paid work in a segregated, reserved or otherwise non-competitive setting
+  paid_intensity_threshold: >-
+    Paid work at or above a stated intensity threshold, for example "employed for
+    at least 25% of working days". A precisely defined construct, NOT `unclear`,
+    but NOT `paid_any` either: it excludes everyone working below the threshold.
+    Record the threshold and its window in outcome_verbatim. Never enters the
+    primary pool, and never substitutes for paid_any
+  paid_or_education_or_training: The source's full EET composite, naming paid work, education AND training
+  paid_or_education: A paid-work-or-education composite where the source does NOT include training. Kept distinct from the EET value so that coding one as the other is never required
+  education_only: Education without paid employment, where separable
+  training_only: Training without paid employment, where separable. A paid apprenticeship is employment, not training-only
+  education_or_training: Education or training combined, where the source does not separate them
+  vocational_activity: Any vocational activity including unpaid, voluntary and work preparation
   unclear: The report does not define what it counted
+
+# Whether a count was printed by the source, derived from its components, or is
+# a fragment with no independent meaning.
+#
+# BEING USED AS A COMPONENT IS A RELATIONSHIP, NOT A PROPERTY OF A RESULT. A
+# directly reported competitive-employment count is a valid secondary result in
+# the competitive-employment family AND may contribute to a derived paid_any
+# total; it stays `reported`. Double counting is prevented by pools being
+# construct-specific, not by suppressing the row.
+#
+# `component_only` is reserved for fragments that have no analytical meaning on
+# their own, such as the single intensity band "25.0-49.9% of working days".
+result_role:
+  reported: The count is printed in the source as extracted. May also be named as a component of a derived row
+  derived: Computed in R from named components, or by a stated complement; requires derivation_justification and an independent check
+  component_only: A fragment with no independent analytical meaning, such as one intensity band. NEVER enters any pool
+
+# How the reported timepoint relates to a common landmark. Only `since_baseline`
+# can be assigned to a horizon.
+#
+# rautio2016 is why this exists: its measurement point is chronological age
+# 44-45, and the 210 months recorded against it is the MEAN time since onset
+# (which ranged from 5 to over 20 years). Assigning that to the ten-year horizon
+# would put a cohort into a landmark band on the strength of an average, and the
+# pooled estimate would then mix an age-anchored measurement with time-anchored
+# ones.
+followup_basis:
+  since_baseline: Months since cohort entry, randomisation or first presentation. The ONLY basis eligible for a horizon
+  since_onset_mean: A mean or median time since illness onset across a cohort whose individual follow-ups differ
+  since_baseline_mean: >-
+    A mean or median elapsed time since cohort entry, across a cohort whose
+    individual follow-ups differ. Added 12 August 2026 for liangrong2021, whose
+    67 months is a median across admissions spanning 2000 to 2013. Distinct from
+    `since_onset_mean`, which is anchored on illness onset rather than entry, and
+    from `calendar_end_common`, which requires a shared end date that a cohort
+    with a 0.2-year minimum follow-up cannot have. Two batches reached for the
+    nearest barring value in turn because neither described their study; the
+    horizon was barred correctly both times, but the record said something
+    untrue about the source. Not eligible for a horizon
+  chronological_age: Measured at a fixed calendar age rather than a fixed elapsed time
+  calendar_end_common: >-
+    Measured from cohort entry, but every participant is followed to one shared
+    calendar end date, so elapsed follow-up varies across the cohort and the
+    figure recorded is its mean or median. Added 12 August 2026 for
+    andersen2026, whose participants have 4.5 to 23.5 years of follow-up: a mean
+    of 11.1 years would place the cohort in a landmark band on the strength of an
+    average spanning two of them. This is the register-study form of the failure
+    D12.3b names, and it is common, so it is separated from `unclear`: the report
+    is perfectly clear about what it measured, and calling that unclear would
+    misreport it as poor reporting in the risk-of-bias and missing-evidence
+    assessments. Not eligible for a horizon
+  unclear: The report does not establish what the timepoint is measured from
+
+# Whether a result is blocked by an unresolved contradiction in its source.
+#
+# A note is not enough: a numerically complete row with a contradiction recorded
+# only in prose stays analytically usable and will silently enter a synthesis.
+# hansen2024 is the case in point, where Table 2's subgroups sum to 99 against a
+# printed total of 105 and that total is the paid_any numerator for OPUS.
+conflict_status:
+  none: No unresolved contradiction affecting this result
+  unresolved: >-
+    The source contradicts itself on this result and the conflict is not
+    resolved. BLOCKED from every synthesis until an author reply resolves it, or
+    permanently if no reply comes. conflict_note is required
+  resolved: The contradiction was resolved; conflict_note records how and on whose authority
 
 ascertainment:
   point_prevalence: Employed AT the timepoint. The only type in the primary pool
@@ -136,3 +284,45 @@ rob_judgement:
   jbi_prevalence: ["yes", "no", unclear, not_applicable]
   rob2: [low, some_concerns, high]
   robins_i: [low, moderate, serious, critical, no_information]
+
+# Domain slugs, fixed per instrument. Added 12 August 2026 after the first two
+# Stage F batches independently invented incompatible slugs for the same JBI
+# checklist (`jbi1_sample_frame` against `q1_sample_frame`). Nothing was wrong
+# with either shard; the schema simply did not say, so each extractor had to
+# guess, and thirteen batches would have produced thirteen vocabularies that no
+# merge could reconcile and no domain-level summary could cross.
+#
+# The instrument-prefixed form wins over the bare `q1..q9` form because RoB 2
+# and ROBINS-I also number their domains, so `q1` alone stops identifying a
+# domain the moment a batch holds more than one instrument.
+#
+# The domain set is complete and closed. Every domain of the chosen instrument
+# is required for every result: a silently absent domain is indistinguishable
+# from an unasked question.
+rob_domain:
+  jbi_prevalence:
+    - jbi1_sample_frame
+    - jbi2_participant_sampling
+    - jbi3_sample_size
+    - jbi4_subjects_setting_described
+    - jbi5_coverage_of_sample
+    - jbi6_condition_identification
+    - jbi7_condition_measurement
+    - jbi8_statistical_analysis
+    - jbi9_response_rate
+  rob2:
+    - rob2_1_randomisation
+    - rob2_2_deviations
+    - rob2_3_missing_outcome_data
+    - rob2_4_outcome_measurement
+    - rob2_5_selective_reporting
+    - rob2_overall
+  robins_i:
+    - robinsi_1_confounding
+    - robinsi_2_selection
+    - robinsi_3_classification
+    - robinsi_4_deviations
+    - robinsi_5_missing_data
+    - robinsi_6_outcome_measurement
+    - robinsi_7_selective_reporting
+    - robinsi_overall

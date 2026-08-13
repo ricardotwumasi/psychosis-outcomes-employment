@@ -10,8 +10,12 @@
 # rather than after an hour of fitting.
 # =============================================================================
 
-PROJ_ROOT <- normalizePath(file.path(dirname(sys.frame(1)$ofile %||% "."), ".."),
-                           mustWork = FALSE)
+# Resolved the same way in every entry point: PROJ_ROOT if set, else the working
+# directory. The earlier version read `sys.frame(1)$ofile`, which is unset unless
+# the file is source()d, and referenced `%||%` a line before defining it.
+PROJ_ROOT <- normalizePath(
+  if (nzchar(Sys.getenv("PROJ_ROOT"))) Sys.getenv("PROJ_ROOT") else getwd(),
+  mustWork = FALSE)
 
 `%||%` <- function(a, b) if (is.null(a)) b else a
 
@@ -41,9 +45,9 @@ load_config <- function(root = getwd()) {
 #' been wrong at some point in some analysis, which is why it is checked rather
 #' than assumed.
 validate_config <- function(cfg) {
-  need <- c("seed", "pool", "horizons", "moderators", "priors",
+  need <- c("seed", "pool", "horizons", "sparse_data", "moderators", "priors",
             "prior_predictive", "reporting", "frequentist", "sampling",
-            "diagnostics", "simulation", "sample_status")
+            "diagnostics", "simulation", "sensitivity", "sample_status")
   missing <- setdiff(need, names(cfg))
   if (length(missing)) {
     stop("analysis.yml is missing required sections: ",
@@ -78,15 +82,28 @@ validate_config <- function(cfg) {
          paste(names(cfg$horizons$bands), collapse = ", "), call. = FALSE)
   }
 
-  # Overlapping bands would assign one result to two horizons.
+  # Bands may overlap: 18 months is in both t12m and t24m. That is resolved by a
+  # prespecified rule rather than by list order, so every band needs a landmark
+  # to measure proximity against, and the tie rule must be one the code
+  # implements. The previous version only warned and let the first band listed
+  # win, which made the assignment an artefact of yaml ordering.
   bands <- cfg$horizons$bands
-  ord <- order(vapply(bands, function(b) b$min_months, numeric(1)))
-  bs <- bands[ord]
-  for (i in seq_len(length(bs) - 1L)) {
-    if (bs[[i]]$max_months > bs[[i + 1L]]$min_months) {
-      warning("horizon bands '", names(bs)[i], "' and '", names(bs)[i + 1L],
-              "' overlap; a result in the overlap is assigned to the earlier band")
+  for (nm in names(bands)) {
+    if (is.null(bands[[nm]]$landmark_months)) {
+      stop("horizon band '", nm, "' needs landmark_months, used to assign a ",
+           "result that falls in more than one band", call. = FALSE)
     }
+    lm <- bands[[nm]]$landmark_months
+    if (lm < bands[[nm]]$min_months || lm > bands[[nm]]$max_months) {
+      stop("horizon band '", nm, "' has landmark_months ", lm,
+           " outside its own range [", bands[[nm]]$min_months, ", ",
+           bands[[nm]]$max_months, "]", call. = FALSE)
+    }
+  }
+  if (!isTRUE(cfg$horizons$tie_break %in% c("longer_horizon", "shorter_horizon"))) {
+    stop("horizons.tie_break must be 'longer_horizon' or 'shorter_horizon'; ",
+         "a result exactly between two landmarks needs a prespecified rule",
+         call. = FALSE)
   }
 
   # Every moderator needs the fields its kind requires. A continuous moderator
@@ -114,9 +131,47 @@ validate_config <- function(cfg) {
     }
   }
 
-  # The primary pool must be able to contain something.
-  if (!length(cfg$pool$designs) || !length(cfg$pool$arm_types)) {
-    stop("pool.designs and pool.arm_types must both be non-empty", call. = FALSE)
+  # The primary pool must be able to contain something. Since D9 the population
+  # gate is employment-related selection rather than parent design, so
+  # pool.designs no longer exists and its absence is not an error.
+  if (!length(cfg$pool$employment_selection) || !length(cfg$pool$arm_types) ||
+      !length(cfg$pool$outcome_construct)) {
+    stop("pool.employment_selection, pool.arm_types and pool.outcome_construct ",
+         "must all be non-empty", call. = FALSE)
+  }
+  if ("designs" %in% names(cfg$pool)) {
+    stop("pool.designs is set. The design-based gate was superseded by D9 on ",
+         "11 August 2026: the primary pool is gated on employment-related ",
+         "selection, not on parent study design. Remove pool.designs and use ",
+         "pool.employment_selection. See docs/methods_deviations.md D9.",
+         call. = FALSE)
+  }
+  # `none` is the only status SAP section 2.1 admits to the primary pool.
+  # Admitting `unclear` here rather than in the named sensitivity analysis would
+  # convert missing information into eligibility.
+  if (!identical(as.character(unlist(cfg$pool$employment_selection)), "none")) {
+    stop("pool.employment_selection must be exactly [none] for the primary ",
+         "pool. `unclear` belongs in sensitivity.implemented, not here; see ",
+         "docs/statistical_analysis_plan.md section 2.1.", call. = FALSE)
+  }
+
+  # The two sensitivity analyses SAP section 2.1 names must exist as executable
+  # specifications, not as inert flags.
+  for (nm in c("unclear_selection_included", "trial_derived_excluded")) {
+    if (is.null(cfg$sensitivity$implemented[[nm]]$pool_override)) {
+      stop("sensitivity.implemented.", nm, ".pool_override is missing. SAP ",
+           "section 2.1 names this analysis; it must be specified here so it ",
+           "runs rather than being declared and skipped.", call. = FALSE)
+    }
+  }
+
+  # Prespecified before any definitive count was seen, so a thin pool is
+  # reported rather than renegotiated.
+  if (!length(cfg$sparse_data$min_cohorts_for_model) ||
+      cfg$sparse_data$min_cohorts_for_model < 2L) {
+    stop("sparse_data.min_cohorts_for_model must be at least 2: a pooled ",
+         "estimate from one cohort is that cohort's proportion, not a ",
+         "meta-analysis", call. = FALSE)
   }
   invisible(TRUE)
 }
