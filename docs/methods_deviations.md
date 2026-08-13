@@ -273,6 +273,16 @@ The extractor recorded it as `unclear`, which blocks the horizon correctly but m
 
 **D12.6 `rob_overall` is suspended as a moderator.** It was listed as an exploratory moderator, which would put an overall risk-of-bias rating into an analysis, but nothing defines how to derive one from JBI's nine items, RoB 2's five domains or ROBINS-I's seven, and D2 forbids collapsing the three scales onto a shared one. Inventing a rule now would manufacture a composite with no standing in any instrument. It is commented out rather than deleted, and is reinstated only if the authorship group prespecifies a per-instrument derivation rule.
 
+**D12.9 A derived count may name a disputed component when the derived row is itself disputed.** **Date: 13 August 2026, at the Stage G merge. Changes no result's eligibility.**
+
+The validator forbade any derived count whose component carried `conflict_status = unresolved`, on the stated ground that the conflict would be laundered into a clean-looking total. The merge surfaced the case the wording did not anticipate: `benson2022_relapse_mostrecent_paidany`, 929 of 16,311, is derived from a full-time component whose printed count and printed percentage contradict each other (the subject of `REQ-benson2022-1`), and the derived row **is itself marked `unresolved`**.
+
+Nothing is laundered there. The total is as visibly disputed as its part, and both are blocked from every pool by the same rule. The test is therefore scoped to the case that can actually launder: a component may be `unresolved` only when the derived row is too. Forbidding the row outright would delete the arithmetic rather than flag it, and the derivation would have to be rediscovered when the authors answer.
+
+This changes no result's eligibility, because both rows were blocked before the change and remain blocked after it. It is recorded because it is a validator rule altered while looking at real data, which is the circumstance that requires disclosure whether or not it changes an answer.
+
+**Not needed, and recorded so:** the partition-sum case that batches F10 and F08 asked for was already implemented in `build_primary_pool()`'s validator before the merge ran. The two F10 derived rows therefore had their component identifiers restored without any rule change, and only the single `jirapramukpitak2022` row was created.
+
 ---
 
 ## D13. The diagnosis gate: the 50 per cent rule is sufficient on its own

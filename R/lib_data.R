@@ -220,13 +220,24 @@ validate_derived_counts <- function(o) {
       }
     }
 
-    # No derivation may rest on a component whose own numbers are disputed: the
-    # conflict would be laundered into a clean-looking total.
+    # No USABLE derivation may rest on a component whose own numbers are
+    # disputed: the conflict would be laundered into a clean-looking total.
+    # The laundering is the harm, so the test is scoped to the case that can
+    # launder. A derived row that carries `unresolved` itself is visibly
+    # disputed, is blocked from every pool by the same rule that blocks its
+    # component, and records a derivation that becomes usable the moment an
+    # author resolves the conflict. Forbidding it outright would delete the
+    # arithmetic rather than flag it, and the conflict would then have to be
+    # rediscovered when the answer arrives.
     if ("conflict_status" %in% names(o) &&
-        any(o$conflict_status[ci] == "unresolved", na.rm = TRUE)) {
+        any(o$conflict_status[ci] == "unresolved", na.rm = TRUE) &&
+        !isTRUE(o$conflict_status[i] == "unresolved")) {
       stop_rows("extraction_outcomes", "derivation_component_result_ids", i,
-                "a component carries conflict_status = unresolved",
-                permitted = "components free of unresolved numerical conflict")
+                paste("a component carries conflict_status = unresolved while",
+                      "the derived row does not"),
+                permitted = paste("components free of unresolved numerical",
+                                  "conflict, unless the derived row is itself",
+                                  "marked unresolved"))
     }
 
     if (partition) {

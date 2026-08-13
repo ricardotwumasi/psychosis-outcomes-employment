@@ -36,6 +36,67 @@ suppressWarnings(suppressMessages({
   library(brms); library(posterior); library(metafor)
 }))
 
+# =============================================================================
+# The no-posterior guard.
+#
+# Sampling a posterior on real employment outcomes is the one irreversible act
+# in this project: once a pooled number exists, every later decision can be
+# accused of having been taken in the light of it. The guard makes that act
+# impossible by accident. It is deliberately not a warning.
+#
+# A DEFINITIVE run requires all three, and refuses on the first that fails:
+#   1. sample_status is "full". While extraction or verification is in
+#      progress, the configured status says so and there is nothing to fit.
+#   2. the worktree is clean. A fit whose inputs are uncommitted cannot be
+#      reproduced from any commit, so it cannot be a definitive result.
+#   3. DEFINITIVE_RUN=yes is set explicitly. Someone has to say so.
+#
+# An ENGINEERING run needs ENGINEERING_FIT=i-understand-this-is-not-a-result,
+# which is unmistakable, and its outputs go to a separate namespace
+# (results/engineering_*) so that an engineering artefact can never be picked
+# up as a result by a reader or a later script.
+# =============================================================================
+FIT_MODE <- local({
+  eng <- Sys.getenv("ENGINEERING_FIT", "")
+  def <- tolower(Sys.getenv("DEFINITIVE_RUN", "")) %in% c("yes", "true", "1")
+  if (identical(eng, "i-understand-this-is-not-a-result")) "engineering"
+  else if (def) "definitive"
+  else "design_only"
+})
+
+assert_may_fit <- function(cfg, mode = FIT_MODE) {
+  if (identical(mode, "engineering")) {
+    message("\n  [ENGINEERING FIT] outputs are NOT results and go to a ",
+            "separate namespace.")
+    return(invisible(TRUE))
+  }
+  if (!identical(mode, "definitive")) {
+    stop("REFUSING TO SAMPLE A POSTERIOR.\n",
+         "  This run is design-only. Nothing is fitted on real employment ",
+         "outcomes.\n",
+         "  For the pools, selection tables and attrition, run ",
+         "Rscript R/04_design_package.R\n",
+         "  A definitive run needs DEFINITIVE_RUN=yes and the gates below; an ",
+         "engineering fit needs\n",
+         "  ENGINEERING_FIT=i-understand-this-is-not-a-result.",
+         call. = FALSE)
+  }
+  fails <- character(0)
+  if (!identical(cfg$sample_status, "full")) {
+    fails <- c(fails, paste0("sample_status is '", cfg$sample_status,
+                             "', not 'full'"))
+  }
+  if (!identical(worktree_status(cfg), "clean")) {
+    fails <- c(fails, paste0("worktree is '", worktree_status(cfg),
+                             "'; a definitive fit must be reproducible from a commit"))
+  }
+  if (length(fails)) {
+    stop("REFUSING A DEFINITIVE FIT. ", length(fails), " gate(s) not satisfied:\n",
+         paste0("  - ", fails, collapse = "\n"), call. = FALSE)
+  }
+  invisible(TRUE)
+}
+
 SKIPS <- new.env(parent = emptyenv()); SKIPS$rows <- list()
 note_skip <- function(step, reason) {
   SKIPS$rows[[length(SKIPS$rows) + 1L]] <-
@@ -60,7 +121,11 @@ main <- function() {
           nrow(dat$cohorts), " cohorts")
 
   aid <- analysis_id(cfg, dat$shas)
-  run_dir <- file.path(ROOT, "results", paste0("run_", aid))
+  # An engineering fit never shares a namespace with a result. The prefix is on
+  # the directory rather than inside a file, so the separation survives someone
+  # copying a table out of it.
+  prefix <- if (identical(FIT_MODE, "engineering")) "engineering_" else "run_"
+  run_dir <- file.path(ROOT, "results", paste0(prefix, aid))
   tab_dir <- file.path(run_dir, "tables"); diag_dir <- file.path(run_dir, "diagnostics")
   for (p in c(tab_dir, diag_dir)) dir.create(p, recursive = TRUE, showWarnings = FALSE)
   cache_dir <- file.path(ROOT, ".cache", "fits", aid)
@@ -110,6 +175,7 @@ main <- function() {
 
   ## ---- primary fit ---------------------------------------------------------
   message("\n== primary prevalence model ==")
+  assert_may_fit(cfg)
   res <- fit_prevalence(pool, cfg, cache_dir)
   if (identical(res$status, "skipped")) {
     note_skip("prevalence_primary", res$reason)

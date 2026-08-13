@@ -1,0 +1,2 @@
+"cohort_id","kept_result_id","kept_report_id","dropped_result_id","dropped_report_id","reason","horizon","sample_status","generated"
+"headspace_hep_fep_au","andersen2024_fep_cohort_t12m_paidany","andersen2024","andersen2024_fep_cohort_t9m_paidany","andersen2024","same cohort, one result selected per prespecified order","t12m","DEFINITIVE EXTRACTION IN PROGRESS - NOT FOR INFERENCE","2026-08-13"
