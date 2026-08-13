@@ -2,8 +2,8 @@
 
 **Review:** Employment Rates and Moderators in Psychosis: A Systematic Review and Meta-Analysis
 **Registration:** PROSPERO [CRD420251008448](https://www.crd.york.ac.uk/PROSPERO/view/CRD420251008448)
-**Version:** 0.2 draft, 11 August 2026
-**Status:** DRAFT. The employment-selection rule and outcome hierarchy were incorporated at the guarantor's request on 11 August 2026 and remain subject to authorship-group approval. No definitive outcome extraction may begin until this document is approved, the corresponding PROSPERO amendment is submitted, and the schema, validator and analysis configuration implement the same rules.
+**Version:** 0.2, 11 August 2026
+**Status:** RATIFIED by the authorship group on 12 August 2026. The employment-selection rule and outcome hierarchy were incorporated at the guarantor's request on 11 August 2026 and ratified with the rest of the document. The corresponding PROSPERO amendment was submitted as version 4.0 on 12 August 2026; version 5.0, carrying the decisions taken during Stage F, is prepared and awaits the guarantor's submission. Definitive extraction has been completed under this plan; **definitive outcome-conditioned fitting remains barred** until the Phase 5 input freeze conditions hold, which include confirmed submission of version 5.0.
 
 Versions 0.1 and deviations D1 to D8 were written before any pooled real-data estimate was examined. The purposive 15-report engineering pilot subsequently produced an unreportable pooled estimate under the superseded design-based rule. The revised population rule in this version is therefore labelled **post-pilot, before definitive extraction and synthesis** in `methods_deviations.md`. The pilot remains non-inferential and its result must not be used to justify an inclusion decision or quoted as a review finding.
 

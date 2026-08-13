@@ -2,9 +2,19 @@
 
 **Record:** CRD420251008448, "Employment Rates and Moderators in Psychosis: A Systematic Review and Meta-Analysis"
 **Guarantor:** Dr Ricardo Twumasi, King's College London
-**Proposed version:** 4.0
-**Drafted:** 5 August 2026; updated 11 August 2026
-**Status:** DRAFT for the authorship group. Not submitted. Submit only after the statistical analysis plan is approved.
+**Proposed version:** 5.0
+**Drafted:** 5 August 2026; updated 11, 12 and 13 August 2026
+**Status:** PREPARED for submission, not submitted. The guarantor submits and confirms; until
+that confirmation is recorded with its date, nothing in this project may describe version 5.0
+as registered.
+
+**Version history of this draft.** Version 4.0 was **submitted on 12 August 2026** and covers
+everything in the field-by-field section below, up to and including the review-status field.
+Version 5.0 is the increment: it registers the decisions taken during Stage F, which are D13,
+D14 and the five schema additions, and it updates the review-status field again now that
+first-pass risk-of-bias judgements exist. The v4.0 sections are retained here unchanged so
+that the record reads as one document rather than as a diff; the v4.0 submission checklist has
+been retired and replaced by the v5.0 checklist at the end.
 
 ---
 
@@ -96,9 +106,110 @@ Decisions D1 to D8 were drafted before any pooled real-data result was examined.
 
 **Status:** complete. The search closed 9 June 2026 and returned 6,698 records, 3,936 after duplicate removal, 279 assessed at full text and 90 reports included. No further search or deduplication run is outstanding.
 
+---
+
+# Version 5.0 additions: decisions taken during Stage F
+
+Everything above was submitted as version 4.0 on 12 August 2026. Everything below was decided
+after that submission, during or immediately after the definitive extraction, and **each was
+made after the results it affects had been seen**. That is precisely the circumstance a
+registry amendment exists to disclose, and it is stated in those terms rather than presented
+as a prospective refinement. Full entries are in `docs/methods_deviations.md`.
+
+### Field: Eligibility criteria, and Strategy for data synthesis (D13, the diagnosis gate)
+
+**Proposed addition:**
+
+> **D13. Where a sample is diagnostically mixed, the 50 per cent qualifying-diagnosis rule is
+> sufficient on its own.** The registered rule admits a mixed sample if at least half of it
+> carries a qualifying psychosis diagnosis **or** a qualifying subgroup can be extracted
+> separately. The implementation required both conditions at once. The rule is applied as
+> registered, that is as a disjunction.
+>
+> **Timing and effect, stated plainly.** This was decided after the affected results had been
+> extracted and seen. Under the current extraction, which is structurally validated and
+> **scientifically unverified**, D13 permits two of the three provisional twelve-month
+> candidates to pass the diagnosis gate: `khare2022b` (Pune public-hospital cohort, 90 per cent
+> qualifying diagnosis) and `khare2021` (Pune private-sector cohort, 59.3 per cent). Without
+> D13, only `andersen2024` would currently remain at that horizon, and the review's own
+> stopping rule for sparse data would then preclude a meta-analysis at twelve months
+> altogether.
+>
+> **Qualification.** None of these rows is human-verified, each carries an open question put to
+> its authors, and the composition of the pool can still change in either direction.
+> Verification and author information, particularly on `mayoralvanson2019`, may add a row or
+> remove one. The figures above describe the pool as it stands on 13 August 2026 and are not a
+> claim about what the pool will contain when the inputs are frozen.
+>
+> Reason for change: the registered wording and the implemented conjunction differ for exactly
+> the cohorts named. Applying the implementation would exclude a cohort that is 90 per cent
+> schizophrenia and schizoaffective, with a clean twelve-month paid-employment count, on a
+> criterion the registration did not impose.
+
+### Field: Strategy for data synthesis (D14, partition sums)
+
+**Proposed addition:**
+
+> **D14. A whole-cohort count may be derived by summing across subgroups that partition the
+> cohort**, where the subgroups are mutually exclusive and exhaustive, share the construct,
+> ascertainment, window and timepoint, and their denominators sum exactly to the derived
+> denominator. The previous rule required derived components to share one arm identity and one
+> denominator, which is right for summing outcome categories within an arm and wrong for a
+> partition into subgroups.
+>
+> **Timing and effect, stated plainly.** This was also decided after the affected results had
+> been seen, and it is registered for that reason. **Its present effect is not admission to the
+> primary pool.** The result it creates, `jirapramukpitak2022` 189 of 549, is a twelve-month
+> **period** prevalence and therefore joins the period-prevalence family, not the primary
+> point-prevalence synthesis. The two further derived rows it governs are a paid-or-education
+> result and an employment, education and training result, both of which belong to secondary
+> outcome families. No row enters the primary pool by virtue of D14.
+>
+> Reason for change: a partition sum is a legitimate and common derivation whose safety
+> condition is that the subgroups do not overlap and omit nobody, which is a different
+> condition from a shared denominator. Without the change, evidence is not lost but is
+> aggregated at a level the review cannot use.
+
+### Field: Data extraction (five schema additions, post-submission, eligibility unchanged)
+
+None of the five changes any study's eligibility or any result's pool membership. Each is
+recorded so that the extraction schema in the registry matches the one actually used.
+
+> **D12.7.** A controlled vocabulary of risk-of-bias domain identifiers was added, so that
+> domain-level judgements are comparable across results and instruments rather than named
+> freely by each extractor.
+>
+> **D12.8.** A `calendar_end_common` value was added to the follow-up basis vocabulary, for
+> studies measured to a shared calendar end point rather than at a fixed elapsed time; it is
+> barred from every landmark horizon. It exists so that a clearly reported study is not
+> recorded as unclear.
+>
+> **`analysis_selection_status`.** Employment-related selection is now recorded separately for
+> the recruited cohort and for the analysed sample, because a cohort recruited without any
+> employment criterion can still be analysed after an employment-related restriction, and the
+> registered rule applies to both.
+>
+> **`reported_percentage_base`.** Where a report prints a percentage, the base it divides by is
+> recorded as a distinct field, so that an unstated base is visible as a blank rather than
+> inferred.
+>
+> **`analysis_sample_id`.** An identifier for the analysed sample, distinct from the cohort and
+> the arm, so that two reports analysing different subsets of one cohort are not conflated.
+
 ### Field: Review status
 
-Update the stage flags: formal screening completed; data extraction ongoing; risk of bias not started; data synthesis not started. The record currently marks all of these as not completed.
+**Proposed text:**
+
+> Formal screening completed. Data extraction completed for all 90 included reports;
+> **first-pass risk-of-bias judgements completed, with independent human verification
+> ongoing**. Data synthesis not started.
+
+Stage flags to match: screening completed; data extraction completed; risk of bias assessment
+ongoing; data synthesis not started. The record as submitted at version 4.0 marked risk of
+bias as not started, which is no longer accurate: 1,491 first-pass domain judgements exist
+across the Stage F shards. It is recorded as ongoing rather than completed because no
+judgement has yet been checked by a second person, and the review's own rule is that a
+first-pass judgement by a single automated extractor is not a completed assessment.
 
 ---
 
@@ -111,12 +222,27 @@ Update the stage flags: formal screening completed; data extraction ongoing; ris
 
 ---
 
-## Submission checklist
+## Submission checklist, version 5.0
 
-- [ ] Statistical analysis plan approved by the authorship group
-- [ ] Employment-selection rule and outcome hierarchy approved by the authorship group
-- [ ] Search update run, deduplicated and dated
-- [ ] True search end date inserted above
+The version 4.0 checklist is retired: every item on it was completed and version 4.0 was
+submitted on 12 August 2026.
+
+- [x] Statistical analysis plan ratified by the authorship group (SAP v0.2, 12 August 2026)
+- [x] D13 and D14 ratified by the authorship group, with the affected results named
+- [x] D9 and D12 ratified by the authorship group (12 August 2026)
+- [x] Post-result timing of D13 and D14 stated explicitly in the proposed text above
+- [x] Review-status wording updated to match the first-pass risk-of-bias state
 - [ ] Amendment reviewed by the guarantor
-- [ ] Submitted to PROSPERO and the returned version number recorded in `methods_deviations.md`
-- [ ] `methods_deviations.md` updated to cite the accepted amendment version and date
+- [ ] **Submitted to PROSPERO by the guarantor**, and the returned version number and date
+      recorded in `docs/methods_deviations.md`
+- [ ] `docs/methods_deviations.md` updated to cite the accepted amendment version and date
+
+**Until the guarantor confirms submission, the status of version 5.0 is "prepared".** No file
+in this repository, and no sentence in the manuscript, may describe it otherwise. The
+confirmation is recorded as event metadata with its date when it arrives, in the same way as
+the author-request dates.
+
+The Phase 5 input freeze depends on this: an outcome-conditioned fit may not be run until
+version 5.0 submission is confirmed and mirrored in the deviations log, because D13 and D14
+were both made after the affected results were seen and the registry is where that is
+disclosed.

@@ -31,6 +31,20 @@ report_quantifiable:
   "no": Employment is reported but no count is recoverable; an author request is the only route
   unclear: Not yet determined
 
+# State of the author data request for a report. The request text itself lives in
+# docs/data_requests.md, keyed by REQ-<report_id>-<n>; the manifest carries only the
+# state and the two dates, so the request wording has one home. `drafted` is the
+# honest state until the review team confirms a message was sent: this project does
+# not send email, and a status of `sent` is event metadata recorded on confirmation,
+# never inferred from the existence of a draft.
+data_request_status:
+  drafted: A de-identified draft exists in docs/data_requests.md; not sent
+  sent: The team has confirmed the request was sent; data_request_date is set
+  responded: A reply was received; data_response_date is set
+  no_response: The window closed with no reply
+  withdrawn: The request was withdrawn before the window closed, with a reason in notes
+  not_requested: No request is made; the reason is recorded in docs/data_requests.md section 4
+
 exclusion_reason:
   wrong_population: Fewer than half the sample has a qualifying psychosis diagnosis and no subgroup is extractable
   wrong_outcome: No employment outcome, or none at twelve months or later

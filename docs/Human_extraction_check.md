@@ -11,6 +11,14 @@
 > `docs/extraction_qa_report.md` §4. The Stage G human verification, which covers every
 > pool-determining field and every risk-of-bias judgement across all 90 reports, is still
 > to be done and `data/extraction_provenance.csv` is the empty ledger waiting for it.
+>
+> **That verification runs to 18 August 2026 and is verification wave 1, not completion.**
+> Wave 1 is a pass over all 90 extractions directed at the pool-determining fields first; it
+> closes on 18 August with a committed record of what was checked, expressed as fractions by
+> verification tier, and a `verification-wave-1` tag created after that commit. Fields left
+> blank in the ledger are unchecked, and a blank is never deleted, so completeness is always
+> a fraction and never a claim. Tier 5 risk-of-bias verification is not expected to finish in
+> wave 1 and is required before any risk-of-bias analysis, GRADE, interpretation or release.
 
 ## Overview
 This document collates the manual screening observations from three independent reviewers regarding the automated data extraction process. The reviews highlight specific data points requiring manual correction or author contact to resolve inconsistencies.

@@ -2,14 +2,27 @@
 
 **Registration:** PROSPERO [CRD420251008448](https://www.crd.york.ac.uk/PROSPERO/view/CRD420251008448), registered 20 March 2025, versions 1.0 and 1.1 (20 March 2025), 2.0 (6 June 2025), 3.0 (9 June 2026), **4.0 (submitted 12 August 2026, carrying D9 to D12)**.
 
-> **A version 5.0 amendment is owed. D13 and D14 are not registered.**
+> **A version 5.0 amendment is owed. D13 and D14 are not registered.** It is prepared in
+> `docs/prospero_amendment_draft.md` as of 13 August 2026 and awaits the guarantor's
+> submission; until that is confirmed and dated here, version 5.0 is prepared and not
+> registered.
 >
 > Both were settled during Stage F, *after* version 4.0 was submitted, so no registry
-> version carries them. Both **admit evidence** to the primary pool and both were made
-> after the affected results were seen. That combination is exactly what a registry
-> amendment exists to record, and leaving it unregistered would be the most criticisable
-> thing in this review. D12.7 and D12.8 also postdate the submission but are schema
-> bookkeeping that changes no result's eligibility.
+> version carries them. Both **admit evidence** and both were made after the affected
+> results were seen. That combination is exactly what a registry amendment exists to
+> record, and leaving it unregistered would be the most criticisable thing in this review.
+>
+> **Where the admitted evidence lands differs between the two, and earlier drafts of this
+> file, the README and the handover all overstated D14 by saying it admits evidence to the
+> primary pool.** Corrected 13 August 2026. **D13 admits rows to the primary pool.** **D14
+> does not**: the row it creates, `jirapramukpitak2022` 189 of 549, is a twelve-month
+> *period* prevalence and belongs to the period-prevalence family, and the two further
+> derived rows it governs are a paid-or-education result and an EET result, both in
+> secondary outcome families. D14 is still a post-result change to a derivation rule and
+> still requires registration; what it does not do is put a row into the primary pool.
+>
+> D12.7 and D12.8 also postdate the submission but are schema bookkeeping that changes no
+> result's eligibility.
 >
 > `docs/prospero_amendment_draft.md` has not been extended to cover them.
 
@@ -148,7 +161,7 @@ Each entry states whether the decision was made **before** or **after** pooled o
 
 ## D9. Employment selection replaces parent design as the primary prevalence gate
 
-**Date:** 11 August 2026. **Post-pilot, before definitive extraction and synthesis. Pending authorship-group ratification.**
+**Date:** 11 August 2026. **Post-pilot, before definitive extraction and synthesis. Ratified by the authorship group 12 August 2026.**
 
 **Registered:** both randomised and non-randomised longitudinal study types are eligible, and the record does not define an employment-selection restriction for the primary synthesis.
 
@@ -202,11 +215,15 @@ Three questions the SAP left implicit, closed now so they cannot be settled afte
 
 The pilot report anticipated that the revised primary pool might be empty. That is why this rule is written now rather than when the number is known.
 
+**Application clarification, 13 August 2026.** D11.3 is unchanged. What is written down here is *when* the count it turns on is taken: **k is counted on the verified, frozen pool at each horizon**, not on a provisional pool during extraction or verification. A cohort counts towards k once every field that determines its pool membership has been human-verified and the inputs have been frozen at the tagged input commit; before that the pool is a working figure that can move in either direction, as it has during Stage F.
+
+This is a clarification of how an existing rule is applied, not a new or modified stopping rule, and it is recorded now for a specific reason: at the time of writing the provisional twelve-month pool stands at k = 3 with a fourth candidate one reversible gate away, so k currently sits either side of the boundary between "descriptive interval only" and "the planned model". Fixing the timing of the count while that is still true means the rule cannot later be read as having been settled in the light of the k it produces. Nothing about the thresholds, the counting unit or the consequences changes.
+
 ---
 
 ## D12. Extraction schema decisions
 
-**Date:** 11 August 2026, revised 12 August 2026 after the pilot rechecks. **Post-pilot and pilot recheck, before definitive extraction. Pending authorship-group ratification.**
+**Date:** 11 August 2026, revised 12 August 2026 after the pilot rechecks. **Post-pilot and pilot recheck, before definitive extraction. Ratified by the authorship group 12 August 2026.**
 
 Labelled this way rather than simply "prospective" because these rules were written after the pilot was extracted and after the Stage B rechecks had read eight of its papers. No definitive count informed them and no pooled estimate was examined, but the rechecks did surface the specific cases below, and D12.3 in particular was **rewritten because a recheck disproved its first version**. That sequence is recorded rather than smoothed over.
 

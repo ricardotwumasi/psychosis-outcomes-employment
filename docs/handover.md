@@ -6,10 +6,13 @@ picks this up next.
 Read this, then `docs/extraction_qa_report.md`, then `config/codebook.md`. Everything
 else is detail.
 
-Two documents are deliberately **not** brought up to date and carry a stale-warning
-header instead, because rewriting them is itself an open task: `docs/data_requests.md`
-(task 2) and `docs/Human_extraction_check.md`, which records a human check of the **pilot
-only** and must not be read as covering Stage F.
+`docs/data_requests.md` was rewritten on 13 August 2026 and is now the send-ready set of
+de-identified drafts: 61 grouped emails, 256 stable request identifiers, and a documented
+reason for every eligible report that generates no request. It is drafted, not sent.
+
+One document is deliberately **not** brought up to date and carries a scope header instead:
+`docs/Human_extraction_check.md` records a human check of the **pilot only** and must not be
+read as covering Stage F.
 
 ---
 
@@ -89,15 +92,22 @@ never merged automatically. Stage F already found two by reading: `hartford_ips_
 EIDP site so it overlaps `eidp_usa`, and `hk_easy_fep_2001_2003` near-certainly shares its
 2001–02 entrants with `hk_easy_2001`.
 
-**e. Two derived rows still need writing under D14.** The rule was ratified *after* the
-batches ran, so the counts it permits are **not in the shards**:
+**e. D14 derived-row completion: one row to create, two to complete in place.** Corrected
+13 August 2026, because the earlier wording ("two derived rows still need writing") would
+have produced duplicates if read literally.
 
-- **`jirapramukpitak2022` 189/549** at 12 months, from 146/372 and 43/177, verified cell
-  by cell in F08. This is the one to do first: the cohort is
-  `employment_selection_status = none`, which makes it one of the few eligible for the
-  primary pool at all.
-- **F10's two derived rows** carry their components in prose with
-  `derivation_component_result_ids` left blank, because the old rule rejected them.
+- **Create exactly one new row: `jirapramukpitak2022` 189/549** at 12 months, from 146/372
+  and 43/177, verified cell by cell in F08. The cohort is
+  `employment_selection_status = none`. Note that this result is a twelve-month **period**
+  prevalence and so joins the period-prevalence family; it is not a primary-pool row, and
+  earlier drafts of this file implied otherwise.
+- **F10's two derived rows already exist inside the 208.** They are not to be written:
+  they carry their components in prose with `derivation_component_result_ids` left blank,
+  because the validator rejected component links whose `arm_id` differed from the derived
+  row. The task is to **populate those blank fields in place and revalidate**, which needs
+  the validator to gain a partition case first (components may differ on `arm_id` and on
+  denominator when their denominators sum exactly to the derived denominator). Writing new
+  rows here would duplicate results that are already extracted.
 
 **f. Validate, then the human verification.** `Rscript R/01_validate_data.R .` and the
 test suite must pass on the merged data. Then independent **human** verification of every
@@ -106,17 +116,28 @@ judgement. `data/extraction_provenance.csv` exists to carry that ledger and is *
 A second agent is not a second human and nothing here treats it as one. `twumasi2026` is
 guarantor-authored and must be checked by a non-author.
 
-**g. Build the pool** and print the attrition in both result rows and distinct cohorts. If
-it is sparse, apply D11.3 as written: the primary fit for that horizon stops and nothing
-else does. That rule was written before any of these counts were seen and it holds.
+**g. Build the pool** and print the attrition in both result rows and distinct cohorts.
+
+The earlier version of this paragraph said that any model fit is stopped by D11.3. That
+described the empty pilot pool and is no longer true, so it is replaced. **D11.3 is applied
+to the verified, frozen pool at each horizon, and not before** (see the application
+clarification in `docs/methods_deviations.md`). The provisional twelve-month pool currently
+stands at k = 3, none of it human-verified, with a fourth candidate one reversible gate
+away, so the rule's consequence is not yet determined at any horizon. Building the pool now
+is a design-only exercise: it produces selection tables and attrition counts stamped
+`DEFINITIVE EXTRACTION IN PROGRESS - NOT FOR INFERENCE`, and no posterior is sampled on real
+employment outcomes. The thresholds themselves were written before any of these counts were
+seen and they hold.
 
 ### 2. Author queries (task #12)
 
-`docs/data_requests.md` is still the old narrative list and needs rewriting as send-ready
-per-report emails. Stage F multiplied the inputs: **50 results are blocked on unresolved
-published contradictions**, each with its candidate resolution already recorded in
-`conflict_note` and the shard's `unresolved_queries.md`. The highest-value requests
-identified by the batches:
+**Rewritten 13 August 2026. The drafts exist; sending is the team's.** Stage F multiplied
+the inputs: **50 results are blocked on unresolved published contradictions**, each with its
+candidate resolution already recorded in `conflict_note` and the shard's
+`unresolved_queries.md`. Three requests are flagged primary-critical, and each has a
+non-response consequence prespecified in the file before any reply arrives. The window
+closes **27 August 2026 at 23:59 UK time**. The highest-value requests identified by the
+batches:
 
 - `solmi2022` — a 21,551-person national register cohort reporting percentages only. By
   far the largest single loss in the review.
@@ -137,9 +158,16 @@ from here.
 
 **This is the most criticisable gap in the review as it stands, and it was created by
 Stage F.** Version 4.0 was submitted on 12 August 2026 carrying D9 to D12. D13 and D14
-were settled *after* that submission, during extraction. **Both admit evidence to the
-primary pool, and both were made after the affected results had been seen.** No registry
-version records either.
+were settled *after* that submission, during extraction. **Both admit evidence, and both
+were made after the affected results had been seen.** No registry version records either.
+
+The two are not equivalent in effect, and the amendment says so. **D13 admits rows to the
+primary pool**: under the current unverified extraction it is what lets `khare2022b` (90 per
+cent qualifying diagnosis) and `khare2021` (59.3 per cent) pass the diagnosis gate at twelve
+months. **D14 does not.** The row it creates, `jirapramukpitak2022` 189 of 549, is a period
+prevalence and joins the period-prevalence family; the two other derived rows it governs are
+paid-or-education and EET results in secondary families. Describing D14 as admitting evidence
+to the primary pool overstates it, and the version 5.0 text is written to avoid that.
 
 That combination is exactly what a registry amendment exists to disclose. The deviations
 log labels both honestly and states the sequence, but an internal document is not the
@@ -255,8 +283,42 @@ shards' `unresolved_queries.md`.
 - **Independent human verification.** Required before the freeze, not before extraction.
   `data/extraction_provenance.csv` is empty and is the ledger for it.
 - **Author correspondence sent.** Drafts are task 2; sending is the team's.
-- **Any model fit.** The primary fit is stopped by the prespecified sparse-data rule
-  (D11.3), written before the counts were seen.
+- **Any outcome-conditioned model fit.** Not because D11.3 stops it: that statement
+  described the empty pilot pool and is withdrawn. The bar is the Phase 5 input freeze.
+  Definitive fitting waits for confirmed PROSPERO v5.0 submission, the closed author window,
+  human verification of every pool-determining field, an adjudicated overlap audit and a
+  tagged input commit. D11.3 is then applied to the verified, frozen k per horizon, without
+  renegotiation. Design-only outputs and model engineering on synthetic data may proceed at
+  any time.
 - **`rob_overall` as a moderator.** Suspended, not deleted (D12.6).
 - **`isrep_rct` documentary confirmation.** Coded `selected` on authorship-group
   adjudication; Fowler et al. 2009b is paywalled and not held, and the data says so.
+
+---
+
+## Commit cadence and tag policy
+
+**Commit per milestone, push at least daily during active work.** A milestone is a state
+someone else could pick up: a completed merge, a closed verification wave, a rewritten
+governance document. Work that sits uncommitted overnight is work whose provenance depends
+on one machine.
+
+**Tags pin immutable states only**, and **the record is committed before its tag is
+created**. A tag that precedes the commit it is supposed to name pins the wrong tree, and the
+mistake is invisible afterwards. The order is: write the record, validate, commit, then tag,
+then push. Planned tags:
+
+| Tag | Pins | Created after |
+|---|---|---|
+| `stage-g-merge` | The merged, non-inferential baseline the checking team works against | the merge commit validates |
+| `verification-wave-1` | The wave-one verification record, as fractions by tier | the wave-one record is committed on 18 August |
+| `author-window-closed` | Every request identifier resolved to a response, non-response or withdrawal | the closed request state is committed on 27 August |
+| the input freeze tag | Data, code, config, prompts, both environments, CmdStan, source hashes and the fit inventory | every Phase 5 gate holds in one reviewable state |
+
+**Privacy scanning is per commit, not per series.** Before each commit, inspect the staged
+path list and the staged diff, and scan the staged index for email addresses (the single
+corresponding-author address already published in the README is the only one permitted
+anywhere) and for any PDF, docx, xlsx, private contact record, `CLAUDE.md` or internal memo. Immediately before any push, audit the whole
+outgoing range `origin/main..HEAD`, every blob rather than the index, because a file added
+with a secret in one commit and cleaned in the next still ships the first blob. Non-force
+pushes only, and explicit staging always: never `git add .` or `git add -A`.
