@@ -2,6 +2,23 @@
 
 The registered protocol commits to this: "Authors will be asked to provide any required data not available in published reports." This file lists what to ask for and from whom.
 
+> **STALE, 13 August 2026. This file predates Stage F and has not been rewritten.**
+>
+> It is kept because its supplement findings and its email template are still good, but
+> its scope is now wrong in both directions and it must be rewritten before anything is
+> sent. Rewriting it as send-ready per-report emails is open task 2 in
+> `docs/handover.md`.
+>
+> What changed. The "21 reports without extractable counts" framing is superseded: those
+> 21 were never review exclusions and are now `include` under D10.2, and Stage F settled
+> extractability by reading, finding **27 of the 75 non-pilot reports yield no recoverable
+> count**. Separately, **50 of the 208 Stage F results are blocked on unresolved published
+> contradictions**, each with its candidate resolution already recorded in the relevant
+> shard's `unresolved_queries.md` and in `conflict_note`. Those queries do not appear in
+> this file at all. The highest-value requests Stage F identified are listed in
+> `docs/handover.md` task 2; `solmi2022`, a 21,551-person register cohort reporting
+> percentages only, is by far the largest single loss.
+
 **Status at 5 August 2026:** three supplements were supplied locally and two are now fully resolved. Twenty-one reports still lack a recoverable numerator or denominator.
 
 ---
@@ -11,7 +28,7 @@ The registered protocol commits to this: "Authors will be asked to provide any r
 | Report | What the supplement gave | Now |
 |---|---|---|
 | `lin2026` | Table S3, observed-case employment counts at every visit: month 12 121/303, month 15 119/289, month 18 127/280 | **Included.** Point prevalence. Note the denominators are completers, so attrition is informative and the available-case assumption is doing real work here |
-| `jirapramukpitak2022` | Table S3, one-year employment: early stage 146/372 and later stage 43/177, total 189/549 | **Included.** Period prevalence (12-month earnings), so it enters the period-prevalence sensitivity rather than the primary pool |
+| `jirapramukpitak2022` | Table S3, one-year employment: early stage 146/372 and later stage 43/177, total 189/549 | **Verified cell by cell in Stage F (F08), but the 189/549 row does not exist yet.** The old derivation rule forbade summing across two subgroup denominators; D14 now permits it, and writing the row is the first item of the Stage G merge. Period prevalence (12-month earnings), so it enters the separate period-prevalence synthesis rather than the primary pool |
 
 ## Partially resolved, still needs a request
 
@@ -23,7 +40,7 @@ That is not enough. Back-calculating the numerator from a whole-number percentag
 
 **Ask:** the exact number employed at each age, for the schizophrenia group, corresponding to Appendix Table 1's denominators.
 
-**But note:** the outcome is the AKM annual "most important employment status", which is period prevalence over a year. Even with exact counts this report sits outside the primary point-prevalence pool and would contribute only to the period-prevalence sensitivity. Weigh the request accordingly.
+**But note:** the outcome is the AKM annual "most important employment status", which is period prevalence over a year. Even with exact counts this report sits outside the primary point-prevalence pool and would contribute only to the separate period-prevalence synthesis. Weigh the request accordingly.
 
 ---
 
@@ -80,7 +97,9 @@ Note that `chan2022`, `klungsyr2021`, `majuri2023` and `jones2024` belong to coh
 >
 > Our primary outcome is the proportion in paid employment at a defined follow-up point. Your paper reports [what it reports], from which we cannot recover a numerator and denominator. We would rather not reconstruct counts from rounded percentages, since that introduces error we cannot quantify.
 >
-> Would you be able to provide the number of participants in paid employment, and the number whose employment status was observed, at [timepoint]? If your measure combines employment with education or training, figures for paid employment alone would be especially valuable, though we would gladly take the composite as well.
+> Would you be able to provide the number of participants in any paid employment, and the number whose employment status was observed, at [timepoint]? If available, we would also be grateful for separate counts for competitive paid employment, paid sheltered or otherwise non-competitive employment, education without paid employment, and training without paid employment, each with its denominator. Please indicate whether categories are mutually exclusive and whether a supported job was in the open labour market. If your published measure is an employment, education or training composite, we would gladly retain that exact composite as well.
+>
+> We are also checking whether study recruitment was conditional on employment status, wanting or readiness to work, an employment goal, or participation in a vocational service or placement. If this is not fully described in the report, could you confirm whether any such criterion applied?
 >
 > We are happy to acknowledge your contribution and to share the synthesis before submission.
 >

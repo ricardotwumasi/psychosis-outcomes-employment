@@ -2,6 +2,8 @@
 
 **Purpose:** engineering validation of the extraction schema, the validators and the modelling pipeline. **Not** an estimate of anything.
 
+**Post-pilot decision, 11 August 2026:** the definitive extraction plan uses employment-related selection rather than parent design as the population gate. Allocated trial arms remain outside the prevalence intercept, but a verified whole-cohort analysis from a trial may qualify. The primary outcome is strictly `paid_any`; paid subtypes, EET, education and training are separate outcome families.
+
 Every output table from this pilot carries `sample_status = "PURPOSIVE PILOT - NOT FOR INFERENCE"`. No pooled employment rate and no moderator estimate from these 15 reports may be quoted in a slide, a draft, a grant report or a manuscript.
 
 ---
@@ -22,15 +24,15 @@ The schema is the deliverable. A pilot of well-behaved studies would validate no
 |---|---|---|
 | Several reports of one cohort | The result-selection rule and the cohort random effect are the main structural changes in this plan; if they fail, the whole analysis is pseudo-replicated | `hansen2024` + `hansen2024b` (OPUS), `rautio2016` + `majuri2021` (NFBC 1966), `darjee2017` + `thomson2023` (Carstairs) |
 | Zero events | The exact binomial likelihood exists for this; a normal approximation with a continuity correction would fail here | `thomson2023` (no paid employment at all at 20 years), `darjee2017` (1 in supported work), `fowler2019` (0 of 24 in one arm) |
-| Trial arms | Must be kept out of the prevalence intercept and routed to the intervention synthesis | `christensen2019` (3-arm IPS RCT), `fowler2019` (ISREP) |
+| Trial provenance and allocated arms | Allocated arms must be routed to intervention synthesis; an unselected merged whole cohort must exercise the whole-cohort safeguards | `christensen2019` (3-arm IPS RCT), `fowler2019` (ISREP), `hansen2024` (merged OPUS cohort) |
 | Several timepoints in one report | Tests horizon banding and the landmark rule | `lin2026` (months 3, 6, 9, 12, 15, 18) |
-| Several outcome constructs in one arm | Tests one-row-per-result rather than one categorical column | `chen2023` (supported, paid sheltered, unpaid training) |
+| Several outcome constructs in one arm | Tests one-row-per-result and the separation of competitive paid work, paid sheltered work and unpaid training | `chen2023` |
 | Administrative register | Tests the `registry` setting and the period-prevalence exclusion | `twumasi2026`, `cunningham2025`, `hansen2024` |
 | Internally inconsistent published numbers | Tests that the validator catches what a reader would miss | `tarricone2017` (46 per cent of total vs 53 per cent of 135), `mihaljevicpeles2016` (77/257 vs 77/205) |
 | Non-European, non-Anglophone setting | Guards against a pipeline that only works on Nordic registers | `dayabandara2026` (Sri Lanka), `chen2023` (Taiwan), `lin2026` (Asia-Pacific) |
 | Rounded or perturbed counts | Statistics New Zealand randomly rounds all IDI counts to base 3 | `cunningham2025` |
 | Conflict of interest | Tests that a COI flag travels with the record | `twumasi2026` |
-| Composite employment-or-education | Must be routed to the secondary construct, not the primary | `twumasi2026`, `cunningham2025` |
+| Composite employment, education or training | Must be routed to the separate EET outcome family, not the paid-employment primary | `twumasi2026`, `cunningham2025` |
 
 ## The 15
 

@@ -2,8 +2,9 @@
 
 **Run:** `results/run_ebc5fe8b5ab5`, 5 August 2026
 **Sample:** 15 purposively selected reports. `PURPOSIVE PILOT - NOT FOR INFERENCE`
+**Decision update:** the selection-based population principle was incorporated into SAP version 0.2 on 11 August 2026, with broader coding and trial-origin safeguards. The historical pilot fit below used the superseded rule.
 
-The pilot's purpose was to prove the schema, the validators and the pipeline on real data. It did that, and it also surfaced four problems with the analysis plan that need deciding before full extraction. Those are the useful output; the pooled number is not.
+The pilot's purpose was to prove the schema, the validators and the pipeline on real data. It did that, and it also surfaced four problems with the analysis plan that required decisions before full extraction. Those are the useful output; the pooled number is not.
 
 ---
 
@@ -58,13 +59,15 @@ Pooled posterior 0.406 [0.201, 0.619]. It is prior-influenced at k = 2 and is re
 
 ### 3.1 The pool rule excludes trials by design when it should exclude selection on employment
 
-The rule currently drops any cohort whose `design` is `rct`. That removed 27 results including the OPUS 20-year follow-up, where both arms are merged, the original allocation is no longer meaningful, and participants were consecutively referred first-episode patients in a defined catchment who were **not** selected on wanting to work.
+The rule used for this historical run drops any cohort whose `design` is `rct`. That removed 27 results including the OPUS 20-year follow-up, where both original arms are represented in a merged whole-cohort analysis and participants were first-episode patients recruited from defined clinical catchments who were **not** selected on wanting to work. Original allocation remains relevant treatment-history provenance even when the reported prevalence analysis combines the arms.
 
-The exchangeability concern that justifies excluding trial arms is selection on employment-related eligibility, not randomisation as such. The schema already records exactly that, in `baseline_unemployed_required` and `baseline_wants_work_required`.
+The principal concern is target-population applicability and transportability: selection on employment-related eligibility changes the population being estimated, whereas randomisation as such does not. The two pilot fields `baseline_unemployed_required` and `baseline_wants_work_required` capture part, but not all, of that selection.
 
-**Recommendation:** replace the design-based exclusion with a selection-based one. Admit an arm to the primary pool when `arm_type == "cohort"` and both selection flags are `no`, whatever the parent design. Under that rule OPUS at 20 years would qualify on selection grounds (it would still be excluded here, because its ascertainment is period prevalence), and `chen2023` would be correctly excluded, since its `baseline_wants_work_required` is `yes`.
+**Initial recommendation:** replace the design-based exclusion with a selection-based one. Under the simple two-flag version, OPUS at 20 years would qualify on selection grounds, although its employment outcome remains period prevalence, and `chen2023` would be excluded.
 
-This changes the estimand's population and needs authorship-group approval before full extraction.
+**Resolution, 11 August 2026:** the principle is accepted for the revised extraction plan, pending full authorship-group ratification and PROSPERO amendment. Eligibility now uses `employment_selection_status = none/selected/unclear`, supported by source wording, rather than relying only on the two baseline flags. Only a whole recruited cohort can enter. A trial-derived whole cohort additionally requires all original arms, common ascertainment, no post-randomisation selection and no intervention specifically intended to change employment. Trial origin is retained and an observational-origin-only sensitivity is prespecified.
+
+This decision corrects composition rather than increasing evidence. The initial gates retain 21 results from seven cohorts under either rule, but replace eight Chen results with eight OPUS results. At twelve months the selection rule leaves only the Croatian competitive-employment result; the stricter outcome hierarchy in SAP version 0.2 then excludes it from the `paid_any` primary pool. The revised pilot primary pool is therefore empty and no replacement pooled fit is warranted.
 
 ### 3.2 Parallel cohorts reported together are forced into the wrong shape
 
@@ -130,9 +133,9 @@ Two parallel agents extracted 15 reports and produced 66 results in roughly 16 m
 
 ## 9. What to do next
 
-1. Decide 3.1 (selection-based rather than design-based pool rule). Blocks full extraction.
+1. Obtain authorship-group ratification of section 3.1 and implement the approved selection and outcome rules in the schema, vocabularies, validator, pool builder and tests. Blocks full extraction.
 2. Decide 3.2 (parallel cohorts) and update the codebook.
 3. Exercise the pipeline on a horizon containing a zero-event cohort.
-4. Obtain the screening export, run the search update, send the author requests in `docs/data_requests.md`.
+4. Send the author requests in `docs/data_requests.md`. The screening export and the search update are both closed: `DATA_EXTRACTION_FINAL.xlsx` is the screening record and the search closes 9 June 2026 (D8).
 5. Independently verify the pilot extraction, starting with the derived counts and the eight inconsistent reports.
 6. Benchmark the full fit inventory before making any runtime claim.

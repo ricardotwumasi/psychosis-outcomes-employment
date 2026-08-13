@@ -2,10 +2,10 @@
 
 **Review:** Employment Rates and Moderators in Psychosis: A Systematic Review and Meta-Analysis
 **Registration:** PROSPERO [CRD420251008448](https://www.crd.york.ac.uk/PROSPERO/view/CRD420251008448)
-**Version:** 0.1 draft, 5 August 2026
-**Status:** DRAFT. Not yet approved by the authorship group. No outcome extraction beyond the non-inferential pilot may begin until this document is approved and the corresponding PROSPERO amendment is submitted.
+**Version:** 0.2 draft, 11 August 2026
+**Status:** DRAFT. The employment-selection rule and outcome hierarchy were incorporated at the guarantor's request on 11 August 2026 and remain subject to authorship-group approval. No definitive outcome extraction may begin until this document is approved, the corresponding PROSPERO amendment is submitted, and the schema, validator and analysis configuration implement the same rules.
 
-This plan is written before the outcome data exist. Only one study row and a 15-report engineering pilot are available at the time of writing, and no pooled estimate has been computed. Any decision taken after seeing pooled results will be recorded separately in `methods_deviations.md` and labelled post hoc.
+Versions 0.1 and deviations D1 to D8 were written before any pooled real-data estimate was examined. The purposive 15-report engineering pilot subsequently produced an unreportable pooled estimate under the superseded design-based rule. The revised population rule in this version is therefore labelled **post-pilot, before definitive extraction and synthesis** in `methods_deviations.md`. The pilot remains non-inferential and its result must not be used to justify an inclusion decision or quoted as a review finding.
 
 ---
 
@@ -29,11 +29,15 @@ Two separate questions are synthesised separately. They are not combined into on
 
 ### 2.1 Primary estimand: employment prevalence in psychosis cohorts
 
-> Among people with a schizophrenia spectrum disorder or first-episode psychosis identified in an observational cohort, what proportion are in paid employment at a defined follow-up landmark of at least twelve months?
+> Among people with a schizophrenia spectrum disorder or first-episode psychosis recruited into a longitudinal clinical, catchment, registry or population sample without employment-related selection, what proportion are in any paid employment at a defined follow-up landmark of at least twelve months, under the care received?
 
-Trial participants are **excluded** from this estimand. A person randomised into a vocational intervention trial has typically been required to be unemployed, to want to work, to be clinically stable, and to consent to a service. Their employment rate is conditioned on that selection and is not an estimate of employment in the underlying population. Control and treatment-as-usual arms are therefore not pooled with observational cohorts by default. They may be added in a named sensitivity analysis, but only after a written comparability review of their eligibility criteria, and the sensitivity result is reported alongside the primary rather than in place of it.
+The primary synthesis is defined by the recruited population and analysis sample, not by the parent study's design label. Randomisation protects a treatment comparison but does not itself make a sample representative or unrepresentative. Conversely, an observational cohort recruited through a vocational service can be selected directly on factors that determine employment. A random-effects distribution cannot convert such a conditional rate into a marginal prevalence for a broader clinical population.
 
-This is a change from the earlier working assumption that observational cohorts and control arms could share a pool.
+Employment-related selection includes eligibility, enrolment or analytic restriction based on baseline employment or unemployment, wanting or being ready to work, an employment goal, eligibility for or participation in vocational services, current vocational placement, or previous failure to obtain employment. Each recruited sample is classified as `none`, `selected` or `unclear`, with the eligibility wording and source location retained. `none` requires sufficiently complete information to establish absence of employment-related selection; silence in an incompletely reported methods section is `unclear`, not `none`.
+
+Only a **whole recruited cohort** can contribute to the primary prevalence estimand. Individually allocated intervention, active-control and treatment-as-usual arms do not enter the prevalence intercept. A trial-derived whole cohort is eligible only when every original allocation group is represented without omission or selective reweighting, the same construct and ascertainment apply across groups, no post-randomisation subgroup has been selected, and the experimental intervention was not specifically intended to change employment. Parent trial design and treatment history remain recorded as provenance.
+
+Samples classified as `selected` remain eligible for the review and for an intervention-effect synthesis or a separately labelled employment-selected population synthesis. Samples classified as `unclear` are excluded from the primary analysis and admitted only in a named sensitivity analysis. A second prespecified sensitivity analysis excludes every trial-derived cohort. This separates population eligibility from possible indirectness due to trial participation and experimentally assigned care.
 
 ### 2.2 Secondary estimand: intervention effect on employment
 
@@ -47,7 +51,9 @@ Job tenure, relationship status, wages and social functioning are registered out
 
 | Registered outcome | Designation in this plan |
 |---|---|
-| Employment status | Primary, both estimands above |
+| Any paid employment | Primary headline outcome, both estimands above |
+| Employment, education or training | Separate registered vocational-participation outcome; key secondary after PROSPERO amendment |
+| Education and training | Extracted separately where the source permits; separate or narrative syntheses |
 | Job tenure | Separate synthesis if at least ten cohorts report a comparable duration measure; narrative otherwise |
 | Wages earned | Narrative only. Currencies, years and definitions are not commensurable without a purchasing-power adjustment that the review has not registered |
 | Relationship status | Narrative only |
@@ -59,18 +65,27 @@ Job tenure, relationship status, wages and social functioning are registered out
 
 ### 3.1 Primary construct
 
-**Point-prevalence paid employment.** Work for pay, whether competitive, supported or sheltered, held at the landmark timepoint.
+**Point-prevalence any paid employment (`paid_any`).** Current work performed in return for wages or salary at the landmark timepoint. It includes full-time and part-time employment, competitive employment, and paid supported or sheltered work. It excludes education, unpaid training or work experience, volunteering, homemaking, receipt of welfare benefits, and any activity for which remuneration or an employment relationship cannot be established.
 
 **Education and training are not counted as employment in the primary construct.** This matters concretely: the one row currently in the repository (`sturup2022`) defines its outcome as "work as primary income source or registered student", which is a different construct and cannot enter the primary estimate as recorded.
 
+Only an explicitly reported `paid_any` total, or a verified sum of mutually exclusive and exhaustive paid-employment categories with a common denominator, may enter the primary pool. A competitive-only or sheltered-only numerator is a subtype and must not substitute for any paid employment. Full-time and part-time counts may be summed only when the categories are mutually exclusive and exhaustive. Competitive and supported counts must not be summed merely from their labels because supported employment can occur in an ordinary competitive job.
+
 ### 3.2 Constructs recorded separately
 
-Each is extracted where reported and analysed as its own outcome, never merged into the primary:
+Each construct below is extracted where reported and analysed within its own outcome family, never merged into the primary paid-employment numerator:
 
-- **Competitive employment only** (open labour market, at or above minimum wage, not set aside for people with disabilities). Reported as a secondary pooled estimate where at least ten cohorts supply it.
-- **Supported or sheltered employment.**
-- **Employment or education combined**, which is what many first-episode services report. Recorded because it is common, analysed separately because it is not the primary construct.
-- **Broad vocational activity**, including unpaid and voluntary activity.
+| Construct | Analytical treatment |
+|---|---|
+| Competitive paid employment | Separate paid-employment subtype. Supported mainstream employment is competitive when the job itself is in the open labour market |
+| Paid sheltered or otherwise non-competitive employment | Separate paid-employment subtype; never assumed to be equivalent to supported mainstream employment |
+| Employment, education or training composite (EET) | Separate registered vocational-participation outcome. Preserve the source composite and never pool it with paid-only rows |
+| Education without paid employment | Separate outcome where recoverable |
+| Training without paid employment | Separate outcome where recoverable. Paid apprenticeships count as paid employment; an unpaid placement, therapeutic allowance or ambiguous stipend does not |
+| Education or training combined | Retained as a combined secondary result only when the source does not separate its components |
+| Broad vocational activity | Unpaid work, voluntary activity, work preparation or other non-employment activity; secondary or narrative only |
+
+When a source reports EET or its complement, NEET, the exact source composite is retained. Paid employment, education and training are also extracted as separate rows whenever their numerators and denominators are available. A combined count is derived only from exact, mutually exclusive and exhaustive categories with the same denominator; overlapping categories are never added. Every derived count records its component result identifiers and requires independent checking.
 
 A report frequently supplies several of these for one arm and timepoint. The extraction schema therefore stores one row per result, not one categorical outcome column per arm, so no valid outcome is discarded to fit the table.
 
@@ -81,11 +96,11 @@ Only **point prevalence** enters the primary estimate. Three other ascertainment
 | Ascertainment | Meaning | Primary pool |
 |---|---|---|
 | `point_prevalence` | Employed at the landmark | Included |
-| `period_prevalence` | Employed during a defined window, for example a tax year | Excluded, named sensitivity |
-| `any_time_during_followup` | Ever employed across follow-up | Excluded, reported separately |
+| `period_prevalence` | Employed during a defined window, for example a tax year | Excluded; separate period-prevalence synthesis |
+| `any_time_during_followup` | Ever employed across follow-up | Excluded; separate cumulative-attainment synthesis |
 | `unclear` | Cannot be determined from the report | Excluded, counted in the flow |
 
-`period_prevalence` is a separate level rather than being folded into either neighbour because national registers routinely report employment over a tax year, and silently treating that as point prevalence would inflate the pooled estimate by an unknown amount.
+`period_prevalence` is a different estimand, not a robustness version of point prevalence. National registers routinely report employment over a tax year, and treating that as current status would inflate the pooled estimate by an unknown amount. The length and definition of every ascertainment window are recorded. Employment at any time between baseline and follow-up is cumulative employment attainment and is analysed separately from both point and period prevalence.
 
 ---
 
@@ -116,7 +131,7 @@ A cohort is one identified group of participants. One cohort can generate many p
 Rules, in order:
 
 1. Every report is mapped to a `cohort_id` in `data/inclusion_manifest.csv` before any result is selected. The mapping is printed for human review and is never inferred silently.
-2. Where several reports describe one cohort at one horizon, **one result is selected**, by this prespecified order: (a) the report whose analysis population is largest at that horizon; (b) if tied, the report with the outcome construct closest to the primary; (c) if still tied, the earliest publication. The reports not selected are named in the output, not dropped invisibly.
+2. Result selection occurs **within the same cohort, horizon, ascertainment and exact outcome construct**. A narrower paid-employment subtype or an EET composite never substitutes for `paid_any`. Where several otherwise equivalent results remain, select (a) the report whose analysis population is largest; (b) if tied, the result with the clearest denominator and ascertainment; and (c) if still tied, the earliest publication. Reports not selected are named in the output, not dropped invisibly.
 3. Where one cohort legitimately contributes several non-overlapping results at one horizon, for example two subgroups whose combined count is not recoverable, the dependence is modelled explicitly with a nested term.
 
 There is no minimum number of multi-result cohorts below which dependence may be ignored. Dependence is a property of the design, not of how many clusters happen to be available to estimate a variance component. Where a variance component cannot be estimated, a result is selected or aggregated prospectively under rule 2; the dependence is never simply left unmodelled.
@@ -154,12 +169,14 @@ Available-case analysis assumes employment status is missing at random condition
 A cohort is eligible for the primary estimand only if all of the following are recorded and satisfied:
 
 - A schizophrenia spectrum disorder or first-episode psychosis, ascertained by a stated diagnostic criterion (ICD, DSM or RDC) or by a register diagnosis code recorded in the extraction.
-- At least 50 per cent of the sample has a qualifying psychosis diagnosis, or a qualifying subgroup can be extracted separately.
+- At least 50 per cent of the sample has a qualifying psychosis diagnosis. This condition is sufficient on its own for a whole recruited cohort; subgroup extractability is not additionally required. Where fewer than 50 per cent qualify, an extractable diagnostic subgroup is retained for a separately labelled subgroup analysis and does not enter the whole-cohort primary estimand. Clarified 12 August 2026; see `docs/methods_deviations.md` D13.
 - Psychosis is not secondary to a medical condition such as encephalitis or epilepsy.
+- The recruited and analysed sample has `employment_selection_status = none` under section 2.1.
+- The result represents the whole recruited cohort rather than an allocated arm or post-hoc subgroup. A trial-derived whole cohort additionally satisfies the safeguards in section 2.1.
 
 Recorded for every cohort so that eligibility can be checked rather than asserted: `diagnostic_instrument`, `diagnosis_confirmed` (how), `perc_qualifying_diagnosis`, `first_episode` (yes/no/mixed), `subgroup_extractable`.
 
-Clinical high risk (`chr`) and mixed severe mental illness (`smi_mixed`) samples are **not** admitted to the primary pool merely for being valid vocabulary values. `chr` cohorts are excluded from the primary estimand entirely. `smi_mixed` cohorts enter only when a psychosis subgroup is separately extractable.
+Clinical high risk (`chr`) and mixed severe mental illness (`smi_mixed`) samples are **not** admitted to the primary pool merely for being valid vocabulary values. `chr` cohorts are excluded from the primary estimand entirely. `smi_mixed` cohorts enter only when at least 50 per cent of the cohort carries a qualifying psychosis diagnosis.
 
 ---
 
@@ -169,11 +186,11 @@ Risk of bias attaches to a **result and its estimand**, not to a publication. A 
 
 | Evidence type | Instrument |
 |---|---|
-| Prevalence estimate from an observational cohort | **JBI critical appraisal checklist for prevalence studies** (9 items) |
+| Prevalence estimate from an eligible whole cohort, irrespective of parent design | **JBI critical appraisal checklist for prevalence studies** (9 items), with trial-origin applicability recorded where relevant |
 | Effect estimate from a randomised comparison | **Cochrane RoB 2** |
 | Effect estimate from a non-randomised intervention study | **ROBINS-I** |
 
-Neither RoB 2 nor ROBINS-I is designed for a prevalence estimate, so neither is used for the primary estimand. This corrects the registered record, which names RoB 2 alone for a predominantly observational review.
+Neither RoB 2 nor ROBINS-I is designed to assess the sampling frame and recruitment of a prevalence estimate, so neither is used for the prevalence estimand. A trial-derived cohort receives RoB 2 for any treatment-effect result and a separate JBI appraisal for its prevalence result; one assessment does not substitute for the other. This corrects the registered record, which names RoB 2 alone.
 
 The existing risk-of-bias table in the MSc supplementary material applies the RoB 2 category `Some concerns` to quasi-experimental studies assessed with ROBINS-I. Those judgements mix two instruments' response scales and **are not migrated**. All risk-of-bias assessment is redone under this plan.
 
@@ -196,9 +213,10 @@ These thresholds replace the earlier draft's eight-cohort and four-per-level rul
 1. Follow-up horizon
 2. Diagnosis group (first-episode versus established schizophrenia versus mixed psychosis)
 3. Country income level (high versus middle)
-4. Employment construct (competitive only versus any paid)
 
 **Exploratory** (reported as exploratory, not used to support a conclusion): mean age, percentage female, education, baseline employment, antipsychotic use, negative symptom severity, region, setting, risk-of-bias judgement.
+
+Outcome constructs are not treated as a conventional study-level moderator. They are nested, potentially overlapping outcomes often measured in the same participants. Separate construct-specific models are reported and, where enough cohorts report paired constructs, a paired or multivariate comparison may be explored without causal interpretation.
 
 All moderator estimates are ecological: they describe variation between cohort means and do not license an inference about individuals within cohorts. That caveat is stated wherever moderator results appear.
 
@@ -348,13 +366,13 @@ GRADE is applied to each pooled estimand, adapted for prevalence evidence: start
 
 ## 15. Open decisions requiring authorship-group approval
 
-1. The exclusion of trial control arms from the primary prevalence estimand (section 2.1).
-2. The exclusion of education from the primary employment construct (section 3.1), which changes how the existing `sturup2022` row is treated.
-3. The twelve-month landmark and its 9 to 18 month window (section 4).
-4. The available-case denominator (section 6).
-5. The switch to the JBI prevalence checklist for the primary estimand (section 8).
-6. The confirmatory moderator set (section 9.2).
-7. Whether a directional threshold for the pooled proportion has a policy rationale worth stating (section 10.6).
+The employment-selection rule in section 2.1 and the outcome hierarchy in section 3 were incorporated on 11 August 2026 at the guarantor's request. They remain subject to ratification by the full authorship group and submission of the PROSPERO amendment, but are no longer unresolved drafting questions.
+
+1. The twelve-month landmark and its 9 to 18 month window (section 4).
+2. The available-case denominator (section 6).
+3. The switch to the JBI prevalence checklist for the primary estimand (section 8).
+4. The confirmatory moderator set (section 9.2).
+5. Whether a directional threshold for the pooled proportion has a policy rationale worth stating (section 10.6).
 
 ---
 
