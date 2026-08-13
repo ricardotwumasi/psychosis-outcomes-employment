@@ -32,6 +32,23 @@ renv/python/
 renv/sandbox/
 renv/staging/
 
+# Python bytecode. The .py sources under scripts/ are the artefacts; the caches
+# are written whenever one script imports another and are machine-specific.
+__pycache__/
+*.pyc
+
 # Platform noise.
 .DS_Store
 *~
+private/
+
+# Internal working documents. Reviews, assistant instructions and execution
+# plans are working notes, not part of the public record of the review. The
+# record of what was decided belongs in docs/methods_deviations.md and the
+# commit history; these files are the scaffolding that got us there, and they
+# quote unredacted contact details and draft wording that has not been checked.
+CLAUDE.md
+BAYESIAN_META_ANALYSIS_PLAN_FEASIBILITY_REVIEW.md
+DEFINITIVE_EXTRACTION_PLAN_REVIEW.md
+POST_STAGE_F_PLAN_REVIEW_2026-08-13.md
+EXECUTION_PLAN_2026-08-13.md

@@ -1,0 +1,26 @@
+# Python dependencies for scripts/check_folder.py.
+#
+# Pinned because the folder gate is part of the release freeze: a different
+# PyMuPDF can extract different text from the same PDF, and the SHA-256 and
+# page-one readability checks would then mean something different from run to
+# run.
+#
+# Verified working under Python 3.9.13 on macOS (darwin 25.4.0), 11 August 2026,
+# re-verified 13 August 2026.
+#
+# The interpreter is the Anaconda one, and naming it matters. `python3` resolves
+# to it only because /opt/anaconda3/bin precedes /usr/bin on this machine's PATH;
+# the system interpreter at /usr/bin/python3 is Python 3.9.6 and has neither
+# PyMuPDF nor openpyxl, so the same documented command fails under any PATH that
+# does not put Anaconda first. Write the interpreter out and the command is
+# reproducible regardless of PATH:
+#
+#     /opt/anaconda3/bin/python3 -m pip install -r requirements.txt
+#     /opt/anaconda3/bin/python3 scripts/check_folder.py
+#     /opt/anaconda3/bin/python3 scripts/check_shard.py
+#
+# Python is used here rather than R because poppler is not installed on this
+# machine, so PyMuPDF is the only working PDF reader, and openpyxl is needed to
+# read DATA_EXTRACTION_FINAL.xlsx.
+openpyxl==3.1.5
+PyMuPDF==1.26.5

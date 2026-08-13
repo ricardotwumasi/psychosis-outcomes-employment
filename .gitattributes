@@ -1,0 +1,9 @@
+# Line endings for the data of record.
+#
+# Every extraction table is a CSV whose bytes are hashed into
+# data/batch_ledger.csv, so a CRLF introduced by an editor or a platform is not
+# a cosmetic difference: it changes the shard hash and makes an immutable shard
+# look edited. Forcing LF in the working tree and in the index keeps the hash a
+# statement about the data rather than about the machine that last touched the
+# file.
+*.csv text eol=lf
