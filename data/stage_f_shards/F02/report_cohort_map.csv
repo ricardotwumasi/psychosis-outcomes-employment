@@ -1,0 +1,6 @@
+report_id,cohort_id,relationship,contributes_results,notes
+evensen2017,jump_norway,describes,yes,CONFIRMED from the paper. Whole 148-starter cohort; the 2-year employment counts and the 139 observation denominator.
+gjerdalen2023,jump_norway,describes,yes,CONFIRMED. Same 148 participants followed to 5 years by register linkage.
+evensen2019,jump_norway,secondary_analysis,yes,CONFIRMED. Cost-effectiveness analysis on the 69 who consented to register extraction; contributes the cumulative-attainment result only.
+lystad2017,jump_norway,secondary_analysis,no,"CONFIRMED. The 131 with neurocognitive assessment. No employment count is recoverable (Figure 3 has no data labels), so it contributes construct definitions only."
+klungsyr2021,jump_norway,secondary_analysis,no,CONFIRMED. G-estimation on the same 131. Outcome is mean working hours per week; no employment numerator or denominator exists.

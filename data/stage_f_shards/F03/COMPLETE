@@ -1,0 +1,30 @@
+batch_id: F03
+completed_utc: 2026-08-12
+extractor: claude-opus-5
+prompt_file: config/prompts/extraction_v2.md
+reports: ayesaarriola2020 mayoralvanson2019 basaraba2023 nossel2018 benson2022 lin2022 (6 of 6 done)
+cohorts: pafip_spain ontracky_ny us_vha (3 components, all confirmed from the papers)
+
+files written:
+  extraction_reports.csv      6 rows
+  extraction_cohorts.csv      3 rows
+  extraction_arms.csv         5 rows
+  extraction_outcomes.csv    19 rows (13 results + 6 component_only fragments)
+  extraction_rob.csv        117 rows (13 results x 9 jbi_prevalence domains; checker left blank)
+  report_cohort_map.csv       6 rows
+  provenance.csv            104 rows (13 results x 8 primary-determining fields)
+  manifest_changes.csv       13 rows
+  inconsistencies.md
+  unresolved_queries.md
+
+self-checks run before writing this marker: headers identical to data/*.csv; every controlled
+value present in config/vocabularies.yml; every (cohort_id, arm_id) and report_id resolves;
+source_locator and outcome_verbatim non-empty on every outcome row; conflict_note present
+wherever conflict_status = unresolved; numerator <= denominator on every row; followup_months
+blank wherever followup_basis is not since_baseline; all nine JBI domains present for every
+non-component result and none for any component_only fragment; derived sums recomputed
+(577+284+68=929, 908+428+93=1429) and component denominators equal the derived row's.
+
+two reports contribute no result and are recorded as include with report_quantifiable = no:
+ayesaarriola2020 (10-year denominators recoverable only by back-calculation from a percentage)
+and lin2022 (unemployment percentages only, no counts, and employment is not the complement).

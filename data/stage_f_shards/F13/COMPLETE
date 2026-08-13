@@ -1,0 +1,29 @@
+Batch F13 complete.
+
+Extractor: claude-opus-5
+Prompt: config/prompts/extraction_v3.md (sha256 ec136411256b09bad6c9d7d9bf440a666266782934c483540a21fb563b77e32c)
+Date: 12 August 2026
+
+All five reports read in full and extracted. PDF sha256 prefixes verified against
+data/batch_ledger.csv for all five files.
+
+  tsiachristas2016  oxford_ahsn     e012611.full.pdf                d1896a045732d9f6
+  turner2019        detect_dublin   ijot-12-2018-0023.pdf           533663fb9bf28ea0
+  xu2020            pku_beijing     s12888-020-2484-x.pdf           dd3966c2648ab51b
+  yamaguchi2020     jisef_japan     yamaguchi-et-al-2020-...pdf     ce3eb59210ef71a5
+  zhang2017         wuxi_ise_rct    zhang-et-al-2017-...pdf         391f6e7156768069
+
+Contents: 5 reports, 5 cohorts, 10 arms, 15 results, 124 risk-of-bias rows
+(every domain of one instrument for every result), 5 report-cohort rows,
+150 provenance rows (10 primary-determining fields per result), 10 manifest changes.
+
+All five cohorts CONFIRMED against the manifest; none refuted.
+
+Validates standalone: `Rscript R/01_validate_data.R` reports "schema and vocabulary
+validation passed" on a copy of this shard placed alone in data/.
+
+Pool behaviour on this shard alone: 7 of 15 results blocked by unresolved conflicts,
+5 further removed by employment-related selection at recruitment, 2 by construct.
+One result survives every gate, xu2020_cohort_t125m_paidany (23/62), and lands in
+t120m rather than t12m. It requires human verification of two fields before use:
+followup_basis and the paid_any construct (unresolved_queries.md Q6 and Q7).

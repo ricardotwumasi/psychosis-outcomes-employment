@@ -1,0 +1,25 @@
+batch_id: F12
+reports: rodriguezpulido2021 shimada2022 solmi2022 stouten2019 stralin2019 topor2019
+cohorts: nagano_iot_rct parachute_sweden parnassia_hague se_registers stockholm_2000 tenerife_cr_rct
+n_reports: 6
+n_cohorts: 6
+n_arms: 11
+n_results: 16
+n_rob_rows: 126
+n_provenance_rows: 96
+n_manifest_changes: 12
+prompt_file: config/prompts/extraction_v3.md
+model: claude-opus-5
+extractor: claude-opus-5
+completed_utc: 2026-08-12
+validation: PASSED standalone. Rscript R/01_validate_data.R against a sandbox root holding this
+  shard alone: "configuration loaded and validated / read: 6 reports, 6 cohorts, 11 arms,
+  16 results, 126 rob rows / schema and vocabulary validation passed / derived columns computed".
+  Every result carries exactly one instrument and that instrument's complete domain set.
+  checker is blank on all 126 rob rows, as Stage G requires.
+primary_pool_contribution: none. All 16 results are removed by the pool clauses and every removal
+  is visible in the attrition log: 3 by unresolved conflict (solmi2022), 4 by employment-related
+  selection at recruitment (rodriguezpulido2021), 2 by employment-related analytic restriction
+  (topor2019), 5 by not being a whole recruited cohort (shimada2022, stouten2019), 2 by not being
+  point prevalence (stralin2019).
+report_quantifiable: stralin2019 yes; the other five no.

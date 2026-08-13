@@ -1,0 +1,30 @@
+Batch F06 complete.
+
+Prompt: config/prompts/extraction_v3.md
+Prompt sha256 (per data/batch_ledger.csv): ec136411256b09bad6c9d7d9bf440a666266782934c483540a21fb563b77e32c
+Extractor: claude-opus-5
+Completed (UTC): 2026-08-12
+
+All six reports read in full and extracted:
+  baltazar2022  iusmm_montreal         CONFIRMED
+  bell2018      va_ct_vr               CONFIRMED (sample is not exclusively VA: 13 of 77 from CMHC)
+  bhullar2018   pepp_ontario_1997      CONFIRMED
+  blackman2025  nimh_ctnb              CONFIRMED
+  bonnesen2026  cross_tracks_dk        CONFIRMED
+  conus2017     eppic_melbourne_1998   CONFIRMED
+
+Contents: 6 reports, 6 cohorts, 7 arms, 12 results, 96 risk-of-bias rows
+(8 jbi_prevalence results x 9 domains + 4 rob2 results x 6 domains, no domain omitted),
+120 provenance rows (12 results x 10 primary-determining fields), 12 manifest changes.
+
+Validates standalone: `Rscript R/01_validate_data.R` against a root containing only this
+shard reports "schema and vocabulary validation passed" and builds the pools without error.
+One result survives every primary gate, at the 10-year horizon:
+bhullar2018_cohort_t120m_paidany, 35/65.
+
+Two items require a human before merge, both written up in unresolved_queries.md:
+  U2  baltazar2022_cohort_t348m_paidany carries checked_by = unchecked_pending_stage_g.
+      It is the only derived count in the batch and its arithmetic has NOT been
+      independently checked.
+  U19 conus2017 exposes a followup_basis vocabulary gap (variable individual endpoint with
+      no shared calendar end date); coded `unclear` as the least wrong of three options.

@@ -1,0 +1,24 @@
+batch_id: F05
+extractor: claude-opus-5
+prompt_file: config/prompts/extraction_v2.md
+prompt_sha256: d1a8551a2c06cdd948c649de4cde927606d5b1d670176e6896de2569c8de6eaa
+completed_utc: 2026-08-12
+reports_extracted: 6 of 6 (strassnig2017, strassnig2018, wang2020b, wang2020c, andersen2024, andersen2026)
+
+rows: 6 reports, 5 cohorts, 6 arms, 16 results, 108 rob domain judgements,
+      7 report-cohort rows, 208 provenance rows, 12 manifest changes
+
+validation: the shard validates standalone against R/01_validate_data.R with the
+project config and vocabularies (schema and vocabulary validation passed; derived
+columns computed; primary pool built). Run in an isolated sandbox root; nothing
+was written to the project.
+
+primary pool contributed at t12m: 1 result,
+  andersen2024_fep_cohort_t12m_paidany, 205 of 578, headspace_hep_fep_au.
+  The 9-month result of the same cohort was set aside by the proximity rule (D11.2).
+
+cohorts: suffolk_county (confirmed), yuli_taiwan (confirmed),
+         headspace_hep_fep_au and headspace_hep_uhr_au (provisional headspace_hep_au refuted
+         and split), dk_eop_pooled (confirmed).
+
+checker: blank throughout. Independent human verification is Stage G.

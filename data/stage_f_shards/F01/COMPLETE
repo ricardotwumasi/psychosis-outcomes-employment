@@ -1,0 +1,14 @@
+batch_id: F01
+completed_utc: 2026-08-12
+extractor: claude-opus-5
+prompt: config/prompts/extraction_v1.md
+reports_read: chan2019 chan2020 chan2022 chang2016 chang2016b (5 of 5)
+cohorts_confirmed: hk_easy_2001, hk_standard_care_2000, hk_easy_fep_2001_2003, hk_easy_ext_rct
+results_extracted: 2 (both chang2016; both conflict_status = unresolved)
+results_entering_any_landmark_horizon: 0 (chang2016 measures at 36 months, which falls in no band)
+validated_standalone: yes, Rscript R/01_validate_data.R over this shard alone;
+  "schema and vocabulary validation passed"; primary pool empty at t12m, removed by the
+  "no unresolved conflict in the source" clause.
+manifest_changes: 11 (see manifest_changes.csv); chan2020 cohort hint CONFIRMED,
+  chang2016 and chang2016b cohort assignments REFUTED and split out.
+checker: NOT DONE. Stage G, human.

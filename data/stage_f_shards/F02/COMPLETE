@@ -1,0 +1,42 @@
+batch_id: F02
+cohort: jump_norway (Job Management Programme, Norway)
+reports: evensen2017, evensen2019, gjerdalen2023, klungsyr2021, lystad2017 (5 of 5 read in full)
+prompt: config/prompts/extraction_v1.md
+extractor: claude-opus-5
+completed: 2026-08-12
+
+rows: 5 reports, 1 cohort, 2 arms, 10 results, 27 risk-of-bias domain judgements,
+      5 report-cohort map rows, 66 provenance rows, 8 proposed manifest changes
+
+validated standalone against R/01_validate_data.R with config/ and this shard's
+tables copied into an isolated root:
+  "configuration loaded and validated"
+  "read: 5 reports, 1 cohorts, 2 arms, 10 results, 27 rob rows"
+  "schema and vocabulary validation passed"
+  "derived columns computed"
+  primary pool at t12m: 0 results, removed at the clause
+  "no employment-related selection at recruitment" (all 10 rows)
+
+headline decisions:
+  employment_selection_status = selected (vocational_service_entry).
+    Cohort membership required starting the JUMP vocational rehabilitation
+    programme; 25 otherwise-eligible referrals who did not start are outside the
+    148, recruitment ran through mental health AND vocational services and NAV,
+    and gjerdalen2023 states that all participants exhibited some level of
+    motivation to work. Not `unclear`: the restriction is stated, not merely
+    unreported. Not `none` in either direction.
+  paid_any NOT IDENTIFIED at any horizon. Only competitive employment is work
+    for an employer's wage; work placement and sheltered work are financed by
+    work assessment allowance or disability benefits. Bound at 2 years on the
+    139 observed: 31 <= paid_any <= 88. No paid_any row emitted (rautio2016
+    precedent, D12.3).
+  t12m: the only timepoint in the 9-18 month band is 10 months, and its
+    numerator exists only as "8.1 %" in a figure. Left blank.
+  t24m selected: evensen2017_cohort_t24m_paidcomp, 31 of 139 observed.
+  t60m selected: gjerdalen2023_cohort_t60m_paidcomp, 33 of 148, PERIOD
+    prevalence over a 12-month window.
+  cumulative selected: evensen2019_consentreg_t24m_paidcomp_ever, 21 of 69.
+  one instrument only: jbi_prevalence. No randomised effect estimate exists in
+    this batch with counts, so no rob2 and no robins_i assessment was made.
+
+checker: NOT DONE. Stage G, and a human's.

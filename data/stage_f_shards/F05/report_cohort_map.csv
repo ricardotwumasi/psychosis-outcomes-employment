@@ -1,0 +1,8 @@
+report_id,cohort_id,relationship,contributes_results,notes
+strassnig2017,suffolk_county,describes,no,"Produces one extracted result row, but it is blocked by conflict_status = unresolved and no numerator is recoverable. The selected suffolk_county result at the 240-month horizon comes from strassnig2018 (larger analysis population, counts that reproduce printed percentages), per SAP section 5 and D11.2."
+strassnig2018,suffolk_county,describes,yes,"Selected report for suffolk_county at 240 months. Both reports measure the same construct at the same nominal timepoint on the same cohort, so only one may contribute; 146 + 87 = 233 against strassnig2017's 128, and strassnig2017's numerator is unrecoverable."
+wang2020b,yuli_taiwan,describes,no,Eligible participants but no recoverable employment numerator or denominator; employment appears only as mean cumulative work months and income per year.
+wang2020c,yuli_taiwan,describes,no,Overlapping analysis sample with wang2020b (525 against 561). No recoverable employment numerator or denominator.
+andersen2024,headspace_hep_fep_au,describes,yes,Sole report of this cohort in the batch. Two timepoints (9 and 12 months) fall in the t12m band; 12 months is nearer the landmark and is selected under D11.2.
+andersen2024,headspace_hep_uhr_au,describes,no,"Ultra-high-risk cohort, diagnosis_group = chr, barred from the primary synthesis outright by SAP section 7. No results extracted; the figures are in Table 2, p. 880."
+andersen2026,dk_eop_pooled,describes,yes,Sole report of this cohort. Results are period prevalence at a variable elapsed follow-up and are not assignable to a landmark horizon.

@@ -1,0 +1,31 @@
+Batch F10 complete.
+
+Reports extracted (6/6): maguire2021, majuri2023, martini2017, mcgurk2016, mervis2017, moncrieff2025
+Cohorts written (5 new): eppic_melbourne_2011, saopaulo_prevoc, brooklyn_tsw_rct,
+  institute_living_rct, radar_trial
+Cohort referenced but NOT re-emitted: nfbc1966 (already in data/ from the pilot; corroborated, not
+  changed). majuri2023 contributes no result, so no row of the existing cohort is touched.
+
+Rows: 6 reports, 5 cohorts, 12 arms, 16 outcomes, 75 risk-of-bias, 6 report-cohort map,
+      144 provenance, 9 manifest changes.
+
+Prompt: config/prompts/extraction_v3.md
+Extractor: claude-opus-5, 2026-08-12
+
+Verification run before this file was written:
+  1. Shard self-check: headers byte-identical to data/*.csv; every controlled value in
+     config/vocabularies.yml; every foreign key resolves; no duplicate result_id; source_locator and
+     outcome_verbatim non-empty on all 16 outcome rows; every unresolved row carries a conflict_note;
+     every derived row carries a derivation_justification; no forbidden computed column; every
+     non-component_only result carries all domains of exactly one instrument and no component_only
+     row carries any; checker blank throughout. PASS.
+  2. Project validator, shard merged into a scratch copy of data/:
+     Rscript R/01_validate_data.R  ->  "schema and vocabulary validation passed".
+     One earlier failure was found and fixed by this run; it is documented in unresolved_queries.md
+     under schema question 2.
+
+None of the 16 results enters the primary prevalence pool, and each is stopped by a recorded gate
+rather than by omission: 3 cohorts are employment-selected under D9 (saopaulo_prevoc,
+brooklyn_tsw_rct, institute_living_rct), 2 whole-cohort results are composites rather than paid_any
+(eppic_melbourne_2011 work-or-study, radar_trial EET), 1 is barred from every horizon by
+followup_basis, and 11 of 16 are blocked by conflict_status = unresolved.

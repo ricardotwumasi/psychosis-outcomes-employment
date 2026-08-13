@@ -1,0 +1,7 @@
+F07 complete
+reports: cook2016 detore2019 domenicano2025 drake2015 falk2016 fulford2018
+cohorts: eidp_usa hartford_ips_rct eis_ferrara ct_dual_diagnosis stockholm_2005 raise_etp
+prompt: config/prompts/extraction_v3.md
+rows: 6 reports, 6 cohorts, 9 arms, 23 results, 189 rob domain judgements, 8 report-cohort rows, 184 provenance rows
+validated standalone with Rscript R/01_validate_data.R: schema and vocabulary validation passed
+extractor: claude-opus-5, 2026-08-12

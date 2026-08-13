@@ -1,0 +1,9 @@
+report_id,cohort_id,relationship,contributes_results,notes
+cook2016,eidp_usa,describes,yes,"Long-term SSA-linked follow-up of 449 of the 1,648 EIDP participants, from six of the eight sites."
+cook2016,hartford_ips_rct,overlaps_with,no,"The Hartford trial is one of the eight EIDP sites (detore2019 acknowledgements, EIDP cooperative #UD7 SM51818), so its participants are EIDP participants. Whether any are among these 449 cannot be determined because the six contributing sites are not named. Do not pool eidp_usa with hartford_ips_rct."
+detore2019,hartford_ips_rct,describes,yes,"Secondary analysis of the Hartford supported employment trial (Mueser et al. 2004), IPS arm only."
+detore2019,eidp_usa,overlaps_with,no,"Acknowledgements: 'This project was one of eight controlled trials of vocational rehabilitation programs, supported by cooperative #UD7 SM51818 ... as part of the Employment Intervention Demonstration Program (EIDP).' Evidenced overlap with the EIDP cohort described by cook2016."
+domenicano2025,eis_ferrara,describes,yes,Confirmed from Methods 2.1-2.2 and Figure 1.
+drake2015,ct_dual_diagnosis,describes,yes,Describes the schizophrenia-spectrum subgroup (150) of the 198 enrolled; both randomised case-management arms merged.
+falk2016,stockholm_2005,describes,yes,"Confirmed from Materials and methods, Study population, p. 260."
+fulford2018,raise_etp,secondary_analysis,yes,A secondary cross-lagged panel analysis of RAISE-ETP; the trial's own outcome reports are cited as references 33-35 and are not in this batch.

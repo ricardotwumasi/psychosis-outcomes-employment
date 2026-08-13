@@ -1,0 +1,49 @@
+batch_id: F04
+completed_utc: 2026-08-12
+extractor: claude-opus-5
+prompt: config/prompts/extraction_v2.md
+reports_read: clarke2023 killackey2019 harrow2017 jones2024 khare2022 khare2022b (6 of 6; khare2022b was staged as unknown2022)
+cohorts_confirmed: eppic_ips_rct, chicago_followup, pune_public (3 of 3; no cohort refuted, no new cohort split out)
+triage_hint: killackey2019 -> eppic_ips_rct CONFIRMED from both papers (same registry number
+  ACTRN12608000094370, same 171/25/146 flow, same site, same baseline employment count, and
+  clarke2023 cites killackey2019 as its reference 11).
+results_extracted: 8 rows (6 analytic, 2 component_only fragments of one derived count)
+  killackey2019_ips_t6m_paidcomp        47/66   6m   paid_competitive, period 6m
+  killackey2019_tau_t6m_paidcomp        29/60   6m   paid_competitive, period 6m
+  clarke2023_cohort_t18m_paidany        37/100  18m  paid_any, point
+  harrow2017_sz_ap20y_t240m_vocact       9/36   240m vocational_activity, period 12m
+  harrow2017_sz_noap20y_t240m_vocact    16/22   240m vocational_activity, period 12m
+  khare2022b_cohort_t12m_paidany        53/107  12m  paid_any, point, DERIVED from two printed cells
+  (+ 2 component_only cells: 45/107 and 8/107)
+  jones2024: NO result. No employment count at any timepoint; latent class sizes are
+  memberships, not prevalences, and are not recorded as such.
+  khare2022: NO result. linked_report; its age-subgroup counts (24/51 and 22/43 at 12 months)
+  lose the SAP section 5 selection to khare2022b's whole-cohort 53/107 at the same timepoint.
+results_entering_any_landmark_horizon: 1 (khare2022b at t12m). killackey2019 measures at 6
+  months, which falls in no band; clarke2023's 18 months is t24m under D11.1; harrow2017's 240
+  months is the 108-and-above band but on a non-paid construct in non-randomised subgroups.
+primary_pool_contribution: ZERO at t12m. The single surviving result is removed by the
+  "eligible diagnosis group" clause: pune_public is smi_mixed with subgroup_extractable = no,
+  and the implemented gate requires BOTH the 50 per cent threshold and an extractable psychosis
+  subgroup where SAP section 7 reads as a disjunction. That is a review-team decision, recorded
+  in unresolved_queries.md note A, not coded around.
+risk_of_bias: 46 rows, one instrument per result, every domain present.
+  rob2 x2 (killackey2019 arms; overall HIGH, driven by outcome-dependent missingness: two
+    participants withdrew because they obtained employment)
+  jbi_prevalence x1 (clarke2023; frame and sampling `no`, coverage and response rate `no`)
+  robins_i x2 (harrow2017; overall SERIOUS, confounding by indication)
+  jbi_prevalence x1 (khare2022b; coverage, condition identification and response rate `no`)
+  The two component_only rows carry no rob rows by design; see unresolved_queries.md note D.
+  checker: NOT DONE. Stage G, human.
+validated_standalone: yes. Rscript R/01_validate_data.R over this shard alone:
+  "read: 6 reports, 3 cohorts, 7 arms, 8 results, 46 rob rows",
+  "schema and vocabulary validation passed", "derived columns computed",
+  primary pool at t12m = 0 results from 0 cohorts, removals logged clause by clause.
+manifest_changes: 14 rows. unknown2022 is NOT a supplement: it is the full article
+  (Psychiatric Rehabilitation Journal 2022;45(3):237-246), so report_id -> khare2022b,
+  first_author -> Khare, doi -> 10.1037/prj0000512, title de-prefixed. The manifest's
+  "53/107 at 12m derived by summing cells, VERIFY" is VERIFIED. The manifest's harrow2017 note
+  "25/58 at 20y" is REFUTED as a recordable result: the paper never prints it and its two parts
+  sit on different arms and denominators. killackey2019 adjudicated from pending to include.
+inconsistencies: 13 entries, 6 of them reconciliations. None blocking; no result in this batch
+  carries conflict_status = unresolved.

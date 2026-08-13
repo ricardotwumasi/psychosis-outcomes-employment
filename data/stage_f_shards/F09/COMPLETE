@@ -1,0 +1,36 @@
+batch_id: F09
+status: complete
+extractor: claude-opus-5
+prompt_file: config/prompts/extraction_v3.md
+completed_utc: 2026-08-12
+
+All six reports read in full and extracted: khare2021, leighton2019, leighton2019b,
+liangrong2021, lindgren2020, luo2019.
+
+Tables written:
+  extraction_reports.csv     6 rows
+  extraction_cohorts.csv     7 rows   (one new cohort_id: glasgow_edinburgh_2006)
+  extraction_arms.csv        8 rows
+  extraction_outcomes.csv   14 rows   (12 poolable, 2 component_only)
+  extraction_rob.csv        96 rows   (72 jbi_prevalence over 8 results, 24 rob2 over 4 results)
+  report_cohort_map.csv     10 rows   (3 validation_sample rows, contributes_results = no)
+  provenance.csv           112 rows   (8 primary-determining fields x 14 results)
+  manifest_changes.csv      11 rows
+  inconsistencies.md
+  unresolved_queries.md
+
+Validation: `Rscript R/01_validate_data.R` run against this shard in isolation.
+"schema and vocabulary validation passed". The only external reference is
+report_cohort_map.csv's leighton2019 -> opus_1998 validation_sample row, which names a
+cohort defined in data/ and resolves on merge; it is deliberate and required by the batch
+brief. The other six tables resolve standalone.
+
+Pool effect of this shard, from the validator's own attrition log:
+  primary pool at horizon t12m: 1 result from 1 cohort (khare2021, 287/456, pune_private).
+  liangrong2021's paid_any is correctly barred at the horizon clause by its followup_basis.
+
+NO OPUS RESULT ROW EXISTS IN THIS SHARD. opus_1998 appears once in extraction_outcomes.csv,
+inside the notes field of the national_eden row, recording why the 173/553 figure was not
+extracted.
+
+Nothing was written outside this shard directory. data/ was read only.

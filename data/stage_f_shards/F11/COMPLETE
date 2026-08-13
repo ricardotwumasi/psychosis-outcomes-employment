@@ -1,0 +1,42 @@
+batch_id: F11
+status: complete
+extractor: claude-opus-5
+prompt_file: config/prompts/extraction_v3.md
+extraction_date: 2026-08-12
+
+All six reports read in full and extracted:
+  mucci2021      nirp_italy       confirmed
+  nakamura2025   kariya_daycare   confirmed
+  pedersen2025   opus_2014        confirmed, and confirmed DISTINCT from opus_1998
+  peebo2022      tallinn_fep      confirmed, plus a second cohort tallinn_fep_tau
+  petrakis2019   stvincents_ips   confirmed
+  ringbom2023    fi_birth_1987    confirmed
+
+Shard contents: 6 reports, 7 cohorts, 8 arms, 38 results, 326 risk-of-bias domain
+judgements, 7 report-cohort rows, 380 provenance rows, 14 manifest changes.
+
+Validated standalone against config/vocabularies.yml, config/analysis.yml and
+R/01_validate_data.R (copied into an isolated root holding this shard's five
+extraction tables and report_cohort_map.csv only):
+  "configuration loaded and validated"
+  "read: 6 reports, 7 cohorts, 8 arms, 38 results, 326 rob rows"
+  "schema and vocabulary validation passed"
+  "derived columns computed"
+  exit status 0
+
+This shard contributes 0 results to the primary pool at any horizon, which is a
+finding and not an error. Pool attrition on the shard alone: 7 results blocked by
+an unresolved published conflict, 24 by employment-related selection at
+recruitment, 5 by ascertainment other than point prevalence, 2 by outcome
+construct. No result in this batch is both point-prevalence paid_any and drawn
+from a whole recruited cohort with no employment-related selection.
+
+PDF sha256 (first 16 hex, all matching data/inclusion_manifest.csv):
+  mucci2021      6666d378981ad08f
+  nakamura2025   1d2beddf8a7e4a15
+  pedersen2025   06280af90ce7c929
+  peebo2022      b7a8a9857955bfab
+  petrakis2019   5c56f60a0565dc23
+  ringbom2023    9ce9db74d6592746
+
+Nothing was written outside this shard directory.

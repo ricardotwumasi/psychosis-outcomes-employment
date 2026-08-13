@@ -1,0 +1,62 @@
+Batch F08 complete.
+
+Prompt: config/prompts/extraction_v3.md
+Extractor: claude-opus-5
+Completed (UTC): 2026-08-12
+
+All six reports read in full and extracted.
+
+  report                cohort                              status
+  greenwood2025         eye2_trial                          CONFIRMED
+  hakulinen2019         dk_registers_birth                  CONFIRMED
+  hakulinen2020         fi_registers_scz + fi_registers_nonaff  REFINED (see manifest_changes.csv)
+  hui2026               hk_jcep_2009                        CONFIRMED
+  jackel2025            vivantes_berlin_rct                 CONFIRMED
+  jirapramukpitak2022   bangkok_licm                        CONFIRMED (one cohort, not two)
+
+Contents: 6 reports, 7 cohorts, 17 arms, 19 results, 143 risk-of-bias rows
+(9 jbi_prevalence results x 9 domains + 6 rob2 results x 6 domains + 4 robins_i results
+x 8 domains, no domain omitted), 190 provenance rows (19 results x 10 primary-determining
+fields), 14 manifest changes, 21 inconsistencies, 21 unresolved queries.
+
+VALIDATES STANDALONE. `Rscript R/01_validate_data.R` against a root containing only this
+shard reports "configuration loaded and validated / read: 6 reports, 7 cohorts, 17 arms,
+19 results, 143 rob rows / schema and vocabulary validation passed / derived columns
+computed" and builds the pools without error.
+
+NO RESULT FROM THIS BATCH ENTERS THE PRIMARY POOL, and every exclusion is on a stated
+prespecified clause rather than on a missing value. The pool-construction log runs:
+19 results in; 4 removed by unresolved conflict (jackel2025); 2 by employment selection at
+recruitment (jackel2025); 9 as not a whole recruited cohort (greenwood2025 x2, hui2026,
+jirapramukpitak2022 x6); 2 as not point prevalence (hakulinen2019); and the last 2
+(hakulinen2020) by the horizon filter, because followup_basis = calendar_end_common and the
+only extractable timepoint is year 0.
+
+THE THREE COUNTS THAT WERE NOT WRITTEN, which is the substance of this batch:
+  hakulinen2019   87% not employed at age 25. Whole-number percentage; the appendix
+                  carrying the denominator is NOT in the held PDF. Blank plus a note.
+  hakulinen2020   every year except year 0. Graphical only. Blank plus a note.
+  hui2026         158/219 at 4 years. Not printed, and the derivation fails D12.2 twice.
+                  Blank plus a note, with the candidate values put to the authors.
+
+THE ONE COUNT THAT WAS VERIFIED AND THEN STILL NOT WRITTEN:
+  jirapramukpitak2022  189/549. Exact, and its two components were verified cell by cell,
+                  but summing two subgroup arms on two denominators is forbidden by D12.2
+                  and by the validator. Raised for a schema ruling at U15.
+
+Items requiring a human before merge, all in unresolved_queries.md:
+  U15  the D12.2 subgroup-partition ruling above; the only usable result withheld on a
+       schema question rather than an evidential one.
+  U16  jirapramukpitak2022's diagnosis gate: 277/549 = 50.5% carry a stated diagnostic
+       criterion, within a percentage point of the SAP section 7 threshold.
+  U20  whether splitting the manifest's single fi_registers into two cohort_ids was right.
+       No synthesis consequence either way; flagged so the merge is not surprised.
+  U21  nothing in this shard has been independently checked; `checker` is blank throughout.
+
+Two vocabulary gaps found: no ascertainment value for a duration measure (U3) and no region
+value for Southeast Asia (U19). One vocabulary definition is literally false of a study it
+correctly classifies: calendar_end_common (U7).
+
+Retrieved during this extraction and not previously in the repository: Additional file 1 of
+jirapramukpitak2022, holding Table S3. URL and sha256 in extraction_reports.csv and at U18;
+it should be added to data/supplement_provenance.csv.
