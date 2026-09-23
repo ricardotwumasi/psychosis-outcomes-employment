@@ -74,7 +74,12 @@ frequentist_compare <- function(d, bayes_summaries, cfg) {
     tau_logit = bt$median, i2 = NA_real_, k = bp$n_draws * 0L + NA_integer_,
     note = "", stringsAsFactors = FALSE), tab)
 
-  tab$n_cohorts_continuity_corrected <- n_corrected
+  # Only the approximate logit row adds 0.5 to zero and full cells (escalc,
+  # to = "only0"). brms and rma.glmm use the binomial likelihood and correct
+  # nothing, so repeating the count on their rows, as this did before
+  # 23 September 2026, told a reader they had been corrected too.
+  tab$n_cohorts_continuity_corrected <- ifelse(
+    grepl("^rma on logit", tab$model), n_corrected, 0L)
   tab$comparison_is_a_gate <- FALSE
   tab$sample_status <- cfg$sample_status
 

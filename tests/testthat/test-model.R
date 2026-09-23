@@ -7,6 +7,7 @@
 source(file.path(PROJ, "R", "lib_model.R"))
 source(file.path(PROJ, "R", "lib_synthetic.R"))
 source(file.path(PROJ, "R", "03_fit_prevalence.R"))
+source(file.path(PROJ, "R", "06_frequentist_compare.R"))
 
 cfg <- test_cfg()
 full_cfg <- within(cfg, sample_status <- "full")
@@ -207,4 +208,111 @@ test_that("a two-cohort synthetic fit runs end to end, uses the configured prior
   expect_true(row$interval_lo < row$estimate && row$estimate < row$interval_hi)
   expect_true(row$predictive_new_cohort_hi - row$predictive_new_cohort_lo >
                 row$interval_hi - row$interval_lo)
+})
+
+# --- review of the provisional fit, 23 September 2026 ------------------------
+
+test_that("the two-sided predictive p is small for an observed zero the model rarely produces, where the old one-sided form always read 1 and so hid the misfit", {
+  set.seed(1)
+  yrep <- stats::rbinom(4000, 60, 0.3)
+  expect_equal(mean(yrep / 60 >= 0), 1)             # the old statistic
+  expect_lt(ppc_p_two_sided(yrep, 0L), 0.01)
+  # 1 only where it should be: every replicate equals the observation
+  expect_equal(ppc_p_two_sided(rep(0L, 100), 0L), 1)
+  # and the far upper tail is caught as well as the lower
+  expect_lt(ppc_p_two_sided(yrep, 60L), 0.01)
+  expect_gt(ppc_p_two_sided(yrep, 18L), 0.5)
+})
+
+test_that("leave-one-cohort-out at k = 2 reports each remaining cohort's exact interval and fits nothing, because a two-cohort pool less one is one cohort's observed proportion", {
+  hp <- list(horizon = "t12m", data = data.frame(
+    cohort_id = c("c1", "c2"), result_id = c("r1", "r2"),
+    n_employed = c(53L, 287L), n_outcome_observed = c(107L, 456L),
+    followup_months = 12L))
+  lo <- leave_one_cohort_out(hp, cfg)
+  expect_equal(nrow(lo$rows), 2L)
+  expect_equal(lo$rows$k_remaining, c(1L, 1L))
+  expect_match(lo$rows$method, "exact binomial")
+  expect_length(lo$fits, 0L)
+  expect_null(lo$ppc)
+  # dropping c1 leaves c2's own Clopper-Pearson interval
+  bt <- stats::binom.test(287, 456, conf.level = cfg$reporting$interval_prob)
+  r <- lo$rows[lo$rows$dropped_cohort_id == "c1", ]
+  expect_equal(c(r$interval_lo, r$interval_hi), as.numeric(bt$conf.int))
+  expect_match(lo$rows$analysis_status, "^POST HOC.*D15")
+})
+
+test_that("leave-one-cohort-out at k = 3 refits once per cohort with k - 1 remaining under distinct fit ids, so no refit can be served another's cache entry", {
+  skip_if(nzchar(Sys.getenv("SKIP_SLOW_TESTS")), "SKIP_SLOW_TESTS is set")
+  skip_if_not(requireNamespace("cmdstanr", quietly = TRUE), "cmdstanr unavailable")
+  c2 <- cfg
+  c2$sampling$chains <- 2L; c2$sampling$iter_warmup <- 200L
+  c2$sampling$iter_sampling <- 200L
+  c2$sampling$adapt_delta_ladder <- list(0.95)
+  hp <- list(horizon = "t120m", data = data.frame(
+    cohort_id = c("a", "b", "c"), result_id = c("ra", "rb", "rc"),
+    n_employed = c(35L, 0L, 23L), n_outcome_observed = c(65L, 56L, 62L),
+    followup_months = c(120L, 240L, 125L)))
+  lo <- leave_one_cohort_out(hp, c2)
+  expect_equal(nrow(lo$rows), 3L)
+  expect_equal(lo$rows$k_remaining, c(2L, 2L, 2L))
+  expect_length(unique(lo$rows$fit_id), 3L)
+  expect_equal(nrow(lo$ppc), 3L)
+  expect_true(all(lo$ppc$ppc_p_two_sided >= 0 & lo$ppc$ppc_p_two_sided <= 1))
+  expect_true(all(c("adapt_delta_final", "max_treedepth") %in%
+                    names(lo$fits[[1]]$diagnostics)))
+  expect_equal(lo$fits[[1]]$diagnostics$adapt_delta_final, 0.95)
+  # the label follows the cohorts that REMAIN, so dropping the 20-year cohort
+  # narrows the observed range rather than repeating the full pool's
+  expect_equal(lo$rows$horizon_label[lo$rows$dropped_cohort_id == "b"],
+               "10 years or more (observed 120 to 125 months)")
+  expect_equal(lo$rows$horizon_label[lo$rows$dropped_cohort_id == "a"],
+               "10 years or more (observed 125 to 240 months)")
+})
+
+test_that("the study table carries every horizon that has a pool, each row under its own horizon, so the long-horizon attrition can be audited from the outputs", {
+  dat <- derive_columns(synthetic_extraction(cfg), cfg)
+  hs <- names(cfg$horizons$bands)
+  pools <- lapply(hs, function(h) build_primary_pool(dat, cfg, horizon = h))
+  st <- do.call(rbind, lapply(pools, prevalence_study_table, cfg = cfg))
+  with_rows <- hs[vapply(pools, function(p) nrow(p$data) > 0L, logical(1))]
+  expect_gt(length(with_rows), 1L)
+  expect_setequal(unique(st$horizon), with_rows)
+  for (p in pools) expect_setequal(st$result_id[st$horizon == p$horizon], p$data$result_id)
+})
+
+test_that("only the logit rma row is flagged as continuity corrected, because brms and rma.glmm use the binomial likelihood and correct nothing", {
+  d <- data.frame(n_employed = c(0L, 20L, 15L), n_outcome_observed = c(50L, 60L, 55L))
+  bs <- data.frame(quantity = c("pooled_proportion", "between_cohort_sd"),
+                   median = c(0.2, 0.5), q_lo = c(0.1, 0.1), q_hi = c(0.3, 1),
+                   n_draws = 100L)
+  tab <- suppressWarnings(frequentist_compare(d, bs, cfg))$table
+  corr <- setNames(tab$n_cohorts_continuity_corrected, tab$model)
+  expect_equal(unname(corr[grepl("^rma on logit", names(corr))]), 1L)
+  expect_true(all(corr[!grepl("^rma on logit", names(corr))] == 0L))
+})
+
+test_that("each pooled summary row says which interval it reports, so report_hdi = TRUE is never read as the row's interval being an HDI", {
+  set.seed(2)
+  dr <- data.frame(b_Intercept = stats::rnorm(4000, -2, 1),
+                   sd_cohort_id__Intercept = abs(stats::rnorm(4000, 0, 1)))
+  s <- prevalence_summaries(dr, cfg)
+  expect_true(all(startsWith(s$interval_reported, cfg$reporting$primary_interval)))
+  expect_true(all(grepl("also reported", s$interval_reported) == s$report_hdi))
+})
+
+test_that("the prior against posterior table reproduces the prior interval in the config comment and reads 0.05 above the prior 95th percentile when the data say nothing", {
+  set.seed(3)
+  p <- cfg$priors$primary
+  dr <- data.frame(b_Intercept = stats::rnorm(2e5, p$intercept_mean, p$intercept_sd),
+                   sd_cohort_id__Intercept = abs(stats::rnorm(2e5, 0, p$tau_sd)))
+  o <- prior_posterior_overlap(dr, cfg)
+  mu <- o[o$quantity == "pooled_proportion", ]
+  tau <- o[o$quantity == "between_cohort_sd", ]
+  expect_equal(round(mu$prior_hi, 3), 0.615)
+  expect_equal(round(tau$prior_q95, 2), 0.98)
+  expect_equal(tau$posterior_mass_above_prior_q95, 0.05, tolerance = 0.005)
+  # a posterior pushed above the prior registers as conflict
+  dr$sd_cohort_id__Intercept <- dr$sd_cohort_id__Intercept + 1
+  expect_gt(prior_posterior_overlap(dr, cfg)$posterior_mass_above_prior_q95[2], 0.5)
 })

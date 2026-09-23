@@ -250,13 +250,20 @@ fit_model <- function(formula, data, priors, cfg, fit_id,
 
   fit <- run(ladder[1])
   escalations <- 0L
+  ad_used <- ladder[1]
   for (ad in ladder[-1]) {
     if (n_divergent(fit) == 0) break
     message("  [escalate] ", fit_id, " to adapt_delta = ", ad)
     fit <- run(ad)
+    ad_used <- ad
     escalations <- escalations + 1L
   }
+  # An escalation is one complete refit at the next adapt_delta on the ladder,
+  # with max_treedepth unchanged. The value the kept fit was sampled with is
+  # recorded, so a count of escalations can be read as a setting rather than
+  # reconstructed from the ladder.
   attr(fit, "escalations") <- escalations
+  attr(fit, "adapt_delta") <- ad_used
   attr(fit, "fit_id") <- fit_id
   # Recorded from the configuration that sampled the fit, so the treedepth-hit
   # count is taken against the limit actually used and never a default.
@@ -270,6 +277,28 @@ fit_model <- function(formula, data, priors, cfg, fit_id,
 }
 
 # --- posterior predictive ----------------------------------------------------
+
+#' Two-sided posterior predictive tail probability for one observed count.
+#'
+#' Replaces the one-sided mean(p_rep >= obs) used before 23 September 2026.
+#' That quantity is identically 1 whenever the observed count is 0, because
+#' every replicate is at least 0, so a cohort the model could hardly reproduce
+#' (carstairs_1992, 0 employed at 20 years, in the provisional fit) was printed
+#' as a perfect fit. The two-sided form doubles the smaller tail, so it is small
+#' when the observation sits in EITHER tail, and is 1 only when at least half
+#' the replicates lie at or below it and at least half at or above it, for
+#' example when every replicate equals it.
+#'
+#' Computed on integer COUNTS, not on proportions. Both tails include the
+#' observed value itself (<= and >=), which is the conventional treatment of a
+#' discrete predictive distribution and why the sum of the tails can exceed 1;
+#' the result is capped at 1.
+#'
+#' @param yrep integer draws of the replicated count for one cohort.
+#' @param y the observed count.
+ppc_p_two_sided <- function(yrep, y) {
+  min(1, 2 * min(mean(yrep <= y), mean(yrep >= y)))
+}
 
 #' Posterior predictive check, in both replication forms.
 #'
@@ -295,8 +324,8 @@ posterior_predictive_check <- function(fit, d, cfg) {
       form = form, cohort_id = d$cohort_id, result_id = d$result_id,
       observed = obs, lower = lo, upper = hi,
       inside = obs >= lo & obs <= hi,
-      bayes_p = vapply(seq_along(obs), function(i) mean(p_rep[, i] >= obs[i]),
-                       numeric(1)),
+      ppc_p_two_sided = vapply(seq_along(obs), function(i)
+        ppc_p_two_sided(yrep[, i], d$n_employed[i]), numeric(1)),
       stringsAsFactors = FALSE
     )
   }

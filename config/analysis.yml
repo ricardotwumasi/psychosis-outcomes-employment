@@ -258,6 +258,17 @@ reportability:
 # 0.39 at a pooled 0.25; 95 per cent of the prior lies below 0.98. Ajnakina
 # reported I-squared near 96 per cent, so a prior concentrated below 0.2 would
 # be indefensible. Rover et al. (2021).
+#
+# 23 September 2026, after the provisional fit. The claim above that the prior
+# "cannot by itself produce the estimate" did not hold at t12m. Both t12m
+# cohorts lay above the prior's central mass: one (0.63) above the prior's
+# 95 per cent upper bound on the pooled proportion (0.615 analytically, 0.619
+# in the prior predictive simulation), the other (0.50) near its 91st
+# percentile. The posterior median (0.53) sat below the pooled raw proportion
+# (0.60), drawn toward the prior, so the prior did shape the estimate. No prior
+# value below is changed, because the priors were prespecified; prior
+# sensitivity (tables/prior_sensitivity.csv) and a prior against posterior
+# table (tables/prior_posterior_overlap.csv) are reported alongside.
 priors:
   primary:
     intercept_mean: -1.1
@@ -404,11 +415,14 @@ sensitivity:
     # tables/sensitivity_by_horizon.csv
     missing_outcome_bounds: true
 
-  # DEFERRED, WITH A REASON. No code runs these. Each reason is a property of
-  # the evidence base now, not a judgement about the analysis, and is revisited
-  # when the cohort count changes.
+  # DEFERRED, WITH A REASON. No code runs these, with one exception stated in
+  # its own entry: leave_one_cohort_out runs POST HOC under deviation D15, and
+  # stays listed here because its prespecified form, predictive assessment at
+  # k >= 5, is still deferred. Each reason is a property of the evidence base
+  # now, not a judgement about the analysis, and is revisited when the cohort
+  # count changes.
   deferred_with_reason:
-    leave_one_cohort_out: "uninformative at k = 2 or 3, where dropping a cohort leaves one or two; implement when any horizon reaches k >= 5"
+    leave_one_cohort_out: "prespecified as deferred: uninformative at k = 2 or 3, where dropping a cohort leaves one or two; implement when any horizon reaches k >= 5. Since 23 September 2026 implemented POST HOC for k >= 3 (deviation D15), after prior-data conflict and posterior predictive misfit in the provisional fit; at k = 2 the two cohort-level exact binomial intervals are reported instead of a refit. tables/leave_one_cohort_out.csv and diagnostics/ppc_loco.csv; does not replace the prespecified primary"
     attrition_moderator: "a moderator, and no moderator is reportable below 10 cohorts under `reportability`"
     all_moderators: "not reportable below 10 cohorts under `reportability`; moderator_slopes.csv records each as not reported"
     intervention_model: "SAP section 10.2; a separate synthesis of randomised arms, not a sensitivity of the prevalence estimate"

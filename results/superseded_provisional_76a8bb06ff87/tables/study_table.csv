@@ -1,0 +1,3 @@
+"cohort_id","report_id","result_id","n_employed","n_outcome_observed","proportion","followup_months","outcome_construct","design","country_iso3","ci_lo","ci_hi","sample_status","result_status"
+"pune_public","khare2022b","khare2022b_cohort_t12m_paidany",53,107,0.495327102803738,12,"paid_any","prospective_cohort","IND",0.402410704021837,0.588567401006376,"DEFINITIVE EXTRACTION IN PROGRESS - NOT FOR INFERENCE","PROVISIONAL, PRE-FREEZE - NOT FOR CITATION"
+"pune_private","khare2021","khare2021_cohort_t12m_paidany",287,456,0.629385964912281,12,"paid_any","prospective_cohort","IND",0.584148692645862,0.672461488399192,"DEFINITIVE EXTRACTION IN PROGRESS - NOT FOR INFERENCE","PROVISIONAL, PRE-FREEZE - NOT FOR CITATION"

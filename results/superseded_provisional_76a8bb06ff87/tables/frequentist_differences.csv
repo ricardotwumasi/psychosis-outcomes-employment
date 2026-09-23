@@ -1,0 +1,5 @@
+"horizon","quantity","brms","rma_glmm","absolute_difference","interpretation","sample_status","result_status"
+"t12m","pooled_proportion",0.528433540307061,0.576719827197023,0.0482862868899626,"descriptive only; not a pass/fail criterion","DEFINITIVE EXTRACTION IN PROGRESS - NOT FOR INFERENCE","PROVISIONAL, PRE-FREEZE - NOT FOR CITATION"
+"t12m","tau_logit",0.429865,0.221609983843077,0.208255016156923,"descriptive only; not a pass/fail criterion","DEFINITIVE EXTRACTION IN PROGRESS - NOT FOR INFERENCE","PROVISIONAL, PRE-FREEZE - NOT FOR CITATION"
+"t120m","pooled_proportion",0.225946980681985,0.122574022527302,0.103372958154683,"descriptive only; not a pass/fail criterion","DEFINITIVE EXTRACTION IN PROGRESS - NOT FOR INFERENCE","PROVISIONAL, PRE-FREEZE - NOT FOR CITATION"
+"t120m","tau_logit",1.09815,2.65013763573079,1.55198763573079,"descriptive only; not a pass/fail criterion","DEFINITIVE EXTRACTION IN PROGRESS - NOT FOR INFERENCE","PROVISIONAL, PRE-FREEZE - NOT FOR CITATION"

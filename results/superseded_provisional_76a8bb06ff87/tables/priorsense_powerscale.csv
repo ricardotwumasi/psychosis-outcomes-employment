@@ -1,0 +1,5 @@
+"horizon","fit_id","variable","prior","likelihood","diagnosis","sample_status","result_status"
+"t12m","prevalence_t12m","b_Intercept",0.0594702853018863,0.0161890592354241,"potential strong prior / weak likelihood","DEFINITIVE EXTRACTION IN PROGRESS - NOT FOR INFERENCE","PROVISIONAL, PRE-FREEZE - NOT FOR CITATION"
+"t12m","prevalence_t12m","sd_cohort_id__Intercept",0.157929640338685,0.0320349055912958,"potential strong prior / weak likelihood","DEFINITIVE EXTRACTION IN PROGRESS - NOT FOR INFERENCE","PROVISIONAL, PRE-FREEZE - NOT FOR CITATION"
+"t120m","prevalence_t120m","b_Intercept",0.0789631894238583,0.0510500837301157,"potential prior-data conflict","DEFINITIVE EXTRACTION IN PROGRESS - NOT FOR INFERENCE","PROVISIONAL, PRE-FREEZE - NOT FOR CITATION"
+"t120m","prevalence_t120m","sd_cohort_id__Intercept",0.283566251580296,0.121166335364678,"potential prior-data conflict","DEFINITIVE EXTRACTION IN PROGRESS - NOT FOR INFERENCE","PROVISIONAL, PRE-FREEZE - NOT FOR CITATION"

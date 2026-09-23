@@ -23,6 +23,11 @@
 # more. Where the model runs, the two named sensitivity pools, the
 # missing-outcome bounds, the frequentist comparison and priorsense run too,
 # and below small_k_threshold the one-at-a-time prior grid runs alongside.
+#
+# Since 23 September 2026 a POST HOC leave-one-cohort-out analysis (deviation
+# D15) also runs at every horizon the model reaches, with a prior against
+# posterior table. The leave-one-cohort-out rows carry that label in their own
+# column, and neither addition replaces the prespecified primary.
 # =============================================================================
 
 `%||%` <- function(a, b) if (is.null(a)) b else a
@@ -83,7 +88,11 @@ main <- function() {
   # directory of stamped tables with no fit behind them. The design tables a
   # design-only run used to write here are produced by R/04_design_package.R.
   message("\n== fit guard ==")
-  gate <- assert_may_fit(cfg, mode)
+  # Captured once, here. The run writes its own outputs under results/, so a
+  # status read later always says dirty and the manifest would misreport the
+  # tree the fit was actually gated on.
+  wt_at_guard <- worktree_status(cfg)
+  gate <- assert_may_fit(cfg, mode, worktree = wt_at_guard)
   # Each mode has its own namespace. The prefix is on the directory rather than
   # inside a file, so the separation survives someone copying a table out of
   # it, and every table ALSO carries result_status for when it does not.
@@ -95,7 +104,7 @@ main <- function() {
   # Split by mode, so an engineering or provisional fit can never be served
   # from cache to a definitive run with the same analysis identifier.
   cache_dir <- file.path(ROOT, ".cache", "fits", mode, aid)
-  message("  analysis_id ", aid, "  (worktree ", worktree_status(cfg), ")")
+  message("  analysis_id ", aid, "  (worktree ", wt_at_guard, ")")
 
   # Every table written by this runner goes through here, so none can leave
   # without sample_status and result_status.
@@ -107,17 +116,25 @@ main <- function() {
 
   ## ---- design checks -------------------------------------------------------
   message("\n== design checks ==")
-  pool <- build_primary_pool(dat, cfg)
+  # Every horizon's pool is built here, so pool_construction.csv and
+  # study_table.csv carry the clause-by-clause trail and the cohorts admitted
+  # at EACH horizon, with a horizon column. Only the primary's used to be
+  # written, and the t120m attrition could not be audited from the outputs.
+  pools <- lapply(names(cfg$horizons$bands),
+                  function(h) build_primary_pool(dat, cfg, horizon = h))
+  names(pools) <- names(cfg$horizons$bands)
+  pool <- pools[[cfg$horizons$primary]]
   message("  primary pool: ", nrow(pool$data), " results from ",
           length(unique(pool$data$cohort_id)), " cohorts at ", pool$horizon)
-  pool$log$sample_status <- cfg$sample_status
-  write_tab(pool$log, file.path(tab_dir, "pool_construction.csv"))
+  plog <- do.call(rbind, lapply(pools, function(p) cbind(horizon = p$horizon, p$log)))
+  plog$sample_status <- cfg$sample_status
+  write_tab(plog, file.path(tab_dir, "pool_construction.csv"))
   if (!is.null(pool$dropped_for_overlap)) {
     write_tab(pool$dropped_for_overlap, file.path(tab_dir, "reports_set_aside.csv"))
     message("  ", nrow(pool$dropped_for_overlap),
             " report(s) set aside by the result-selection rule, named in reports_set_aside.csv")
   }
-  st <- prevalence_study_table(pool, cfg)
+  st <- do.call(rbind, lapply(pools, prevalence_study_table, cfg = cfg))
   if (!is.null(st)) write_tab(st, file.path(tab_dir, "study_table.csv"))
 
   diagnostics <- list()
@@ -153,12 +170,12 @@ main <- function() {
   pooled_rows <- list(); sens_rows <- list(); grid_rows <- list()
   summaries <- list(); ppc_overall <- list(); ppc_per <- list()
   fq_tabs <- list(); fq_diffs <- list(); ps_rows <- list()
+  loco_rows <- list(); loco_ppc <- list(); overlap_rows <- list()
   grid <- prior_grid_settings(cfg)
 
   for (h in names(cfg$horizons$bands)) {
     message("\n== prevalence at ", h, " ==")
-    hp <- if (identical(h, cfg$horizons$primary)) pool
-          else build_primary_pool(dat, cfg, horizon = h)
+    hp <- pools[[h]]
     res <- fit_prevalence(hp, cfg, cache_dir, horizon = h)
     pooled_rows[[h]] <- pooled_row(res, cfg)
     r <- pooled_rows[[h]]
@@ -168,6 +185,10 @@ main <- function() {
                       r$interval_hi, if (isTRUE(r$small_k)) "  (small k)" else ""))
     }
     if (identical(res$status, "no_estimate")) note_skip(paste0("prevalence_", h), res$reason)
+    if (identical(res$status, "exact_binomial")) {
+      note_skip(paste0("leave_one_cohort_out_", h),
+                "one cohort; leaving it out leaves nothing to estimate")
+    }
     if (!identical(res$status, "ok")) next
 
     keep_fit(res)
@@ -180,6 +201,20 @@ main <- function() {
     fq <- frequentist_compare(res$data, res$summaries, cfg)
     fq_tabs[[h]] <- cbind(horizon = h, fq$table)
     fq_diffs[[h]] <- cbind(horizon = h, fq$differences)
+
+    ## prior against posterior for mu and tau, with the explicit conflict
+    ## indicator (added 23 September 2026; see prior_posterior_overlap)
+    overlap_rows[[h]] <- cbind(
+      horizon = h, horizon_label = r$horizon_label, fit_id = res$fit_id,
+      prior_posterior_overlap(posterior::as_draws_df(res$fit), cfg))
+
+    ## leave one cohort out: POST HOC, deviation D15. At k = 2 the rows are
+    ## the two cohorts' own exact intervals and nothing is refitted; above
+    ## that, every refit passes the same diagnostics gate as the primary.
+    lo <- leave_one_cohort_out(hp, cfg, cache_dir, horizon = h)
+    loco_rows[[h]] <- lo$rows
+    if (!is.null(lo$ppc)) loco_ppc[[h]] <- lo$ppc
+    for (f in lo$fits) keep_fit(f)
 
     ## priorsense power-scaling on the primary fit. An error is recorded as a
     ## skip with its message, never swallowed.
@@ -202,7 +237,7 @@ main <- function() {
         gr <- pooled_row(g, cfg)
         pr <- grid[[nm]]
         grid_rows[[paste(h, nm)]] <- cbind(
-          gr[c("horizon", "k_cohorts")], setting = nm,
+          gr[c("horizon", "horizon_label", "k_cohorts")], setting = nm,
           varied = if (nm %in% c("primary", "weak")) nm
                    else sub("^grid_(.*)_[^_]+$", "\\1", nm),
           intercept_mean = pr$intercept_mean, intercept_sd = pr$intercept_sd,
@@ -237,10 +272,10 @@ main <- function() {
       if (!same && identical(sv$status, "ok")) keep_fit(sv)
       row <- pooled_row(sv, cfg)
       row$analysis <- nm
-      row <- cbind(row[c("horizon", "analysis")], label = v$label,
+      row <- cbind(row[c("horizon", "horizon_label", "analysis")], label = v$label,
                    identical_to_primary = same,
                    n_cohorts_bounded = v$n_bounded %||% NA_integer_,
-                   row[setdiff(names(row), c("horizon", "analysis"))],
+                   row[setdiff(names(row), c("horizon", "horizon_label", "analysis"))],
                    stringsAsFactors = FALSE)
       if (same) row$note <- paste0("identical data to the primary pool; the primary fit is reported",
                                    if (nzchar(row$note)) paste0("; ", row$note) else "")
@@ -259,6 +294,9 @@ main <- function() {
   write_tab(bind(fq_diffs), file.path(tab_dir, "frequentist_differences.csv"))
   write_tab(bind(ppc_overall), file.path(diag_dir, "ppc_overall.csv"))
   write_tab(bind(ppc_per), file.path(diag_dir, "ppc_per_result.csv"))
+  write_tab(bind(loco_rows), file.path(tab_dir, "leave_one_cohort_out.csv"))
+  write_tab(bind(loco_ppc), file.path(diag_dir, "ppc_loco.csv"))
+  write_tab(bind(overlap_rows), file.path(tab_dir, "prior_posterior_overlap.csv"))
   if (any(pooled$prior_sensitivity_required) && !length(grid_rows)) {
     stop("a small-k horizon requires prior sensitivity but no grid row was ",
          "produced", call. = FALSE)
@@ -318,7 +356,7 @@ main <- function() {
     fit_mode = mode, synthetic_data = sel$synthetic, git_tag = gate$tag,
     source_commit = tryCatch(system2("git", c("-C", shQuote(ROOT), "rev-parse", "HEAD"),
                                      stdout = TRUE), error = function(e) NA_character_),
-    worktree = worktree_status(cfg),
+    worktree = wt_at_guard,
     config_sha256 = cfg$.sha_analysis, vocab_sha256 = cfg$.sha_vocab,
     r_version = R.version.string,
     brms_version = as.character(utils::packageVersion("brms")),

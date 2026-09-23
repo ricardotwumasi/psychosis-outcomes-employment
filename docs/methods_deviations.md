@@ -326,6 +326,23 @@ The discrepancy survived the pilot because `carstairs_1992`, the only `smi_mixed
 
 ---
 
+## D15. Post hoc leave-one-cohort-out at the long-term horizon
+
+**Date:** 23 September 2026. **After the provisional, pre-freeze fits of 23 September 2026 were seen. Not yet ratified by the authorship group.** This is the first deviation in this log made after a pooled real-data estimate was examined, and it is labelled accordingly.
+
+**Issue.** Once the author window closed, the `t120m` pool held three cohorts. One of them, `thomson2023` (Carstairs, a high-security forensic hospital cohort), contributes 0 employed of 56 living participants observed at 240 months. It entered only because the author's reply supplied the missing denominator, and it passes every prespecified gate. In the provisional fit this one zero-event cohort roughly halved the pooled proportion and tripled tau. priorsense flagged prior-data conflict: the posterior median of tau, 1.1, sits in the top 3 per cent of the half-normal(0, 0.5) prior. The new-cohort posterior predictive interval excluded the cohort even though it was in the fit. An independent statistical review recommended reporting each cohort's influence.
+
+**Ruling (proposed).**
+- Where a horizon's primary pool holds three or more cohorts, the model is refitted dropping each cohort in turn.
+- At two cohorts, the two cohort-level exact binomial intervals are reported instead of a refit.
+- Every such output is labelled **post hoc**, cites this entry, and **does not replace the prespecified primary estimate**, which is still the one reported first.
+
+The eligibility question that the influence exposes is a question for the authorship group, not for a sensitivity analysis: should a population detained in high-security care be pooled with community cohorts for a prevalence of paid work? Leave-one-cohort-out was already named in `config/analysis.yml` as the planned cross-validation, deferred as uninformative at k = 2 or 3. What is new here is running it for influence at k = 3, after an estimate was seen.
+
+**Direction and transparency.** The primary pool, the priors and the gates are unchanged. Nothing is excluded. The analysis adds information and removes none, and a reader can see the primary estimate and each cohort's influence side by side.
+
+---
+
 ## Non-deviations, recorded to prevent confusion
 
 - **Extraction by a machine checked by a human** is what the record already specifies ("Data will be extracted by one person (or a machine) and checked by at least one other person (or machine)"). The LLM-assisted extraction used here is within the registered process, not a departure from it. Every field determining inclusion or the primary estimate is checked independently.

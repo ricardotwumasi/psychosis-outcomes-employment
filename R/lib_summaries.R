@@ -95,6 +95,15 @@ prevalence_summaries <- function(dr, cfg, intercept = "b_Intercept",
   out$report_hdi <- vapply(seq_len(nrow(out)),
                            function(i) hdi_adds_information(out[i, ]), logical(1))
   if (!isTRUE(cfg$reporting$hdi_when_asymmetric)) out$report_hdi <- FALSE
+  # report_hdi = TRUE means the HDI is reported IN ADDITION to the headline
+  # interval, not instead of it; read alone it looked like a statement that the
+  # row's interval was an HDI. Each row therefore says which interval it
+  # reports, in words, and in which columns.
+  headline <- sprintf("%s (q_lo, q_hi)", cfg$reporting$primary_interval)
+  out$interval_reported <- ifelse(
+    out$report_hdi,
+    paste0(headline, "; HDI (hdi_lower, hdi_upper) also reported because the posterior is asymmetric"),
+    paste0(headline, " only; hdi columns are for audit and are not reported"))
   out$sample_status <- cfg$sample_status
   rownames(out) <- NULL
   out
@@ -169,6 +178,14 @@ fit_diagnostics <- function(fit, fit_id) {
   max_td <- attr(fit, "max_treedepth") %||%
     tryCatch(fit$fit@stan_args[[1]]$control$max_treedepth, error = function(e) NULL)
   if (is.null(max_td)) max_td <- NA_integer_
+  # The adapt_delta the kept fit was sampled with, by the same two routes. With
+  # `escalations` beside it, a reader can see what an escalation changed: each
+  # one is a refit at the next value of sampling.adapt_delta_ladder, with
+  # max_treedepth held at the value in the column above. A fit cached before
+  # this attribute existed falls back to the stanfit arguments.
+  ad <- attr(fit, "adapt_delta") %||%
+    tryCatch(fit$fit@stan_args[[1]]$control$adapt_delta, error = function(e) NULL)
+  if (is.null(ad)) ad <- NA_real_
 
   ebfmi <- tryCatch({
     ch <- np$Chain[np$Parameter == "energy__"]
@@ -188,6 +205,7 @@ fit_diagnostics <- function(fit, fit_id) {
     min_ess_tail = min(s$ess_tail, na.rm = TRUE),
     max_mcse_mean = max(s$mcse_mean, na.rm = TRUE),
     num_divergent = if (all(is.na(div))) NA_integer_ else as.integer(sum(div)),
+    adapt_delta_final = ad,
     max_treedepth = max_td,
     num_max_treedepth = if (all(is.na(td)) || is.na(max_td)) NA_integer_ else as.integer(sum(td >= max_td)),
     min_ebfmi = if (all(is.na(ebfmi))) NA_real_ else min(ebfmi, na.rm = TRUE),
@@ -232,4 +250,52 @@ diagnostics_failure_reason <- function(d, cfg) {
       sprintf("min_ebfmi %.3f not > %.2f", d$min_ebfmi, g$min_ebfmi)
   )
   if (!length(failed)) "" else paste(failed, collapse = "; ")
+}
+
+#' Prior against posterior for the pooled proportion and tau at one horizon.
+#'
+#' Added 23 September 2026 after the provisional fit, where both t12m cohorts
+#' lay above the prior's central mass and the pooled posterior was drawn back
+#' toward the prior. The prior summaries are analytic, not simulated: medians
+#' and equal-tailed quantiles are invariant under the monotone plogis, so the
+#' pooled-proportion prior is plogis of the normal quantiles, and tau's prior is
+#' half-normal, whose q-th quantile is tau_sd * qnorm((1 + q) / 2).
+#'
+#' The conflict indicator is deliberately simple and explicit: the fraction of
+#' posterior mass above the prior's 95th percentile. Under no conflict it sits
+#' near or below 0.05 (data that are uninformative leave it at 0.05); a value
+#' well above that says the data pulled the parameter into a region the prior
+#' treated as improbable. It is computed for both rows so they read alike, and
+#' it is a description, not a test.
+#'
+#' @param dr a draws data frame from posterior::as_draws_df().
+#' @param priors the prior settings the fit used (priors.primary by default).
+prior_posterior_overlap <- function(dr, cfg, priors = cfg$priors$primary,
+                                    intercept = "b_Intercept",
+                                    sd_par = "sd_cohort_id__Intercept") {
+  prob <- cfg$reporting$interval_prob
+  a <- (1 - prob) / 2
+  qs <- c(a, 0.5, 1 - a)
+  mu_q <- stats::plogis(stats::qnorm(qs, priors$intercept_mean, priors$intercept_sd))
+  mu_p95 <- stats::plogis(stats::qnorm(0.95, priors$intercept_mean, priors$intercept_sd))
+  tau_q <- priors$tau_sd * stats::qnorm((1 + qs) / 2)
+  tau_p95 <- priors$tau_sd * stats::qnorm(0.975)
+  post <- list(pooled_proportion = stats::plogis(dr[[intercept]]),
+               between_cohort_sd = dr[[sd_par]])
+  one <- function(q, pr, p95, draws, prior_text) {
+    data.frame(quantity = q, prior = prior_text,
+               prior_median = pr[2], prior_lo = pr[1], prior_hi = pr[3],
+               posterior_median = stats::median(draws),
+               posterior_lo = unname(stats::quantile(draws, a)),
+               posterior_hi = unname(stats::quantile(draws, 1 - a)),
+               prior_q95 = p95,
+               posterior_mass_above_prior_q95 = mean(draws > p95),
+               stringsAsFactors = FALSE)
+  }
+  rbind(
+    one("pooled_proportion", mu_q, mu_p95, post$pooled_proportion,
+        sprintf("plogis(normal(%g, %g))", priors$intercept_mean, priors$intercept_sd)),
+    one("between_cohort_sd", tau_q, tau_p95, post$between_cohort_sd,
+        sprintf("half-normal(0, %g) on the logit scale", priors$tau_sd))
+  )
 }
