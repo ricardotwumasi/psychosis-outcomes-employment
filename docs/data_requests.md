@@ -4,9 +4,30 @@ The registered protocol commits to this: "Authors will be asked to provide any r
 not available in published reports." This file is the send-ready set of those requests,
 rewritten from the Stage F shards on 13 August 2026.
 
-**Status: drafted, not sent.** Nothing in this file is a claim that any message has left the
-project. The review team sends; the sent, reminder, response and closure dates are recorded
-as event metadata in `data/inclusion_manifest.csv` when the team confirms each one.
+**Status: window closed 27 August 2026 (23:59 UK time); closure recorded 23 September 2026.**
+The drafts below are kept as written. What happened to them is recorded in the closure section
+that follows and, per report, in `data_request_status` in `data/inclusion_manifest.csv`. Sent
+and response dates were not recorded by the team and are left blank rather than reconstructed.
+
+## Closure of the author window (recorded 23 September 2026)
+
+Recorded from two sources only: the guarantor's confirmation on 23 September 2026 that the four
+primary-critical requests were sent and drew no reply, and the reply annotations in the final
+extraction sheet (`dissertation_shared_folder/230926/extraction_outcomes_final.xlsx`, not in the
+repository). Every value change follows from `data/result_corrections.csv`, which names the
+authority for each row; no merged table was edited by hand.
+
+| Status | Reports | What changed |
+|---|---|---|
+| **Replied** | `chang2016`, `hakulinen2020`, `hui2026`, `maguire2021`, `majuri2021`, `tarricone2017`, `thomson2023` | `maguire2021` (46.8 per cent confirmed) and `chang2016` FEMP (construct includes study) are `resolved` on author authority. `chang2016` FES stays `unresolved`: the construct is confirmed but the 370 against 374 denominator conflict persists. `hui2026` gains 158/219 from author-corrected counts; its construct stays `unclear`. `thomson2023` gains the author's 72 (56 consented + 16 deceased); the paid-work row is recorded 0/56 among the living. `hakulinen2020` supplied an employment series by year relative to first hospitalisation, held in the row notes and **not** yet admitted to any horizon (see `docs/handover.md`, open questions). `majuri2021` and `tarricone2017` clarifications are annotations only. |
+| **No reply** | `andersen2024`, `khare2021`, `khare2022b`, `mayoralvanson2019` (the primary-critical group), `hansen2024`, `benson2022`, `strassnig2017`, `strassnig2018` | The prespecified consequences below are applied exactly as written on 13 August 2026. `andersen2024`: every `paid_any` row built on the NEET item is recoded `unclear` (9-month rows included, or the 9-month row would enter the twelve-month band) and the study leaves the primary pool. `mayoralvanson2019`: stays out, admitted to the named sensitivity analysis only. `khare2021`, `khare2022b`: retained with the caveats stated. `hansen2024`, `strassnig2017` and `strassnig2018` keep their blocks. |
+| **Not recorded** | every other report whose status is still `drafted` in the manifest, and the internal query `REQ-twumasi2026-3` | The team has not confirmed whether these were sent. **Open item for the guarantor.** If they were sent, each becomes `no_response` and the report keeps its extracted state; nothing in any current pool depends on them. `twumasi2026` contributes no primary result either way, under its prespecified consequence. |
+
+The MSc dissertation (September 2026, p. 14) reports that the authors of eight reports
+were contacted, with four supplying data, two promising data not received by the cut-off and
+two not replying. That count does not match the table above, which records seven replies. The
+table follows the extraction sheet, which is the more specific record; the difference is
+noted rather than resolved.
 
 ## What is in this file and what is deliberately not
 
@@ -1192,6 +1213,21 @@ named non-author.*
   timepoint. The stated 69.1 per cent against 38,160 implies a denominator that is not printed.
 - **REQ-twumasi2026-2.** Can paid employment be separated from the education and training
   composite? As reported, the outcome cannot enter the primary paid-employment pool.
+- **REQ-twumasi2026-3.** (Added 18 August 2026.) Point prevalence of paid employment, and
+  separately of education or training, at landmark months 12, 24, 60 and 120 since cohort
+  entry, computed from the DREAM weekly labour-market affiliation data, with person-level
+  numerators and denominators disclosure-rounded under Statistics Denmark rules. Items 1 and
+  2 alone cannot admit the study to any pool: the published measure is ever-during-follow-up,
+  and both the primary `paid_any` pool and the secondary EET family require point prevalence
+  at a landmark. The full computation specification for this internal query is held privately
+  in `private/twumasi2026_dream_brief.md`, gitignored like the contact log.
+
+**Prespecified non-response consequence.** Written on 18 August 2026, before any reply was
+received, so that the final decision cannot depend on the resulting k.
+
+| Report | Field in question | If unanswered at closure |
+|---|---|---|
+| `twumasi2026` | The denominator behind "38,160 (69.1%)", the paid-only split, and landmark point prevalence | **The study contributes no result to the primary paid-employment pool at any horizon.** Its only `paid_any` point-prevalence row is the month-0 baseline, outside every landmark band; the 120-month rows are composite, ever-during-follow-up, and without a recoverable denominator, and `twumasi2026_cohort_t120m_paidoredu` stays blocked under D12.3d. All rows keep their extracted state and the report is counted in the missing-evidence assessment (SAP section 12). |
 
 ---
 

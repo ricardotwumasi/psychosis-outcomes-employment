@@ -1,11 +1,14 @@
 # Deviations from the registered protocol
 
-**Registration:** PROSPERO [CRD420251008448](https://www.crd.york.ac.uk/PROSPERO/view/CRD420251008448), registered 20 March 2025, versions 1.0 and 1.1 (20 March 2025), 2.0 (6 June 2025), 3.0 (9 June 2026), **4.0 (submitted 12 August 2026, carrying D9 to D12)**.
+**Registration:** PROSPERO [CRD420251008448](https://www.crd.york.ac.uk/PROSPERO/view/CRD420251008448), registered 20 March 2025, versions 1.0 and 1.1 (20 March 2025), 2.0 (6 June 2025), 3.0 (9 June 2026), **4.0 (submitted 12 August 2026, carrying D9 to D12)**, **5.0 (submitted 23 September 2026, carrying D13, D14, D12.7, D12.8 and the schema additions)**.
 
-> **A version 5.0 amendment is owed. D13 and D14 are not registered.** It is prepared in
-> `docs/prospero_amendment_draft.md` as of 13 August 2026 and awaits the guarantor's
-> submission; until that is confirmed and dated here, version 5.0 is prepared and not
-> registered.
+> **Version 5.0 was submitted on 23 September 2026** by the guarantor, carrying D13, D14,
+> D12.7, D12.8 and the schema additions, from the text in `docs/prospero_amendment_draft.md`.
+> Submission confirmed by the guarantor on 23 September 2026; the returned PROSPERO version
+> number is to be recorded here when it arrives. Until 23 September 2026 the banner below
+> read "a version 5.0 amendment is owed", and the history is kept because the order of
+> events is part of the disclosure: D13 and D14 were registered after the counts they admit
+> had been extracted, and before any outcome-conditioned model was fitted.
 >
 > Both were settled during Stage F, *after* version 4.0 was submitted, so no registry
 > version carries them. Both **admit evidence** and both were made after the affected
@@ -24,7 +27,7 @@
 > D12.7 and D12.8 also postdate the submission but are schema bookkeeping that changes no
 > result's eligibility.
 >
-> `docs/prospero_amendment_draft.md` has not been extended to cover them.
+> `docs/prospero_amendment_draft.md` covers both in its version 5.0 section.
 
 This log records every departure from the registered record, with its date and rationale. It mirrors, and does not replace, the dated PROSPERO amendment drafted in `prospero_amendment_draft.md`. A repository file is not a registry entry, and reviewers check the registry.
 

@@ -43,7 +43,12 @@ which is `REQ-khare2021-4` in `docs/data_requests.md`.
 **Assign the two cohorts to different checkers**, so that one person's reading of the
 recruitment description is not the only thing separating them.
 
-**Status: open.**
+**Status: adjudicated, distinct cohorts.** Adjudicated by the review team and confirmed by the
+guarantor on 23 September 2026: `pune_public` and `pune_private` are separate cohorts with no
+shared participants, and both stay in the twelve-month pool as two cohorts. `REQ-khare2021-4`
+(recruitment windows) drew no reply, so the adjudication rests on the sites and sectors the
+reports describe; that is recorded as a limitation of the k = 2 twelve-month pool, both of whose
+cohorts come from one investigator group.
 
 ---
 

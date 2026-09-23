@@ -4,9 +4,9 @@
 **Guarantor:** Dr Ricardo Twumasi, King's College London
 **Proposed version:** 5.0
 **Drafted:** 5 August 2026; updated 11, 12 and 13 August 2026
-**Status:** PREPARED for submission, not submitted. The guarantor submits and confirms; until
-that confirmation is recorded with its date, nothing in this project may describe version 5.0
-as registered.
+**Status:** **SUBMITTED on 23 September 2026** by the guarantor (confirmed 23 September 2026).
+The returned PROSPERO version number is to be recorded in `docs/methods_deviations.md` when it
+arrives. The text below is the text submitted.
 
 **Version history of this draft.** Version 4.0 was **submitted on 12 August 2026** and covers
 everything in the field-by-field section below, up to and including the review-status field.
@@ -232,15 +232,14 @@ submitted on 12 August 2026.
 - [x] D9 and D12 ratified by the authorship group (12 August 2026)
 - [x] Post-result timing of D13 and D14 stated explicitly in the proposed text above
 - [x] Review-status wording updated to match the first-pass risk-of-bias state
-- [ ] Amendment reviewed by the guarantor
-- [ ] **Submitted to PROSPERO by the guarantor**, and the returned version number and date
-      recorded in `docs/methods_deviations.md`
-- [ ] `docs/methods_deviations.md` updated to cite the accepted amendment version and date
+- [x] Amendment reviewed by the guarantor
+- [x] **Submitted to PROSPERO by the guarantor on 23 September 2026**, recorded in
+      `docs/methods_deviations.md`
+- [x] `docs/methods_deviations.md` updated to cite the submission date
+- [ ] The returned PROSPERO version number recorded in `docs/methods_deviations.md`
 
-**Until the guarantor confirms submission, the status of version 5.0 is "prepared".** No file
-in this repository, and no sentence in the manuscript, may describe it otherwise. The
-confirmation is recorded as event metadata with its date when it arrives, in the same way as
-the author-request dates.
+The submission was confirmed by the guarantor on 23 September 2026 and is recorded as event
+metadata with that date.
 
 The Phase 5 input freeze depends on this: an outcome-conditioned fit may not be run until
 version 5.0 submission is confirmed and mirrored in the deviations log, because D13 and D14

@@ -10,7 +10,8 @@
 #
 # The corrections model this implements is:
 #
-#     merged = f(frozen shards, manifest and relationship changes)
+#     merged = f(frozen shards, manifest and relationship changes,
+#                result corrections ledger)
 #
 # so a correction is made by editing an input and rerunning, never by hand
 # editing a merged table. Rerunning is safe: the merge is idempotent, and the
@@ -107,6 +108,21 @@ DUAL_NOTE = ("Two parallel cohorts. The scalar cohort_id carries the "
 # row still goes through the strict three-state rule, against the reconciled
 # values, so nothing is waved through.
 RECONCILIATION = "data/stage_g_reconciliation.csv"
+
+# Corrections made after the merge: an author reply, a prespecified
+# non-response consequence, a D12.3d block. The shards are immutable and the
+# reconciliation file above only carries manifest change rows, so a result-level
+# correction has no other home, and a hand edit to a merged table would be
+# silently undone the next time this script runs. Each row names its table, key,
+# field, old and new values and the authority for the change, and is applied
+# after D14 under the same three-state rule: current == old applies, current ==
+# new is a logged no-op, anything else stops the merge.
+RESULT_CORRECTIONS = "data/result_corrections.csv"
+CORRECTABLE = {
+    "extraction_outcomes": "result_id",
+    "extraction_cohorts": "cohort_id",
+    "inclusion_manifest": "report_id",
+}
 
 # --- D14 completion -----------------------------------------------------------
 #
@@ -300,6 +316,12 @@ def apply_manifest_changes(manifest, changes, faults, log):
             continue
 
         cur = row.get(field, "")
+        # apply_dual_cohorts appends DUAL_NOTE to the overlap note after the
+        # change rows run, so on a rerun the note is the shard's new value plus
+        # that suffix. That is the already-applied state, not a third value.
+        if (rid in DUAL_COHORT_POLICY and field == "cohort_overlap_notes"
+                and cur.endswith("; " + DUAL_NOTE)):
+            cur = cur[:-len("; " + DUAL_NOTE)]
         # `new` is tested first. Where a change is an identity (old == new,
         # which happens when a shard records "confirmed, unchanged"), testing
         # `old` first would report an apply on every run and make an idempotent
@@ -431,6 +453,48 @@ def apply_d14(outcomes, faults, log):
                    % (rid, row["n_employed"], row["n_outcome_observed"], len(comps)))
 
 
+def apply_result_corrections(tables, faults, log):
+    """Apply the post-merge corrections ledger to the merged tables in place."""
+    if not os.path.exists(RESULT_CORRECTIONS):
+        return 0, 0
+    _, rows = read(RESULT_CORRECTIONS)
+    seen = Counter((r["table"], r["key"], r["field"]) for r in rows)
+    for k, n in sorted(seen.items()):
+        if n > 1:
+            faults.append("result_corrections: %s/%s/%s appears %d times" % (k + (n,)))
+    applied = noop = 0
+    for r in rows:
+        table, key, field = r["table"], r["key"], r["field"]
+        if table not in CORRECTABLE:
+            faults.append("result_corrections: table %r is not correctable" % table)
+            continue
+        if not r.get("authority", "").strip():
+            faults.append("result_corrections: %s/%s/%s has no authority" % (table, key, field))
+            continue
+        fields, data = tables[table]
+        if field not in fields:
+            faults.append("result_corrections: %s has no column %r" % (table, field))
+            continue
+        target = [x for x in data if x.get(CORRECTABLE[table], "") == key]
+        if len(target) != 1:
+            faults.append("result_corrections: %s has %d rows keyed %r"
+                          % (table, len(target), key))
+            continue
+        cur = target[0].get(field, "")
+        if cur == r["new"]:
+            noop += 1
+            log.append("noop    corr %-44s %-22s already applied" % (key, field))
+        elif cur == r["old"]:
+            target[0][field] = r["new"]
+            applied += 1
+            log.append("apply   corr %-44s %-22s (%s)" % (key, field, r["authority"]))
+        else:
+            faults.append("result_corrections: %s.%s is %r, which is neither the "
+                          "ledger's old %r nor its new %r; refusing to guess"
+                          % (key, field, cur[:80], r["old"][:80], r["new"][:80]))
+    return applied, noop
+
+
 def main(argv):
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true",
@@ -484,6 +548,12 @@ def main(argv):
     else:
         print("  asserted: %d pilot + %d shard + %d new D14 = %d"
               % (n_pilot, n_shard, n_new, n_out))
+
+    tables = dict(results)
+    tables["inclusion_manifest"] = (man_fields, manifest)
+    c_applied, c_noop = apply_result_corrections(tables, faults, log)
+    print("result corrections applied: %d, already-applied no-ops: %d"
+          % (c_applied, c_noop))
 
     # Every cohort named anywhere must exist in the merged cohort table.
     cohort_ids = {r["cohort_id"] for r in results["extraction_cohorts"][1]}
