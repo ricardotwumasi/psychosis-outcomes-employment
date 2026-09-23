@@ -1,0 +1,3 @@
+"step","status","reason","sample_status","result_status"
+"prevalence_t24m","skipped","0 cohort(s) at horizon t24m; D11.3 gives no estimate","DEFINITIVE EXTRACTION IN PROGRESS - NOT FOR INFERENCE","PROVISIONAL, PRE-FREEZE - NOT FOR CITATION"
+"prevalence_t60m","skipped","0 cohort(s) at horizon t60m; D11.3 gives no estimate","DEFINITIVE EXTRACTION IN PROGRESS - NOT FOR INFERENCE","PROVISIONAL, PRE-FREEZE - NOT FOR CITATION"

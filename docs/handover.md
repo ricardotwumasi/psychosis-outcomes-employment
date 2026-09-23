@@ -1,258 +1,157 @@
-# Handover — start here
+# Handover: start here
 
-**Rewritten 12 August 2026, documents swept for staleness 13 August 2026** for whoever
-picks this up next.
+**Rewritten 23 September 2026**, after the author window closed, the human verification was recorded, and the first provisional Bayesian fits were run. It is written for whoever picks this up next, human or model, with no other context.
 
-Read this, then `docs/extraction_qa_report.md`, then `config/codebook.md`. Everything
-else is detail.
-
-`docs/data_requests.md` was rewritten on 13 August 2026 and is now the send-ready set of
-de-identified drafts: 61 grouped emails, 256 stable request identifiers, and a documented
-reason for every eligible report that generates no request. It is drafted, not sent.
-
-One document is deliberately **not** brought up to date and carries a scope header instead:
-`docs/Human_extraction_check.md` records a human check of the **pilot only** and must not be
-read as covering Stage F.
+Read this file, then `docs/methods_deviations.md` (D13 to D15), then `config/analysis.yml`. Everything else is detail.
 
 ---
 
-## Where the project is
+## Where the project is, in one paragraph
 
-**Stage F is finished. All 75 non-pilot reports are extracted.** The shards are written,
-verified and **not merged**. Stage G is next, and it starts with the merge.
+This is a systematic review and Bayesian meta-analysis of the prevalence of any paid employment in people with psychosis, at landmark horizons of 12 months, 24 months, 5 years and 10 years or more (PROSPERO CRD420251008448).
+- **Extraction** is merged: 90 reports, 78 cohorts and 278 results.
+- **Human verification** covers every pool-determining field.
+- **The author window** closed on 27 August 2026, and every prespecified non-response consequence is applied.
+- **PROSPERO version 5.0** was submitted on 23 September 2026.
 
-All gates pass:
+**Provisional, pre-freeze posteriors now exist** for the two horizons that have at least two cohorts. They are stamped `PROVISIONAL, PRE-FREEZE - NOT FOR CITATION`. They are not definitive, because the gates listed below are still open.
 
-```
-/opt/anaconda3/bin/python3 scripts/check_folder.py   exit 0   90 screened studies, readable PDFs
-/opt/anaconda3/bin/python3 scripts/check_shard.py    exit 0   13 shards structurally sound
-Rscript R/01_validate_data.R .                       exit 0   0 warnings
-Rscript tests/testthat.R                             exit 0   90 pass, 0 fail, 0 skip, 0 warn
-```
+---
 
-`data/extraction_*.csv` still holds **only the 15-report pilot**. Nothing from Stage F is
-in it. `sample_status` is `DEFINITIVE EXTRACTION IN PROGRESS - NOT FOR INFERENCE` and
-stamps every output. **No estimate from anything currently in `data/` may be quoted.**
+## The provisional results
 
-**Nothing is committed.** The whole of this work is in the working tree.
+Source: `results/provisional_8b1dfaa3e539/`, fitted from tag `provisional-fit-2026-09-23b` (commit `768ce61`) on a clean worktree.
+- **Model:** binomial-logit random effects on cohorts, brms 2.23.0 with CmdStan 2.36.0.
+- **Priors:** intercept normal(-1.1, 0.8) and tau half-normal(0, 0.5), unchanged from the SAP.
+- **Diagnostics:** all 28 fits pass (R-hat < 1.01, ESS > 400, no divergences).
+- **Prior predictive:** passes all six prespecified criteria.
 
-### What Stage F produced
+| Horizon | Cohorts (D11.3) | Pooled proportion, posterior median [95% CrI] | New-cohort predictive | tau |
+|---|---|---|---|---|
+| 12 months | 2: khare2021 287/456, khare2022b 53/107 | 0.53 [0.30, 0.66] | [0.17, 0.78] | 0.43 |
+| 24 months | 0 | no estimate | | |
+| 5 years | 0 | no estimate | | |
+| 10 years or more (observed 120 to 240 months) | 3: bhullar2018 35/65, xu2020 23/62, thomson2023 0/56 | 0.23 [0.09, 0.45] | [0.02, 0.78] | 1.10 |
 
-In `data/stage_f_shards/F01..F13/`, copied out of the session scratchpad, which is
-session-scoped and would otherwise have taken the lot with it.
+**How to read them.** This follows the independent statistical review, and the wording matters more than the numbers.
+- **12 months: two cohorts, one investigator group.** Both cohorts are from Pune, from one group, with mixed SMI samples admitted under D13. The observed proportions are 0.50 and 0.63.
+  - The pooled median sits below the raw pooled proportion (0.60). It has been shrunk toward a prior centred on 0.25: pune_private lies above the prior's 95 per cent upper bound, and 37 per cent of the posterior mass lies above the prior's 95th percentile. With k = 2 the lower limit mainly reflects the prior (weak prior: 0.57 [0.13, 0.91]).
+  - **Lead with the two cohort-level exact binomial intervals** (`tables/leave_one_cohort_out.csv`: 0.495 [0.40, 0.59] and 0.629 [0.58, 0.67]), not with the pooled figure.
+  - Admitting the unclear-selection cohort (mayoralvanson2019) moves the estimate to 0.40 [0.22, 0.58]. That shift is as large as the prior's effect and belongs in the text.
+- **10 years or more: the estimate depends on the forensic cohort.** thomson2023 is Carstairs, a high-security forensic cohort with 0 of 56 in paid work at 240 months. It halves the pooled proportion and triples tau.
+  - Without it the estimate is 0.42 [0.24, 0.57], tau 0.38.
+  - Fitted on the other two, the model predicts its 0/56 with a two-sided p of 0.001 (`diagnostics/ppc_loco.csv`).
+  - priorsense flags a prior-data conflict: 67 per cent of the posterior tau mass lies above the prior's 95th percentile.
+  - The pooled figure mixes community and forensic-detention populations and has no single population to generalise to.
+  - The leave-one-cohort-out is **post hoc** (D15, not yet ratified) and does not replace the primary.
+- **The predictive intervals are not headlines.** At k = 2 and 3 they are mostly the tau prior.
+- **The frequentist comparators** (`tables/frequentist_comparison.csv`) cannot identify tau at this k. The two approaches do not validate each other.
 
-| | |
+The superseded first run, `results/superseded_provisional_76a8bb06ff87/` (tag `provisional-fit-2026-09-23`), is kept because it is the output that prompted D15.
+
+---
+
+## What changed on 23 September 2026 (commits `c83d9ff` to the handover commit)
+
+1. **The final extraction sheet** (`dissertation_shared_folder/230926/extraction_outcomes_final.xlsx`) was ingested through `data/result_corrections.csv`, a new ledger that the merge applies after D14 under the three-state rule. It is not edited in by hand. The ledger has 58 rows.
+   - The sheet was built from the 13 August commit, so it reverted the 18 August twumasi2026 block. That revert is rejected.
+   - Every other departure from the sheet has its reason in the ledger: `resolved` rather than `none` for author-confirmed conflicts, thomson2023 recorded as 0/56 among the living, `chang2016` FES left unresolved, and vocabulary repairs.
+2. **The merge is rerunnable again.** A dual-cohort note suffix is no longer read as a third value. Two runs produce byte-identical tables.
+3. **The author window is closed** (`docs/data_requests.md`, closure section).
+   - 7 reports replied and 8 did not.
+   - andersen2024 is recoded `unclear` under its prespecified consequence, on every `paid_any` row, 9 months included, and leaves the pool.
+   - mayoralvanson2019 stays out.
+   - The Khare rows stay, with caveats.
+4. **Human verification is recorded** in `data/extraction_provenance.csv`.
+   - The checker is P. Bagri, a review co-author and the MSc reviewer, who is a non-author of every included report. It was a single-reviewer check against the PDFs, before 11 September 2026.
+   - Tiers 0 to 2 are complete at 100 per cent: 5,264 agree, 10 corrected, 7 superseded by governance and 1 disagree.
+   - Tier 5 (risk of bias) is at 0 per cent.
+5. **PROSPERO v5.0** was submitted on 23 September 2026. The Pune pair is adjudicated as distinct cohorts.
+6. **The model pipeline** now does the following:
+   - fits every horizon under D11.3, counted in distinct cohorts;
+   - fits both sensitivity pools, the prior grid, the weak prior, priorsense, the missing-outcome bounds and post hoc leave-one-cohort-out;
+   - uses two-sided posterior predictive p-values and a left-out-cohort predictive check.
+   - The guard has four modes (below). Tests: 186 pass, 0 fail, 0 skip.
+
+---
+
+## Gates: what is closed and what is open
+
+| Phase 5 gate | State |
 |---|---|
-| Reports | 75 |
-| Cohorts | 65 |
-| Arms | 104 |
-| Results | 208 |
-| Risk-of-bias rows | 1,491 |
-| Results blocked `conflict_status = unresolved` | **50 of 208** |
-| Reports with no recoverable count (`report_quantifiable = no`) | **27 of 75** |
-| Cohorts `selected` on employment criteria | 18 |
-| Cohorts `unclear` | 5 |
-| Cohorts `none` | 42 |
-
-Three prompt versions produced these, and `data/batch_ledger.csv` records which produced
-which shard: **v1** for F01–F02, **v2** for F03–F05, **v3** for F06–F13. The differences
-are real (v2 added the risk-of-bias domain vocabulary, v3 added `calendar_end_common` and
-the rule that `conflict_status = resolved` needs an authority), so do not treat the
-thirteen shards as having been produced under identical instructions.
+| PROSPERO v5.0 submitted | **Closed**: 23 September 2026. The returned version number is still to be recorded in `docs/methods_deviations.md`. |
+| Author window closed, replies applied | **Closed** for every report the sheet or the guarantor names. **Open:** 65 reports are still `drafted` in the manifest, and whether those were sent is unknown. No current pool depends on them. |
+| Every pool-determining field human-verified | **Closed** (tiers 0 to 2). It was single-reviewer; say so in the paper. |
+| Overlap audit adjudicated | Pune pair **closed**. The others are open, and none of them touches a current pool. |
+| Merged tables validate, `git diff --check`, clean tree | **Closed** at `provisional-fit-2026-09-23b`. |
+| Model inventory implemented or formally deferred | **Closed**: deferrals with their reasons are in `config/analysis.yml` (`deferred_with_reason`). |
+| Tier 5 risk of bias verified | **Open**, 0 of 1,491. The MSc appraisal assigned tools on different rules (RoB 2 on proportions from trials), so it is not the same check. This is needed before RoB analyses, GRADE or interpretation, but not before the intercept fit. |
+| `sample_status: full` and the freeze tag | **Open.** Set it when the questions below are settled. |
 
 ---
 
-## The four open tasks, in order
+## Open questions for the authorship group (decide before definitive)
 
-### 1. Stage G — merge, overlap audit, verify
+1. **Is a high-security forensic cohort eligible for a prevalence of paid work?** thomson2023 passes every written gate. Whether detained patients belong in this estimand is an eligibility question, not a sensitivity one. The prespecified primary keeps it. Ratify D15, and decide whether a population rule is needed. Any such rule would be post hoc and must be labelled so.
+2. **The hakulinen2020 author series.** The author supplied employment counts by year relative to first hospitalisation (−10 to +10, for example year 0 968/6,939 and year +10 398/3,801). The extraction sheet calls them "barred by calendar_end_common". If first hospitalisation is cohort entry, years +1, +2, +5 and +10 are landmark data from about 7,000 people, and would populate the empty 24-month and 5-year horizons. This needs a documented ruling, and new rows through `data/result_corrections.csv` if admitted. It is the largest potential change to any pool.
+3. **mayoralvanson2019's denominator: 156 or 157.** The MSc extraction disagrees with ours. Resolve it against the PDF before the unclear-selection sensitivity analysis is reported.
+4. **The 65 `drafted` requests.** Were they sent? If so, record `no_response`.
+5. **The standing questions from Stage F**, still open:
+   - which instrument appraises a single-arm proportion from a trial;
+   - risk of bias for `component_only` fragments;
+   - D12.8 dispersion;
+   - duration thresholds;
+   - vocabulary gaps (FIML, duration outcome, a Southeast Asia region).
+6. **`outcome_construct` is still configured as a confirmatory moderator**, contrary to SAP 9.2. It is moot below 10 cohorts, but fix it before any moderator is reported.
 
-**The merge is not a concatenation.** Work through these in order.
+---
 
-**a. Apply the shard `manifest_changes.csv` files.** Every shard has one and they are not
-yet applied. They carry the corrections that Stage F established by reading the papers,
-including the three `pending` dispositions. `data/inclusion_manifest.csv` still says
-`pending` for `killackey2019`, `chan2020` and `benson2022`; all three were adjudicated to
-`include` in the shards. Until these are applied the manifest understates what is known.
+## How to run things
 
-**b. Add the cohorts Stage F created.** Refutations of the manifest's provisional
-`cohort_id` produced cohorts that exist in shards but not in the manifest:
-`hk_standard_care_2000`, `hk_easy_fep_2001_2003`, `hk_easy_ext_rct`,
-`headspace_hep_fep_au`, `headspace_hep_uhr_au`, `fi_registers_scz`, `fi_registers_nonaff`,
-`tallinn_fep_tau`, `glasgow_edinburgh_2006`. Each has its evidence in the shard.
+The interpreters are `/opt/anaconda3/bin/python3` and `Rscript` (R 4.4.2).
 
-**c. Merge deterministically and fail loud** on a duplicate `report_id` or `result_id`, or
-on a cohort given conflicting attributes by two batches. `scripts/check_shard.py` already
-checks within a shard; it does **not** check across shards, and cross-shard duplication is
-the risk the merge introduces.
+```
+/opt/anaconda3/bin/python3 scripts/merge_stage_g.py          # rebuild merged tables (idempotent; --check to dry-run)
+PROVENANCE_SOURCE_VERSION=<label> /opt/anaconda3/bin/python3 scripts/build_provenance.py
+Rscript R/01_validate_data.R .                                # schema and vocabulary
+Rscript tests/testthat.R                                      # 186 pass
+/opt/anaconda3/bin/python3 scripts/check_shard.py; /opt/anaconda3/bin/python3 scripts/check_folder.py
+Rscript R/04_design_package.R                                 # pools and attrition, no sampling
+```
 
-**d. Global overlap audit across all batches.** Sites, recruitment dates, programme and
-trial names, registries, author overlap, sample sizes. Matching `cohort_id` cannot find
-overlap nobody has recognised. Every candidate pair goes to human adjudication and is
-never merged automatically. Stage F already found two by reading: `hartford_ips_rct` is an
-EIDP site so it overlaps `eidp_usa`, and `hk_easy_fep_2001_2003` near-certainly shares its
-2001–02 entrants with `hk_easy_2001`.
+**To make a correction:** add a row to `data/result_corrections.csv` giving table, key, field, old, new, authority, reason, source, date and actor. Then rerun the merge. Never edit a merged table by hand, because the next merge silently undoes it.
 
-**e. D14 derived-row completion: one row to create, two to complete in place.** Corrected
-13 August 2026, because the earlier wording ("two derived rows still need writing") would
-have produced duplicates if read literally.
+**Fit modes** (`R/lib_config.R`). Exactly one mode variable may be set; two are refused.
 
-- **Create exactly one new row: `jirapramukpitak2022` 189/549** at 12 months, from 146/372
-  and 43/177, verified cell by cell in F08. The cohort is
-  `employment_selection_status = none`. Note that this result is a twelve-month **period**
-  prevalence and so joins the period-prevalence family; it is not a primary-pool row, and
-  earlier drafts of this file implied otherwise.
-- **F10's two derived rows already exist inside the 208.** They are not to be written:
-  they carry their components in prose with `derivation_component_result_ids` left blank,
-  because the validator rejected component links whose `arm_id` differed from the derived
-  row. The task is to **populate those blank fields in place and revalidate**, which needs
-  the validator to gain a partition case first (components may differ on `arm_id` and on
-  denominator when their denominators sum exactly to the derived denominator). Writing new
-  rows here would duplicate results that are already extracted.
+| Mode | Command | Gates | Output |
+|---|---|---|---|
+| design-only | `Rscript R/00_run_all.R` | refuses to sample | none |
+| engineering | `ENGINEERING_FIT=i-understand-this-is-not-a-result SYNTHETIC_DATA=1 Rscript R/00_run_all.R` | synthetic data only | `results/engineering_synthetic_*` (gitignored) |
+| provisional | `PROVISIONAL_FIT=pre-freeze Rscript R/00_run_all.R` | clean tree and a tag at HEAD | `results/provisional_<aid>/` |
+| definitive | `DEFINITIVE_RUN=yes Rscript R/00_run_all.R` | `sample_status: full`, clean tree and a tag at HEAD | `results/run_<aid>/` |
 
-**f. Validate, then the human verification.** `Rscript R/01_validate_data.R .` and the
-test suite must pass on the merged data. Then independent **human** verification of every
-value that can move a result into or out of the primary pool, and every risk-of-bias
-judgement. `data/extraction_provenance.csv` exists to carry that ledger and is **empty**.
-A second agent is not a second human and nothing here treats it as one. `twumasi2026` is
-guarantor-authored and must be checked by a non-author.
+**To promote to definitive:**
+1. Settle the open questions above and verify tier 5.
+2. Set `sample_status: "full"` in `config/analysis.yml`.
+3. Commit, create the input-freeze tag, and run with `DEFINITIVE_RUN=yes`.
+4. Have the output statistically reviewed.
 
-**g. Build the pool** and print the attrition in both result rows and distinct cohorts.
-
-The earlier version of this paragraph said that any model fit is stopped by D11.3. That
-described the empty pilot pool and is no longer true, so it is replaced. **D11.3 is applied
-to the verified, frozen pool at each horizon, and not before** (see the application
-clarification in `docs/methods_deviations.md`). The provisional twelve-month pool currently
-stands at k = 3, none of it human-verified, with a fourth candidate one reversible gate
-away, so the rule's consequence is not yet determined at any horizon. Building the pool now
-is a design-only exercise: it produces selection tables and attrition counts stamped
-`DEFINITIVE EXTRACTION IN PROGRESS - NOT FOR INFERENCE`, and no posterior is sampled on real
-employment outcomes. The thresholds themselves were written before any of these counts were
-seen and they hold.
-
-### 2. Author queries (task #12)
-
-**Rewritten 13 August 2026. The drafts exist; sending is the team's.** Stage F multiplied
-the inputs: **50 results are blocked on unresolved published contradictions**, each with its
-candidate resolution already recorded in `conflict_note` and the shard's
-`unresolved_queries.md`. Three requests are flagged primary-critical, and each has a
-non-response consequence prespecified in the file before any reply arrives. The window
-closes **27 August 2026 at 23:59 UK time**. The highest-value requests identified by the
-batches:
-
-- `solmi2022` — a 21,551-person national register cohort reporting percentages only. By
-  far the largest single loss in the review.
-- `basaraba2023` — the paid-employment component separated from its EET composite would
-  give `ontracky_ny` a `paid_any` result at two landmarks.
-- `hui2026` — the denominator behind "158/219", which F08 refuted; the table's
-  percentages are row percentages, so it establishes no denominator at all.
-- `ayesaarriola2020` — the 10-year denominators, which exist only as 35/0.327 and 22/0.244.
-- `moncrieff2025` (RADAR) — a paid-only numerator; it is the only F10 cohort passing D9 as
-  a whole recruited cohort at a landmark horizon.
-
-**Contact details go in `private/contact_log.csv`, gitignored.** The public manifest
-carries only `data_request_status`, `data_request_date`, `data_response_date`. Do not put
-author emails in the repository. Emails are drafted for the team to send; nothing is sent
-from here.
-
-### 3. A PROSPERO version 5.0 amendment — D13 and D14 are not registered
-
-**This is the most criticisable gap in the review as it stands, and it was created by
-Stage F.** Version 4.0 was submitted on 12 August 2026 carrying D9 to D12. D13 and D14
-were settled *after* that submission, during extraction. **Both admit evidence, and both
-were made after the affected results had been seen.** No registry version records either.
-
-The two are not equivalent in effect, and the amendment says so. **D13 admits rows to the
-primary pool**: under the current unverified extraction it is what lets `khare2022b` (90 per
-cent qualifying diagnosis) and `khare2021` (59.3 per cent) pass the diagnosis gate at twelve
-months. **D14 does not.** The row it creates, `jirapramukpitak2022` 189 of 549, is a period
-prevalence and joins the period-prevalence family; the two other derived rows it governs are
-paid-or-education and EET results in secondary families. Describing D14 as admitting evidence
-to the primary pool overstates it, and the version 5.0 text is written to avoid that.
-
-That combination is exactly what a registry amendment exists to disclose. The deviations
-log labels both honestly and states the sequence, but an internal document is not the
-registry. `docs/prospero_amendment_draft.md` has not been extended to cover them and
-needs a new section for each, stating the timing plainly rather than softening it.
-
-D12.7 and D12.8 also postdate the submission. They are schema bookkeeping that changes no
-result's eligibility, so they are lower priority, but the amendment should mention them
-for completeness.
-
-### 4. The clean frozen commit
-
-The last governance item. Pin data, code, config, prompts, environment and PDF hashes.
-`sample_status` becomes `full` only after the author-response window closes, human
-verification is complete with adjudications recorded, and final validation passes.
+The order is always: commit, then tag, then run.
 
 ---
 
 ## Rules that are easy to get wrong
 
-These each cost real rework already.
+These rules each cost real rework already.
 
-1. **`keep()` in `build_primary_pool` counts `NA` as removed.** A clause on a column that
-   is blank or absent silently empties the pool while the log shows a filter working
-   normally. Every clause is guarded by `need_cols()`. Keep it that way.
-2. **`paid_any` means *any* paid work.** Not competitive-only, not sheltered-only, not
-   above a threshold. Sheltered and welfare-remunerated placements are **not** paid work:
-   SAP 3.1 excludes benefit remuneration, which is why `jump_norway`'s work placements and
-   `nakamura2025`'s Type B work are excluded. `rautio2016` remains the worked example of an
-   unidentifiable `paid_any`.
-3. **A reporting base is not an observed denominator.** `darjee2017` is the original case;
-   Stage F added many. Printed percentages prove what the authors divided by, never that
-   the outcome was observed for that many people.
-4. **Never back-calculate a count from a percentage.** This is absolute and D14 did not
-   soften it. Several Stage F reports print a percentage beside a denominator that would
-   yield a whole number; every one was refused. Blank plus a note beats a confident wrong
-   value.
-5. **Attrition is not post-randomisation subgroup selection** (D12.3c). It lives in
-   `n_outcome_observed`, `missing_data_method`, RoB and the bounding analyses.
-6. **Being a component is a relationship, not a property** (D12.2). `component_only` is
-   only for fragments meaningless alone.
-7. **`conflict_status = unresolved` blocks a result from every synthesis**, and `resolved`
-   requires an **authority** — an author reply or an authorship-group ruling. An
-   extractor's own reconstruction, however convincing the arithmetic, is not one. This was
-   applied against F05's `strassnig2018` call and is now rule 14 of the extraction prompt.
-8. **Cohort-level selection and analysis-level restriction are different facts.** A cohort
-   recruited on employment criteria is `employment_selection_status = selected`; an
-   analysis whose denominator is restricted to the baseline-unemployed is
-   `analysis_selection_status`. Both bar a result and the review records them separately.
-   `tsiachristas2016` and `solmi2022` are the cases.
-9. **Only time measured from cohort entry can take a landmark horizon.** Four barred
-   values now exist and they mean different things: `since_onset_mean`,
-   `chronological_age`, `calendar_end_common` (D12.8, a shared end date) and
-   `since_baseline_mean` (a mean or median elapsed follow-up). Two batches in a row reached
-   for whichever was nearest; the horizon was barred correctly each time but the record
-   said something untrue about the source.
-10. **The migration scripts are idempotent and must stay so.** Run any of them twice and
-    confirm the second run is a no-op. `build_batches.py` additionally refuses to rewrite a
-    batch that has already run.
-11. **The report universe is 90 and it is frozen.** `DATA_EXTRACTION_FINAL.xlsx` and the
-    90 PDFs are the authority, not `data/`. The search closed **9 June 2026**. If any
-    document still says the search closes 2 June 2025 or that an update is outstanding, it
-    is stale. The six off-list reports stay off-list; re-entry needs a documented
-    screening-list amendment under D10.1, not a status change and not a search rerun.
-
----
-
-## Open questions for the authorship group
-
-Raised by extraction, not settled by it. None blocks the merge; all are recorded in the
-shards' `unresolved_queries.md`.
-
-- **Which instrument appraises a single-arm proportion drawn from a trial.** F07 applied
-  `rob2` only where the report itself presents a randomised between-arm comparison of the
-  employment outcome, and `jbi_prevalence` to every other proportion. Consistent, but
-  undefined by the schema.
-- **Whether `component_only` fragments need risk-of-bias rows at all.** F03 argued not, as
-  they have no estimand and enter no pool.
-- **Whether D12.8's bar should carry a dispersion condition.** `xu2020`'s mean cannot span
-  two horizon bands; `andersen2026`'s does. F13 raised it.
-- **Whether a duration threshold inside the follow-up window is `paid_intensity_threshold`.**
-  F13 coded `zhang2017` and `turner2019` that way.
-- **Vocabulary gaps**: no `missing_data_method` value for full information maximum
-  likelihood; no `ascertainment` value for a duration outcome; no region value for
-  Southeast Asia.
+1. **`keep()` in `build_primary_pool` counts `NA` as removed.** Every clause is guarded by `need_cols()`.
+2. **`paid_any` means any paid work.** Sheltered and benefit-remunerated placements are not paid work (SAP 3.1).
+3. **A reporting base is not an observed denominator**, and a count is never back-calculated from a percentage.
+4. **`conflict_status = unresolved` blocks a result from every synthesis.** `resolved` requires an authority: an author reply or an authorship-group ruling.
+5. **Only time from cohort entry can take a landmark horizon.** `since_onset_mean`, `chronological_age`, `calendar_end_common` and `since_baseline_mean` are all barred.
+6. **D11.3 counts distinct cohorts, not rows.**
+7. **A prespecified consequence is applied as written**, including to every row it logically covers. If only andersen2024's 12-month row had been recoded, its 9-month row would have entered the 12-month band.
+8. **The report universe is 90 and it is frozen.** The search closed on 9 June 2026.
 
 ---
 
@@ -260,65 +159,33 @@ shards' `unresolved_queries.md`.
 
 | File | What it is |
 |---|---|
-| `data/stage_f_shards/F01..F13/` | **The Stage F output.** Unmerged. Each holds five extraction tables, `report_cohort_map.csv`, `provenance.csv`, `manifest_changes.csv`, `inconsistencies.md`, `unresolved_queries.md`, `COMPLETE` |
-| `data/batch_ledger.csv` | Which model, prompt version, prompt hash and PDF hashes produced each shard |
-| `docs/extraction_qa_report.md` | State of every adjudication. §7 is the governance gate |
-| `docs/methods_deviations.md` | D1–D14. **D13 and D14 both admit evidence and were made after the affected results were seen**; both say so explicitly |
-| `config/codebook.md` | v0.3. How to fill the tables |
-| `config/prompts/extraction_v1..v3.md` | The versioned extraction prompts, hashed into the ledger |
-| `config/analysis.yml` | Pool gates, horizons, sparse-data rule, the two executable sensitivities |
-| `config/vocabularies.yml` | Every controlled vocabulary, including `rob_domain` (D12.7) |
-| `R/lib_data.R` | Validation, the derived-count rules (D14) and the single `build_primary_pool` |
-| `data/extraction_provenance.csv` | Field-level provenance and the human-verification ledger. **Empty** |
-| `scripts/check_shard.py` | Shard structural check. Does **not** check across shards |
-| `scripts/build_batches.py` | The batch planner. Preserves run fields; refuses to rewrite a batch that ran |
-| `DATA_EXTRACTION_FINAL.xlsx`, `dissertation_shared_folder/Data Extraction Papers` | **The authoritative report universe, frozen.** Search closed 9 June 2026 |
+| `data/extraction_*.csv`, `data/inclusion_manifest.csv`, `data/report_cohort_map.csv` | The merged tables. Output of the merge; never edit them by hand. |
+| `data/result_corrections.csv` | The post-merge corrections ledger, with the authority for every change |
+| `data/stage_g_reconciliation.csv` | Overrides for shard manifest change rows only |
+| `data/extraction_provenance.csv` | Field-level verification ledger, completion by tier |
+| `data/stage_f_shards/` | The immutable Stage F output |
+| `results/provisional_8b1dfaa3e539/` | The current provisional fit |
+| `results/design_package/` | Design-only pools and attrition |
+| `docs/methods_deviations.md` | D1 to D15. D13, D14 and D15 were made after the affected results were seen. |
+| `docs/data_requests.md` | Requests, prespecified consequences, window closure |
+| `docs/overlap_audit_queue.md` | Overlap adjudications |
+| `docs/prospero_amendment_draft.md` | The text submitted as v5.0 |
+| `config/analysis.yml` | Gates, horizons, priors, the sparse-data rule, sensitivities, deferrals |
+| `dissertation_shared_folder/230926/` | The MSc dissertation and the final sheet (gitignored, never commit) |
+
+The MSc dissertation (September 2026) did a narrative synthesis without pooling. Its landmark tables differ from this pipeline's pools in known and explained ways: it counts percentage-only, calendar-end, unresolved-conflict and period-like results that the SAP bars. Do not quote its counts as the review's.
 
 ---
 
-## What is deliberately not done
+## Commit cadence, tags and privacy
 
-- **The merge.** Deliberately left to Stage G, with the manifest changes and new cohorts
-  above.
-- **Independent human verification.** Required before the freeze, not before extraction.
-  `data/extraction_provenance.csv` is empty and is the ledger for it.
-- **Author correspondence sent.** Drafts are task 2; sending is the team's.
-- **Any outcome-conditioned model fit.** Not because D11.3 stops it: that statement
-  described the empty pilot pool and is withdrawn. The bar is the Phase 5 input freeze.
-  Definitive fitting waits for confirmed PROSPERO v5.0 submission, the closed author window,
-  human verification of every pool-determining field, an adjudicated overlap audit and a
-  tagged input commit. D11.3 is then applied to the verified, frozen k per horizon, without
-  renegotiation. Design-only outputs and model engineering on synthetic data may proceed at
-  any time.
-- **`rob_overall` as a moderator.** Suspended, not deleted (D12.6).
-- **`isrep_rct` documentary confirmation.** Coded `selected` on authorship-group
-  adjudication; Fowler et al. 2009b is paywalled and not held, and the data says so.
+Commit per milestone, and push at least daily during active work. Commits are authored as `ricardotwumasi` with no assistant trailer.
 
----
+Tags pin immutable states, and the record is always committed before its tag. The tags so far:
+- `stage-g-merge`
+- `provisional-fit-2026-09-23` (superseded)
+- `provisional-fit-2026-09-23b`
 
-## Commit cadence and tag policy
+The input-freeze tag is still to come.
 
-**Commit per milestone, push at least daily during active work.** A milestone is a state
-someone else could pick up: a completed merge, a closed verification wave, a rewritten
-governance document. Work that sits uncommitted overnight is work whose provenance depends
-on one machine.
-
-**Tags pin immutable states only**, and **the record is committed before its tag is
-created**. A tag that precedes the commit it is supposed to name pins the wrong tree, and the
-mistake is invisible afterwards. The order is: write the record, validate, commit, then tag,
-then push. Planned tags:
-
-| Tag | Pins | Created after |
-|---|---|---|
-| `stage-g-merge` | The merged, non-inferential baseline the checking team works against | the merge commit validates |
-| `verification-wave-1` | The wave-one verification record, as fractions by tier | the wave-one record is committed on 18 August |
-| `author-window-closed` | Every request identifier resolved to a response, non-response or withdrawal | the closed request state is committed on 27 August |
-| the input freeze tag | Data, code, config, prompts, both environments, CmdStan, source hashes and the fit inventory | every Phase 5 gate holds in one reviewable state |
-
-**Privacy scanning is per commit, not per series.** Before each commit, inspect the staged
-path list and the staged diff, and scan the staged index for email addresses (the single
-corresponding-author address already published in the README is the only one permitted
-anywhere) and for any PDF, docx, xlsx, private contact record, `CLAUDE.md` or internal memo. Immediately before any push, audit the whole
-outgoing range `origin/main..HEAD`, every blob rather than the index, because a file added
-with a secret in one commit and cleaned in the next still ships the first blob. Non-force
-pushes only, and explicit staging always: never `git add .` or `git add -A`.
+Privacy scanning is per commit. Scan the staged index for email addresses (only the corresponding address in the README is permitted) and for any PDF, docx, xlsx, `private/` record, `CLAUDE.md` or internal memo. Before any push, audit every blob in `origin/main..HEAD`. Use non-force pushes and explicit staging only.

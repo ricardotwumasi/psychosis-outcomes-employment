@@ -5,14 +5,12 @@
 **Start with [`docs/handover.md`](docs/handover.md).** It states the current state, the
 four open tasks in order, and the rules that are easy to get wrong.
 
-Short version at 13 August 2026: **Stage F is complete.** All 75 non-pilot reports are
-extracted, into 13 shards under `data/stage_f_shards/` that are verified and
-**not yet merged**: 65 cohorts, 208 results, 1,491 risk-of-bias rows. All four gates pass
-(folder, shards, validator, 90 tests). `data/extraction_*.csv` still holds **only** the
-15-report pilot, so nothing currently in it is a finding. The search is complete and
-closes 9 June 2026, the report universe is frozen at 90, the PROSPERO amendment is
-submitted as version 4.0, and the Stage B adjudications are ratified. Next is Stage G:
-merge, overlap audit, and independent human verification.
+Short version at 23 September 2026: extraction is merged (90 reports, 78 cohorts, 278
+results). Every pool-determining field has been human-verified, the author window closed
+on 27 August 2026 with its prespecified consequences applied, and PROSPERO version 5.0 was
+submitted on 23 September 2026. **Provisional, pre-freeze** Bayesian fits exist for the two
+horizons with at least two cohorts. They are stamped not for citation and are not findings;
+see `docs/handover.md` for what stands between them and a definitive run.
 
 Code and data for a systematic review and Bayesian meta-analysis of employment outcomes in people living with psychosis.
 
@@ -25,14 +23,13 @@ Code and data for a systematic review and Bayesian meta-analysis of employment o
 
 **Work in progress. Nothing in this repository is a finding.**
 
-The extraction schema, the analysis plan and the pipeline exist and are proved end to end. All 90 screened reports have now been read: the 15-report pilot, and the 75 remaining in Stage F. **The full synthesis has not been run**, the Stage F shards are not merged into the extraction tables, and every result file carries a `sample_status` column reading `DEFINITIVE EXTRACTION IN PROGRESS - NOT FOR INFERENCE`. No pooled employment rate or moderator estimate may be quoted.
+The extraction is merged and verified at the field level, and the pipeline has produced **provisional, pre-freeze** posteriors in `results/provisional_*`, fitted from a tagged, clean commit. Every table carries `result_status` reading `PROVISIONAL, PRE-FREEZE - NOT FOR CITATION` beside `sample_status` reading `DEFINITIVE EXTRACTION IN PROGRESS - NOT FOR INFERENCE`. No pooled employment rate or moderator estimate may be quoted.
 
-Four things are outstanding, in order. Full detail in [`docs/handover.md`](docs/handover.md):
+Outstanding before a definitive run. Full detail in [`docs/handover.md`](docs/handover.md):
 
-1. **Stage G**: apply the shards' manifest corrections, add the cohorts Stage F created, merge and fail loud on collisions, run the global overlap audit, then **independent human verification** of every value that can move a result into or out of the primary pool. `data/extraction_provenance.csv` is the ledger for that and is empty.
-2. **Author queries.** 50 of the 208 extracted results are blocked on unresolved published contradictions, and 27 of the 75 reports print no recoverable count. Both need send-ready per-report emails in [`docs/data_requests.md`](docs/data_requests.md), for the team to send.
-3. **A PROSPERO version 5.0 amendment.** D13 and D14 were settled *after* version 4.0 was submitted, so **no registry version records them**. Both admit evidence and both were made after the affected results had been seen, which is precisely what a registry amendment exists to disclose. This is the most criticisable gap in the review as it stands. The amendment is prepared in [`docs/prospero_amendment_draft.md`](docs/prospero_amendment_draft.md) and awaits the guarantor's submission.
-4. **A clean frozen commit** pinning data, code, config, prompts, environment and PDF hashes.
+1. **Authorship-group rulings**: eligibility of a high-security forensic cohort for the long-term horizon, and ratification of the post hoc leave-one-cohort-out analysis (D15); whether an author-supplied Finnish register series, by year from first hospitalisation, can take landmark horizons.
+2. **Risk-of-bias verification** (tier 5 of `data/extraction_provenance.csv`), needed before any risk-of-bias analysis, GRADE or interpretation.
+3. **The input freeze**: `sample_status` set to `full`, a freeze tag, and a definitive run under the guard in `R/lib_config.R`.
 
 Two decisions taken during Stage F **admit** evidence and were made after the affected results were seen. Both are recorded as such rather than presented as prospective: **D13** (the 50 per cent diagnosis rule is sufficient on its own) and **D14** (partition sums across mutually exclusive subgroups). They differ in where the evidence lands, and the difference matters: **D13 admits rows to the primary pool; D14 does not.** D14's derived rows are a period-prevalence result and two secondary-family results, so no row enters the primary pool by virtue of D14. See [`docs/methods_deviations.md`](docs/methods_deviations.md).
 
