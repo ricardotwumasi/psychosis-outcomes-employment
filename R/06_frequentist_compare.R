@@ -80,7 +80,6 @@ frequentist_compare <- function(d, bayes_summaries, cfg) {
 
   # Differences are DESCRIBED, not judged. A large gap is a prompt to
   # investigate data, likelihood, priors, convergence and zero-event handling.
-  ex <- tab[tab$model == names(which.max(table(tab$model))) , ]
   diff_tab <- data.frame(
     quantity = c("pooled_proportion", "tau_logit"),
     brms = c(tab$pooled_proportion[1], tab$tau_logit[1]),

@@ -226,12 +226,182 @@ analysis_id <- function(cfg, data_shas) {
 #' Whether the working tree is clean, recorded in the manifest.
 #'
 #' A run made from a dirty tree cannot be reproduced from the commit it names,
-#' so the fact is recorded rather than the run being blocked.
+#' so the fact is recorded, and the provisional and definitive gates refuse on
+#' it.
+#'
+#' A git failure is "unknown", never "clean". The earlier version returned
+#' "clean" whenever git printed nothing, and a git that fails prints nothing,
+#' so a missing repository or a broken git passed the gate it exists to enforce.
 worktree_status <- function(cfg) {
   out <- tryCatch(
-    system2("git", c("-C", shQuote(cfg$.root), "status", "--porcelain"),
-            stdout = TRUE, stderr = FALSE),
-    error = function(e) NA_character_
+    suppressWarnings(system2("git", c("-C", shQuote(cfg$.root), "status", "--porcelain"),
+                             stdout = TRUE, stderr = FALSE)),
+    error = function(e) structure(character(0), status = -1L)
   )
+  if (!is.null(attr(out, "status")) && attr(out, "status") != 0L) return("unknown")
   if (length(out) == 0L) "clean" else "dirty"
+}
+
+#' Tags pointing at HEAD, or NA if git cannot say.
+#'
+#' A provisional or definitive fit must name a tag, because a commit hash in a
+#' manifest is easy to lose and a tag is the thing a reader can check out.
+head_tags <- function(cfg) {
+  out <- tryCatch(
+    suppressWarnings(system2("git", c("-C", shQuote(cfg$.root), "tag", "--points-at", "HEAD"),
+                             stdout = TRUE, stderr = FALSE)),
+    error = function(e) structure(character(0), status = -1L)
+  )
+  if (!is.null(attr(out, "status")) && attr(out, "status") != 0L) return(NA_character_)
+  as.character(out[nzchar(out)])
+}
+
+# =============================================================================
+# The no-posterior guard.
+#
+# Sampling a posterior on real employment outcomes is the one irreversible act
+# in this project: once a pooled number exists, every later decision can be
+# accused of having been taken in the light of it. The guard makes that act
+# impossible by accident. It is deliberately not a warning.
+#
+# It lives here rather than in the runner so it can be tested without running
+# main(). There are four modes, and exactly one environment variable selects
+# each of the three that fit:
+#
+#   design_only    nothing set. Refuses to sample anything.
+#   engineering    ENGINEERING_FIT=i-understand-this-is-not-a-result. Runs on
+#                  SYNTHETIC data only (SYNTHETIC_DATA=1 is required), because
+#                  an ungated fit on real outcomes is exactly what the guard
+#                  exists to prevent, and provisional mode now covers the
+#                  legitimate need to see the real pipeline run.
+#   provisional    PROVISIONAL_FIT=pre-freeze. Real data, before the sample is
+#                  frozen. Needs a clean worktree and a tag at HEAD, writes to
+#                  results/provisional_<aid>/, and every table says
+#                  PROVISIONAL_STAMP in its result_status column.
+#   definitive     DEFINITIVE_RUN=yes. Needs sample_status "full", a clean
+#                  worktree and a tag at HEAD.
+#
+# Setting more than one is refused rather than resolved. The previous version
+# let ENGINEERING_FIT silently win over DEFINITIVE_RUN, so a stale variable in
+# a shell could turn an intended definitive run into an ungated one.
+# =============================================================================
+
+PROVISIONAL_STAMP <- "PROVISIONAL, PRE-FREEZE - NOT FOR CITATION"
+
+MODE_VARS <- c(ENGINEERING_FIT = "i-understand-this-is-not-a-result",
+               PROVISIONAL_FIT = "pre-freeze",
+               DEFINITIVE_RUN = "yes")
+
+#' Resolve the fit mode from the environment, refusing any ambiguity.
+#'
+#' A variable that is set to anything other than its one accepted value is an
+#' error rather than "not set": a mistyped value is someone trying to select a
+#' mode, and quietly falling back to another mode is the silent win this
+#' replaces. DEFINITIVE_RUN keeps its historical aliases true and 1.
+#'
+#' @param env named character vector of the variables, as Sys.getenv returns.
+resolve_fit_mode <- function(env = Sys.getenv(c(names(MODE_VARS), "SYNTHETIC_DATA"),
+                                              unset = "")) {
+  val <- function(v) if (v %in% names(env)) as.character(env[[v]]) else ""
+  set <- names(MODE_VARS)[vapply(names(MODE_VARS), function(v) nzchar(val(v)), logical(1))]
+  if (length(set) > 1L) {
+    stop("REFUSING TO CHOOSE A FIT MODE. More than one mode variable is set: ",
+         paste(set, collapse = ", "), ". Unset all but one; no mode wins ",
+         "silently over another.", call. = FALSE)
+  }
+  mode <- if (!length(set)) "design_only" else {
+    v <- set
+    ok <- if (v == "DEFINITIVE_RUN") tolower(val(v)) %in% c("yes", "true", "1")
+          else identical(val(v), MODE_VARS[[v]])
+    if (!ok) {
+      stop(v, " is set to '", val(v), "', which is not its accepted value '",
+           MODE_VARS[[v]], "'. Refusing rather than guessing which mode was meant.",
+           call. = FALSE)
+    }
+    switch(v, ENGINEERING_FIT = "engineering", PROVISIONAL_FIT = "provisional",
+           DEFINITIVE_RUN = "definitive")
+  }
+  # Synthetic data belongs to engineering and to nothing else. A provisional or
+  # definitive table computed on generated data would carry a real-looking stamp.
+  synthetic <- nzchar(val("SYNTHETIC_DATA"))
+  if (synthetic && !identical(mode, "engineering")) {
+    stop("SYNTHETIC_DATA is set in mode '", mode, "'. Synthetic data is ",
+         "permitted in engineering mode only.", call. = FALSE)
+  }
+  if (identical(mode, "engineering") && !synthetic) {
+    stop("ENGINEERING_FIT requires SYNTHETIC_DATA=1. An engineering fit bypasses ",
+         "every gate, so it may not sample real employment outcomes; use ",
+         "PROVISIONAL_FIT=pre-freeze for a gated fit on the real extraction.",
+         call. = FALSE)
+  }
+  list(mode = mode, synthetic = synthetic)
+}
+
+#' Refuse to sample unless the mode's gates are all satisfied.
+#'
+#' Returns the tag(s) at HEAD so the runner can record them. `worktree` and
+#' `tags` are arguments so the gates can be tested without a real repository in
+#' a particular state.
+assert_may_fit <- function(cfg, mode, worktree = worktree_status(cfg),
+                           tags = head_tags(cfg)) {
+  if (identical(mode, "engineering")) {
+    message("\n  [ENGINEERING FIT] synthetic data; outputs are NOT results and go ",
+            "to a separate namespace.")
+    return(invisible(list(mode = mode, tag = NA_character_)))
+  }
+  if (!mode %in% c("provisional", "definitive")) {
+    stop("REFUSING TO SAMPLE A POSTERIOR.\n",
+         "  This run is design-only. Nothing is fitted on real employment ",
+         "outcomes.\n",
+         "  For the pools, selection tables and attrition, run ",
+         "Rscript R/04_design_package.R\n",
+         "  A provisional fit needs PROVISIONAL_FIT=pre-freeze, a definitive run ",
+         "DEFINITIVE_RUN=yes, each with the gates below;\n",
+         "  an engineering fit needs ENGINEERING_FIT=i-understand-this-is-not-a-result ",
+         "and SYNTHETIC_DATA=1.",
+         call. = FALSE)
+  }
+  fails <- character(0)
+  if (identical(mode, "definitive") && !identical(cfg$sample_status, "full")) {
+    fails <- c(fails, paste0("sample_status is '", cfg$sample_status,
+                             "', not 'full'"))
+  }
+  if (!identical(worktree, "clean")) {
+    fails <- c(fails, paste0("worktree is '", worktree,
+                             "'; a ", mode, " fit must be reproducible from a commit"))
+  }
+  tags <- tags[!is.na(tags)]
+  if (!length(tags)) {
+    fails <- c(fails, paste0("no git tag points at HEAD; tag the commit so a ",
+                             mode, " fit names something a reader can check out"))
+  }
+  if (length(fails)) {
+    stop("REFUSING A ", toupper(mode), " FIT. ", length(fails),
+         " gate(s) not satisfied:\n", paste0("  - ", fails, collapse = "\n"),
+         call. = FALSE)
+  }
+  if (identical(mode, "provisional")) {
+    message("\n  [PROVISIONAL FIT] ", PROVISIONAL_STAMP, "  (tag ",
+            paste(tags, collapse = ";"), ")")
+  }
+  invisible(list(mode = mode, tag = paste(tags, collapse = ";")))
+}
+
+#' The value every output table carries in its result_status column.
+#'
+#' One column, one wording per mode, on every table, so a CSV separated from
+#' its directory still says what it is.
+result_status_label <- function(mode) {
+  switch(mode,
+         provisional = PROVISIONAL_STAMP,
+         engineering = "ENGINEERING, SYNTHETIC DATA - NOT A RESULT",
+         definitive = "definitive",
+         design_only = "design only - no estimate",
+         stop("unknown fit mode '", mode, "'", call. = FALSE))
+}
+
+stamp_result_status <- function(df, mode) {
+  if (is.null(df) || !nrow(df)) return(df)
+  df$result_status <- result_status_label(mode)
+  df
 }

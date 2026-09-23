@@ -166,6 +166,49 @@ intervention_priors <- function(cfg, priors = cfg$priors$primary) {
   )
 }
 
+#' The one-at-a-time prior grid, plus the weak set, as named prior lists.
+#'
+#' Each grid setting varies ONE hyperparameter and holds the others at the
+#' primary values, so a moved estimate can be attributed to the hyperparameter
+#' that moved it. A grid value equal to the primary is the primary fit itself
+#' and is not refitted under another name.
+#'
+#' beta_full_sd is skipped: it scales moderator slopes, and the prevalence model
+#' fitted here has no moderators (none is reportable below ten cohorts), so
+#' varying it would refit an identical model and report a sensitivity that
+#' cannot exist.
+prior_grid_settings <- function(cfg) {
+  base <- cfg$priors$primary
+  grid <- cfg$priors$grid
+  out <- list(primary = base)
+  for (par in setdiff(names(grid), "beta_full_sd")) {
+    for (v in unlist(grid[[par]])) {
+      if (isTRUE(all.equal(v, base[[par]]))) next
+      s <- base
+      s[[par]] <- v
+      out[[sprintf("grid_%s_%g", par, v)]] <- s
+    }
+  }
+  out$weak <- cfg$priors$weak
+  out
+}
+
+#' Short hash of a brms prior specification.
+#'
+#' Part of every cache key, so two fits that differ only in their priors can
+#' never be served from each other's cache file. Hashing the brmsprior object
+#' rather than the yaml settings means the key follows what brms is actually
+#' given, including the nested term's prior.
+prior_hash <- function(priors) {
+  p <- as.data.frame(priors)[c("prior", "class", "coef", "group")]
+  substr(digest::digest(p, algo = "sha256"), 1, 8)
+}
+
+#' Cache file name for a fit: its name and its priors.
+fit_cache_key <- function(fit_id, priors) {
+  paste0(fit_id, "_", prior_hash(priors))
+}
+
 # --- fitting -----------------------------------------------------------------
 
 #' Fit a brms model with the adapt_delta escalation ladder.
@@ -182,7 +225,7 @@ fit_model <- function(formula, data, priors, cfg, fit_id,
   ladder <- unlist(s$adapt_delta_ladder)
 
   if (!is.null(cache_dir)) {
-    cache_file <- file.path(cache_dir, paste0(fit_id, ".rds"))
+    cache_file <- file.path(cache_dir, paste0(fit_cache_key(fit_id, priors), ".rds"))
     if (file.exists(cache_file)) {
       message("  [cache] ", fit_id)
       return(readRDS(cache_file))
@@ -215,10 +258,13 @@ fit_model <- function(formula, data, priors, cfg, fit_id,
   }
   attr(fit, "escalations") <- escalations
   attr(fit, "fit_id") <- fit_id
+  # Recorded from the configuration that sampled the fit, so the treedepth-hit
+  # count is taken against the limit actually used and never a default.
+  attr(fit, "max_treedepth") <- s$max_treedepth
 
   if (!is.null(cache_dir)) {
     dir.create(cache_dir, recursive = TRUE, showWarnings = FALSE)
-    saveRDS(fit, file.path(cache_dir, paste0(fit_id, ".rds")))
+    saveRDS(fit, cache_file)
   }
   fit
 }

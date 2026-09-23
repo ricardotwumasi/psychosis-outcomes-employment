@@ -52,3 +52,6 @@ BAYESIAN_META_ANALYSIS_PLAN_FEASIBILITY_REVIEW.md
 DEFINITIVE_EXTRACTION_PLAN_REVIEW.md
 POST_STAGE_F_PLAN_REVIEW_2026-08-13.md
 EXECUTION_PLAN_2026-08-13.md
+
+# Engineering fits run on synthetic data and are never results.
+results/engineering_*/

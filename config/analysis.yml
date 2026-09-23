@@ -383,16 +383,38 @@ sensitivity:
       label: "All trial-derived cohorts excluded"
       pool_override: {exclude_parent_designs: [rct, cluster_rct, non_randomised_trial]}
 
-  # DECLARED BUT NOT YET IMPLEMENTED. No code reads these. They are listed
-  # separately so the gap is visible, rather than sitting beside the implemented
-  # ones and looking like analyses that run. Each belongs to the modelling stage
-  # and must be implemented or explicitly deferred before any definitive fit.
-  declared_not_yet_implemented:
+  # IMPLEMENTED IN THE RUNNER, not as pool overrides. They are kept out of
+  # `implemented` above because build_sensitivity_pools() treats every entry
+  # there as a pool override. This block is documentation: R/00_run_all.R runs
+  # them at every horizon where D11.3 permits the model (2 or more cohorts).
+  implemented_model_sensitivities:
+    # One hyperparameter at a time over priors.grid, the others held at
+    # priors.primary, plus the whole priors.weak set. Run wherever
+    # sparse_data.small_k_requires_prior_sensitivity applies (2 to 9 cohorts).
+    # beta_full_sd is not varied: it scales moderator slopes and the fitted
+    # prevalence model has none. tables/prior_sensitivity.csv
     prior_grid: true
-    leave_one_cohort_out: true
-    missing_outcome_bounds: true
-    attrition_moderator: true
+    # priorsense::powerscale_sensitivity on each primary fit, for the pooled
+    # logit and tau. tables/priorsense_powerscale.csv
     priorsense: true
+    # Unobserved alive-and-eligible participants all unemployed (worst) or all
+    # employed (best), denominator n_alive_eligible as in prop_unobserved;
+    # cohorts without it keep their observed counts, and the number bounded is
+    # reported. Rows missing_outcome_worst/best in
+    # tables/sensitivity_by_horizon.csv
+    missing_outcome_bounds: true
+
+  # DEFERRED, WITH A REASON. No code runs these. Each reason is a property of
+  # the evidence base now, not a judgement about the analysis, and is revisited
+  # when the cohort count changes.
+  deferred_with_reason:
+    leave_one_cohort_out: "uninformative at k = 2 or 3, where dropping a cohort leaves one or two; implement when any horizon reaches k >= 5"
+    attrition_moderator: "a moderator, and no moderator is reportable below 10 cohorts under `reportability`"
+    all_moderators: "not reportable below 10 cohorts under `reportability`; moderator_slopes.csv records each as not reported"
+    intervention_model: "SAP section 10.2; a separate synthesis of randomised arms, not a sensitivity of the prevalence estimate"
+    simulation_study: "coverage validation under `simulation`; not yet run, and its small_k scenario is k = 12, above every current horizon"
+    i_squared: "not meaningful below 10 cohorts; tau and the new-cohort interval are reported instead"
+    funnel_and_egger: "small-study tests have no power below 10 cohorts (Cochrane Handbook chapter 13)"
 
   # NOT sensitivity analyses, recorded here to prevent them being mistaken for
   # some. Period prevalence, cumulative attainment, competitive-only and

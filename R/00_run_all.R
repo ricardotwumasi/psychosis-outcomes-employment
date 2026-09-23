@@ -17,6 +17,12 @@
 #
 # Nothing is skipped silently. A deliberate skip writes a row with a reason and
 # is printed in the closing summary.
+#
+# Every horizon in horizons.bands is estimated, each under D11.3 on DISTINCT
+# cohorts: no estimate at 0, an exact binomial interval at 1, the model at 2 or
+# more. Where the model runs, the two named sensitivity pools, the
+# missing-outcome bounds, the frequentist comparison and priorsense run too,
+# and below small_k_threshold the one-at-a-time prior grid runs alongside.
 # =============================================================================
 
 `%||%` <- function(a, b) if (is.null(a)) b else a
@@ -29,73 +35,18 @@ ROOT <- local({
 
 suppressWarnings(suppressMessages({
   for (f in c("lib_config.R", "lib_data.R", "lib_summaries.R", "lib_model.R",
-              "01_validate_data.R", "02_prior_predictive.R",
+              "lib_synthetic.R", "01_validate_data.R", "02_prior_predictive.R",
               "03_fit_prevalence.R", "06_frequentist_compare.R")) {
     source(file.path(ROOT, "R", f))
   }
   library(brms); library(posterior); library(metafor)
 }))
 
-# =============================================================================
-# The no-posterior guard.
-#
-# Sampling a posterior on real employment outcomes is the one irreversible act
-# in this project: once a pooled number exists, every later decision can be
-# accused of having been taken in the light of it. The guard makes that act
-# impossible by accident. It is deliberately not a warning.
-#
-# A DEFINITIVE run requires all three, and refuses on the first that fails:
-#   1. sample_status is "full". While extraction or verification is in
-#      progress, the configured status says so and there is nothing to fit.
-#   2. the worktree is clean. A fit whose inputs are uncommitted cannot be
-#      reproduced from any commit, so it cannot be a definitive result.
-#   3. DEFINITIVE_RUN=yes is set explicitly. Someone has to say so.
-#
-# An ENGINEERING run needs ENGINEERING_FIT=i-understand-this-is-not-a-result,
-# which is unmistakable, and its outputs go to a separate namespace
-# (results/engineering_*) so that an engineering artefact can never be picked
-# up as a result by a reader or a later script.
-# =============================================================================
-FIT_MODE <- local({
-  eng <- Sys.getenv("ENGINEERING_FIT", "")
-  def <- tolower(Sys.getenv("DEFINITIVE_RUN", "")) %in% c("yes", "true", "1")
-  if (identical(eng, "i-understand-this-is-not-a-result")) "engineering"
-  else if (def) "definitive"
-  else "design_only"
-})
-
-assert_may_fit <- function(cfg, mode = FIT_MODE) {
-  if (identical(mode, "engineering")) {
-    message("\n  [ENGINEERING FIT] outputs are NOT results and go to a ",
-            "separate namespace.")
-    return(invisible(TRUE))
-  }
-  if (!identical(mode, "definitive")) {
-    stop("REFUSING TO SAMPLE A POSTERIOR.\n",
-         "  This run is design-only. Nothing is fitted on real employment ",
-         "outcomes.\n",
-         "  For the pools, selection tables and attrition, run ",
-         "Rscript R/04_design_package.R\n",
-         "  A definitive run needs DEFINITIVE_RUN=yes and the gates below; an ",
-         "engineering fit needs\n",
-         "  ENGINEERING_FIT=i-understand-this-is-not-a-result.",
-         call. = FALSE)
-  }
-  fails <- character(0)
-  if (!identical(cfg$sample_status, "full")) {
-    fails <- c(fails, paste0("sample_status is '", cfg$sample_status,
-                             "', not 'full'"))
-  }
-  if (!identical(worktree_status(cfg), "clean")) {
-    fails <- c(fails, paste0("worktree is '", worktree_status(cfg),
-                             "'; a definitive fit must be reproducible from a commit"))
-  }
-  if (length(fails)) {
-    stop("REFUSING A DEFINITIVE FIT. ", length(fails), " gate(s) not satisfied:\n",
-         paste0("  - ", fails, collapse = "\n"), call. = FALSE)
-  }
-  invisible(TRUE)
-}
+# The no-posterior guard (resolve_fit_mode and assert_may_fit) lives in
+# lib_config.R, where its modes and gates are documented and tested. The mode
+# is resolved at the start of main(), so conflicting variables stop the run
+# before anything is read, and assert_may_fit runs before ANY sampling,
+# including the prior predictive.
 
 SKIPS <- new.env(parent = emptyenv()); SKIPS$rows <- list()
 note_skip <- function(step, reason) {
@@ -108,28 +59,51 @@ note_skip <- function(step, reason) {
 main <- function() {
   t0 <- Sys.time()
   cfg <- load_config(ROOT)
+  sel <- resolve_fit_mode()
+  mode <- sel$mode
   message("== configuration ==")
   message("  seed ", cfg$seed, ", primary horizon ", cfg$horizons$primary)
   message("  sample_status: ", cfg$sample_status)
+  message("  fit mode: ", mode, if (sel$synthetic) " (SYNTHETIC DATA)" else "")
 
   ## ---- data checks ---------------------------------------------------------
   message("\n== data checks ==")
-  dat <- read_extraction(cfg)
+  dat <- if (sel$synthetic) synthetic_extraction(cfg) else read_extraction(cfg)
   validate_extraction(dat, cfg)
   dat <- derive_columns(dat, cfg)
   message("  validation passed: ", nrow(dat$outcomes), " results, ",
           nrow(dat$cohorts), " cohorts")
 
   aid <- analysis_id(cfg, dat$shas)
-  # An engineering fit never shares a namespace with a result. The prefix is on
-  # the directory rather than inside a file, so the separation survives someone
-  # copying a table out of it.
-  prefix <- if (identical(FIT_MODE, "engineering")) "engineering_" else "run_"
+
+  ## ---- the guard -----------------------------------------------------------
+  # Before anything is written or sampled. A prior predictive fit is still a
+  # fit, and a design-only run previously sampled and cached one before
+  # refusing; a refused provisional run would also have left a provisional_
+  # directory of stamped tables with no fit behind them. The design tables a
+  # design-only run used to write here are produced by R/04_design_package.R.
+  message("\n== fit guard ==")
+  gate <- assert_may_fit(cfg, mode)
+  # Each mode has its own namespace. The prefix is on the directory rather than
+  # inside a file, so the separation survives someone copying a table out of
+  # it, and every table ALSO carries result_status for when it does not.
+  prefix <- switch(mode, engineering = "engineering_synthetic_",
+                   provisional = "provisional_", "run_")
   run_dir <- file.path(ROOT, "results", paste0(prefix, aid))
   tab_dir <- file.path(run_dir, "tables"); diag_dir <- file.path(run_dir, "diagnostics")
   for (p in c(tab_dir, diag_dir)) dir.create(p, recursive = TRUE, showWarnings = FALSE)
-  cache_dir <- file.path(ROOT, ".cache", "fits", aid)
+  # Split by mode, so an engineering or provisional fit can never be served
+  # from cache to a definitive run with the same analysis identifier.
+  cache_dir <- file.path(ROOT, ".cache", "fits", mode, aid)
   message("  analysis_id ", aid, "  (worktree ", worktree_status(cfg), ")")
+
+  # Every table written by this runner goes through here, so none can leave
+  # without sample_status and result_status.
+  write_tab <- function(df, path) {
+    if (is.null(df)) return(invisible(NULL))
+    if (nrow(df) && !"sample_status" %in% names(df)) df$sample_status <- cfg$sample_status
+    utils::write.csv(stamp_result_status(df, mode), path, row.names = FALSE)
+  }
 
   ## ---- design checks -------------------------------------------------------
   message("\n== design checks ==")
@@ -137,29 +111,31 @@ main <- function() {
   message("  primary pool: ", nrow(pool$data), " results from ",
           length(unique(pool$data$cohort_id)), " cohorts at ", pool$horizon)
   pool$log$sample_status <- cfg$sample_status
-  write.csv(pool$log, file.path(tab_dir, "pool_construction.csv"), row.names = FALSE)
+  write_tab(pool$log, file.path(tab_dir, "pool_construction.csv"))
   if (!is.null(pool$dropped_for_overlap)) {
-    write.csv(pool$dropped_for_overlap,
-              file.path(tab_dir, "reports_set_aside.csv"), row.names = FALSE)
+    write_tab(pool$dropped_for_overlap, file.path(tab_dir, "reports_set_aside.csv"))
     message("  ", nrow(pool$dropped_for_overlap),
             " report(s) set aside by the result-selection rule, named in reports_set_aside.csv")
   }
   st <- prevalence_study_table(pool, cfg)
-  if (!is.null(st)) write.csv(st, file.path(tab_dir, "study_table.csv"), row.names = FALSE)
+  if (!is.null(st)) write_tab(st, file.path(tab_dir, "study_table.csv"))
 
   diagnostics <- list()
   expected_fits <- character(0)
+  keep_fit <- function(res) {
+    expected_fits <<- c(expected_fits, res$fit_id)
+    diagnostics[[length(diagnostics) + 1L]] <<- res$diagnostics
+  }
 
   ## ---- model checks: prior predictive --------------------------------------
   message("\n== model checks: prior predictive ==")
   if (nrow(pool$data) < 2L) {
-    note_skip("prior_predictive", "fewer than 2 results in the pool")
+    note_skip("prior_predictive", "fewer than 2 results in the primary-horizon pool")
   } else {
     expected_fits <- c(expected_fits, "prior_predictive")
     pp <- prior_predictive_check(pool$data, cfg, cache_dir)
-    write.csv(pp$table, file.path(tab_dir, "prior_predictive.csv"), row.names = FALSE)
-    write.csv(pp$implied, file.path(tab_dir, "prior_predictive_implied.csv"),
-              row.names = FALSE)
+    write_tab(pp$table, file.path(tab_dir, "prior_predictive.csv"))
+    write_tab(pp$implied, file.path(tab_dir, "prior_predictive_implied.csv"))
     for (i in seq_len(nrow(pp$table))) {
       message(sprintf("  [%s] %s", if (pp$table$pass[i]) "pass" else "FAIL",
                       pp$table$criterion[i]))
@@ -173,44 +149,123 @@ main <- function() {
     message("  prior predictive verdict: pass")
   }
 
-  ## ---- primary fit ---------------------------------------------------------
-  message("\n== primary prevalence model ==")
-  assert_may_fit(cfg)
-  res <- fit_prevalence(pool, cfg, cache_dir)
-  if (identical(res$status, "skipped")) {
-    note_skip("prevalence_primary", res$reason)
-  } else {
-    expected_fits <- c(expected_fits, res$fit_id)
-    write.csv(res$summaries, file.path(tab_dir, "pooled_proportion.csv"),
-              row.names = FALSE)
-    diagnostics[[length(diagnostics) + 1L]] <- res$diagnostics
-    if (!is.null(res$ppc$overall)) {
-      res$ppc$overall$sample_status <- cfg$sample_status
-      write.csv(res$ppc$overall, file.path(diag_dir, "ppc_overall.csv"),
-                row.names = FALSE)
-    }
-    if (!is.null(res$ppc$per_result)) {
-      write.csv(res$ppc$per_result, file.path(diag_dir, "ppc_per_result.csv"),
-                row.names = FALSE)
-    }
-    p <- res$summaries[res$summaries$quantity == "pooled_proportion", ]
-    message(sprintf("  pooled proportion %.3f [%.3f, %.3f]  (k = %d cohorts, nested = %s)",
-                    p$median, p$q_lo, p$q_hi, p$k_cohorts, res$nested))
-    message("  ", cfg$sample_status)
+  ## ---- every horizon, under D11.3 ------------------------------------------
+  pooled_rows <- list(); sens_rows <- list(); grid_rows <- list()
+  summaries <- list(); ppc_overall <- list(); ppc_per <- list()
+  fq_tabs <- list(); fq_diffs <- list(); ps_rows <- list()
+  grid <- prior_grid_settings(cfg)
 
-    ## ---- frequentist diagnostic comparison ---------------------------------
-    message("\n== frequentist comparison (diagnostic, not a gate) ==")
-    fq <- frequentist_compare(pool$data, res$summaries, cfg)
-    write.csv(fq$table, file.path(tab_dir, "frequentist_comparison.csv"),
-              row.names = FALSE)
-    write.csv(fq$differences, file.path(tab_dir, "frequentist_differences.csv"),
-              row.names = FALSE)
-    print(fq$differences[c("quantity", "brms", "rma_glmm", "absolute_difference")],
-          row.names = FALSE)
+  for (h in names(cfg$horizons$bands)) {
+    message("\n== prevalence at ", h, " ==")
+    hp <- if (identical(h, cfg$horizons$primary)) pool
+          else build_primary_pool(dat, cfg, horizon = h)
+    res <- fit_prevalence(hp, cfg, cache_dir, horizon = h)
+    pooled_rows[[h]] <- pooled_row(res, cfg)
+    r <- pooled_rows[[h]]
+    message(sprintf("  k = %d cohorts, %s", r$k_cohorts, r$method))
+    if (!is.na(r$estimate)) {
+      message(sprintf("  estimate %.3f [%.3f, %.3f]%s", r$estimate, r$interval_lo,
+                      r$interval_hi, if (isTRUE(r$small_k)) "  (small k)" else ""))
+    }
+    if (identical(res$status, "no_estimate")) note_skip(paste0("prevalence_", h), res$reason)
+    if (!identical(res$status, "ok")) next
+
+    keep_fit(res)
+    summaries[[h]] <- res$summaries
+    if (!is.null(res$ppc$overall)) ppc_overall[[h]] <- cbind(horizon = h, res$ppc$overall)
+    if (!is.null(res$ppc$per_result)) ppc_per[[h]] <- cbind(horizon = h, res$ppc$per_result)
+
+    ## frequentist diagnostic comparison, at every fitted horizon. It is the
+    ## same comparison as before; nothing in it was specific to one horizon.
+    fq <- frequentist_compare(res$data, res$summaries, cfg)
+    fq_tabs[[h]] <- cbind(horizon = h, fq$table)
+    fq_diffs[[h]] <- cbind(horizon = h, fq$differences)
+
+    ## priorsense power-scaling on the primary fit. An error is recorded as a
+    ## skip with its message, never swallowed.
+    ps <- tryCatch({
+      x <- as.data.frame(priorsense::powerscale_sensitivity(
+        res$fit, variable = c("b_Intercept", "sd_cohort_id__Intercept")))
+      cbind(horizon = h, fit_id = res$fit_id, x)
+    }, error = function(e) {
+      note_skip(paste0("priorsense_", h), conditionMessage(e)); NULL
+    })
+    if (!is.null(ps)) ps_rows[[h]] <- ps
+
+    ## one-at-a-time prior grid and the weak set, required below small k
+    if (isTRUE(res$route$prior_sensitivity_required)) {
+      for (nm in names(grid)) {
+        g <- if (identical(nm, "primary")) res
+             else fit_prevalence(hp, cfg, cache_dir, horizon = h,
+                                 priors = grid[[nm]], analysis = paste0("prior_", nm))
+        if (!identical(nm, "primary")) keep_fit(g)
+        gr <- pooled_row(g, cfg)
+        pr <- grid[[nm]]
+        grid_rows[[paste(h, nm)]] <- cbind(
+          gr[c("horizon", "k_cohorts")], setting = nm,
+          varied = if (nm %in% c("primary", "weak")) nm
+                   else sub("^grid_(.*)_[^_]+$", "\\1", nm),
+          intercept_mean = pr$intercept_mean, intercept_sd = pr$intercept_sd,
+          tau_sd = pr$tau_sd,
+          gr[c("estimate", "interval_lo", "interval_hi", "predictive_new_cohort_lo",
+               "predictive_new_cohort_hi", "tau_median", "tau_lo", "tau_hi",
+               "sample_status")],
+          prior_hash = g$prior_hash, stringsAsFactors = FALSE)
+      }
+    }
+
+    ## named sensitivity pools and missing-outcome bounds, same D11.3 logic
+    sens <- build_sensitivity_pools(dat, cfg, horizon = h)
+    variants <- lapply(sens, function(s) list(label = s$label, pool = s$pool))
+    for (case in c("worst", "best")) {
+      d2 <- missing_outcome_bound_data(res$data, case)
+      variants[[paste0("missing_outcome_", case)]] <- list(
+        label = sprintf("unobserved alive-and-eligible participants all %s",
+                        if (case == "worst") "unemployed" else "employed"),
+        pool = list(data = d2, horizon = h),
+        n_bounded = attr(d2, "n_cohorts_bounded"))
+    }
+    for (nm in names(variants)) {
+      v <- variants[[nm]]
+      vd <- v$pool$data
+      same <- identical(vd[c("cohort_id", "n_employed", "n_outcome_observed")],
+                        res$data[c("cohort_id", "n_employed", "n_outcome_observed")])
+      # An identical data set is the primary fit; refitting it under another
+      # name would only report the same posterior as if it were corroboration.
+      sv <- if (same) res else fit_prevalence(v$pool, cfg, cache_dir, horizon = h,
+                                             analysis = nm)
+      if (!same && identical(sv$status, "ok")) keep_fit(sv)
+      row <- pooled_row(sv, cfg)
+      row$analysis <- nm
+      row <- cbind(row[c("horizon", "analysis")], label = v$label,
+                   identical_to_primary = same,
+                   n_cohorts_bounded = v$n_bounded %||% NA_integer_,
+                   row[setdiff(names(row), c("horizon", "analysis"))],
+                   stringsAsFactors = FALSE)
+      if (same) row$note <- paste0("identical data to the primary pool; the primary fit is reported",
+                                   if (nzchar(row$note)) paste0("; ", row$note) else "")
+      sens_rows[[paste(h, nm)]] <- row
+    }
+  }
+
+  pooled <- do.call(rbind, pooled_rows)
+  write_tab(pooled, file.path(tab_dir, "pooled_by_horizon.csv"))
+  bind <- function(x) if (length(x)) do.call(rbind, x) else NULL
+  write_tab(bind(summaries), file.path(tab_dir, "pooled_proportion.csv"))
+  write_tab(bind(sens_rows), file.path(tab_dir, "sensitivity_by_horizon.csv"))
+  write_tab(bind(grid_rows), file.path(tab_dir, "prior_sensitivity.csv"))
+  write_tab(bind(ps_rows), file.path(tab_dir, "priorsense_powerscale.csv"))
+  write_tab(bind(fq_tabs), file.path(tab_dir, "frequentist_comparison.csv"))
+  write_tab(bind(fq_diffs), file.path(tab_dir, "frequentist_differences.csv"))
+  write_tab(bind(ppc_overall), file.path(diag_dir, "ppc_overall.csv"))
+  write_tab(bind(ppc_per), file.path(diag_dir, "ppc_per_result.csv"))
+  if (any(pooled$prior_sensitivity_required) && !length(grid_rows)) {
+    stop("a small-k horizon requires prior sensitivity but no grid row was ",
+         "produced", call. = FALSE)
   }
 
   ## ---- moderators ----------------------------------------------------------
-  message("\n== moderators ==")
+  message("\n== moderators (primary horizon) ==")
   mod_rows <- list()
   for (nm in names(cfg$moderators)) {
     r <- moderator_reportable(pool$data, cfg, nm)
@@ -222,7 +277,7 @@ main <- function() {
       sample_status = cfg$sample_status, stringsAsFactors = FALSE)
   }
   mods <- do.call(rbind, mod_rows)
-  write.csv(mods, file.path(tab_dir, "moderator_slopes.csv"), row.names = FALSE)
+  write_tab(mods, file.path(tab_dir, "moderator_slopes.csv"))
   message("  ", sum(mods$status == "not reported"), " of ", nrow(mods),
           " moderators below the reportability threshold and correctly not reported")
 
@@ -231,7 +286,7 @@ main <- function() {
   if (length(diagnostics)) {
     dg <- do.call(rbind, diagnostics)
     dg$sample_status <- cfg$sample_status
-    write.csv(dg, file.path(diag_dir, "fit_diagnostics.csv"), row.names = FALSE)
+    write_tab(dg, file.path(diag_dir, "fit_diagnostics.csv"))
     for (i in seq_len(nrow(dg))) {
       message(sprintf("  [%s] %s  rhat %.4f  ess_bulk %.0f  div %d  esc %d%s",
                       if (dg$pass[i]) "pass" else "FAIL", dg$fit_id[i],
@@ -260,6 +315,7 @@ main <- function() {
   files <- list.files(run_dir, recursive = TRUE, full.names = TRUE)
   manifest <- data.frame(
     analysis_id = aid,
+    fit_mode = mode, synthetic_data = sel$synthetic, git_tag = gate$tag,
     source_commit = tryCatch(system2("git", c("-C", shQuote(ROOT), "rev-parse", "HEAD"),
                                      stdout = TRUE), error = function(e) NA_character_),
     worktree = worktree_status(cfg),
@@ -276,21 +332,22 @@ main <- function() {
     bytes = file.info(files)$size,
     row.names = NULL, stringsAsFactors = FALSE
   )
-  write.csv(manifest, file.path(run_dir, "run_manifest.csv"), row.names = FALSE)
+  write_tab(manifest, file.path(run_dir, "run_manifest.csv"))
 
   ## ---- closing summary -----------------------------------------------------
   message("\n== summary ==")
   message("  elapsed ", round(as.numeric(difftime(Sys.time(), t0, units = "secs")), 1), "s")
-  message("  outputs in results/run_", aid)
+  message("  outputs in results/", basename(run_dir))
   if (length(SKIPS$rows)) {
     sk <- do.call(rbind, SKIPS$rows)
-    write.csv(sk, file.path(run_dir, "skipped_steps.csv"), row.names = FALSE)
+    write_tab(sk, file.path(run_dir, "skipped_steps.csv"))
     message("  ", nrow(sk), " step(s) skipped, recorded in skipped_steps.csv:")
     for (i in seq_len(nrow(sk))) message("    - ", sk$step[i], ": ", sk$reason[i])
   } else {
     message("  no steps skipped")
   }
   message("\n  ", cfg$sample_status)
+  message("  ", result_status_label(mode))
   invisible(TRUE)
 }
 

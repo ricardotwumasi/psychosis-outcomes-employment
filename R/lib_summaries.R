@@ -143,7 +143,10 @@ robustness_region <- function(draws, cfg) {
 fit_diagnostics <- function(fit, fit_id) {
   dr <- posterior::as_draws_df(fit)
   vars <- setdiff(names(dr), c(".chain", ".iteration", ".draw"))
-  vars <- vars[vapply(dr[vars], function(x) is.numeric(x) && stats::var(x) > 0, logical(1))]
+  # as.data.frame first: subsetting a draws_df by column drops its metadata and
+  # warns once per fit, which buried real warnings in the run log.
+  vars <- vars[vapply(as.data.frame(dr)[vars], function(x) is.numeric(x) && stats::var(x) > 0,
+                      logical(1))]
 
   s <- posterior::summarise_draws(
     posterior::subset_draws(posterior::as_draws(fit), variable = vars),
@@ -158,8 +161,14 @@ fit_diagnostics <- function(fit, fit_id) {
   div <- getnp("divergent__")
   td <- getnp("treedepth__")
   energy <- getnp("energy__")
-  max_td <- tryCatch(fit$fit@stan_args[[1]]$control$max_treedepth, error = function(e) NULL)
-  if (is.null(max_td)) max_td <- 10L
+  # The limit the fit was sampled with, from fit_model's attribute and failing
+  # that from the stanfit arguments. Never a hard-coded default: sampling uses
+  # 12, and counting hits against 10 would report every transition at depth 10
+  # or 11 as a hit. If neither source has it the count is NA, which the gate
+  # treats as a failure rather than a pass.
+  max_td <- attr(fit, "max_treedepth") %||%
+    tryCatch(fit$fit@stan_args[[1]]$control$max_treedepth, error = function(e) NULL)
+  if (is.null(max_td)) max_td <- NA_integer_
 
   ebfmi <- tryCatch({
     ch <- np$Chain[np$Parameter == "energy__"]
@@ -179,7 +188,8 @@ fit_diagnostics <- function(fit, fit_id) {
     min_ess_tail = min(s$ess_tail, na.rm = TRUE),
     max_mcse_mean = max(s$mcse_mean, na.rm = TRUE),
     num_divergent = if (all(is.na(div))) NA_integer_ else as.integer(sum(div)),
-    num_max_treedepth = if (all(is.na(td))) NA_integer_ else as.integer(sum(td >= max_td)),
+    max_treedepth = max_td,
+    num_max_treedepth = if (all(is.na(td)) || is.na(max_td)) NA_integer_ else as.integer(sum(td >= max_td)),
     min_ebfmi = if (all(is.na(ebfmi))) NA_real_ else min(ebfmi, na.rm = TRUE),
     stringsAsFactors = FALSE
   )
