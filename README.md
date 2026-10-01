@@ -2,15 +2,14 @@
 
 ## Where this is up to
 
-**Start with [`docs/handover.md`](docs/handover.md).** It states the current state, the
-four open tasks in order, and the rules that are easy to get wrong.
+**The analysis is final as of 1 October 2026.** Start with [`docs/handover.md`](docs/handover.md): it
+states what is definitive, how the results must be read, how to reproduce them, and what is
+still open.
 
-Short version at 23 September 2026: extraction is merged (90 reports, 78 cohorts, 278
-results). Every pool-determining field has been human-verified, the author window closed
-on 27 August 2026 with its prespecified consequences applied, and PROSPERO version 5.0 was
-submitted on 23 September 2026. **Provisional, pre-freeze** Bayesian fits exist for the two
-horizons with at least two cohorts. They are stamped not for citation and are not findings;
-see `docs/handover.md` for what stands between them and a definitive run.
+Short version: the inputs are frozen at the tag `input-freeze-2026-10-01` (90 reports, 78
+cohorts, 278 results), and the definitive Bayesian fits are in `results/run_ee868e185b4b/`
+at the tag `definitive-fit-2026-10-01`. An independent statistical review recomputed the
+posteriors by two other methods and asked for no rerun.
 
 Code and data for a systematic review and Bayesian meta-analysis of employment outcomes in people living with psychosis.
 
@@ -21,17 +20,37 @@ Code and data for a systematic review and Bayesian meta-analysis of employment o
 
 ## Status
 
-**Work in progress. Nothing in this repository is a finding.**
+**Definitive results exist, and they are thin.** Of 78 cohorts, 11 report the point prevalence
+of any paid employment in a whole cohort with no employment-related selection, and five of
+those report it at a landmark from cohort entry. Read every figure below with
+[`docs/handover.md`](docs/handover.md); the wording matters more than the numbers.
 
-The extraction is merged and verified at the field level, and the pipeline has produced **provisional, pre-freeze** posteriors in `results/provisional_*`, fitted from a tagged, clean commit. Every table carries `result_status` reading `PROVISIONAL, PRE-FREEZE - NOT FOR CITATION` beside `sample_status` reading `DEFINITIVE EXTRACTION IN PROGRESS - NOT FOR INFERENCE`. No pooled employment rate or moderator estimate may be quoted.
+| Horizon | Cohorts | What the data show |
+|---|---|---|
+| 12 months | 2 | 287/456 (62.9%) and 53/107 (49.5%), both from one research group in Pune. Pooled posterior median 53% (95% CrI 29 to 66), drawn below the crude 60% by the prior. |
+| 24 months | 0 | No estimate. |
+| 5 years | 0 | No estimate. Post hoc (D16): one Finnish register cohort, 552/5,297 (10.4%), which is one cohort's proportion and not a meta-analysis. |
+| 10 years or more | 3 | 35/65, 23/62 and 0/56. Pooled 23% (9 to 45). Post hoc (D15): 42% (24 to 57) without the forensic cohort. Post hoc (D16): 20% (9 to 38) with the Finnish cohort added. |
 
-Outstanding before a definitive run. Full detail in [`docs/handover.md`](docs/handover.md):
+Neither pooled figure is a prevalence for people with psychosis in general. The 12-month pool
+is two clinics in one city. The long-term pool mixes early intervention, adolescent inpatient
+and high-security forensic cohorts and has no single target population. The certainty of both
+is very low.
 
-1. **Authorship-group rulings**: eligibility of a high-security forensic cohort for the long-term horizon, and ratification of the post hoc leave-one-cohort-out analysis (D15); whether an author-supplied Finnish register series, by year from first hospitalisation, can take landmark horizons.
-2. **Risk-of-bias verification** (tier 5 of `data/extraction_provenance.csv`), needed before any risk-of-bias analysis, GRADE or interpretation.
-3. **The input freeze**: `sample_status` set to `full`, a freeze tag, and a definitive run under the guard in `R/lib_config.R`.
+What a reader should know about how the data were checked:
 
-Two decisions taken during Stage F **admit** evidence and were made after the affected results were seen. Both are recorded as such rather than presented as prospective: **D13** (the 50 per cent diagnosis rule is sufficient on its own) and **D14** (partition sums across mutually exclusive subgroups). They differ in where the evidence lands, and the difference matters: **D13 admits rows to the primary pool; D14 does not.** D14's derived rows are a period-prevalence result and two secondary-family results, so no row enters the primary pool by virtue of D14. See [`docs/methods_deviations.md`](docs/methods_deviations.md).
+- **Pool-determining fields** were verified against the source reports by one human reviewer.
+- **Risk-of-bias judgements** were checked against their sources by AI agents, not by a second
+  human. Every result in a pool is appraised; 95 results outside the pools are not. See
+  [`docs/rob_verification/README.md`](docs/rob_verification/README.md).
+- **Author requests** were sent for 80 reports. Ten were answered.
+
+Four decisions were made after the affected data or results had been seen, and each is
+recorded as such in [`docs/methods_deviations.md`](docs/methods_deviations.md). **D13** (the
+50 per cent diagnosis rule is sufficient on its own) admits rows to the primary pool. **D14**
+(partition sums across mutually exclusive subgroups) admits none. **D15** (leave-one-cohort-out)
+and **D16** (interval-aware timing for an author-supplied register series) are post hoc
+analyses that change no primary pool and replace no primary estimate.
 
 ## Authors
 
@@ -51,7 +70,7 @@ Two questions, synthesised separately and never combined. Full reasoning in [`do
 
 Four decisions shape every output:
 
-- **Only any paid employment is primary.** Competitive-only and sheltered-only results are separate subtypes and cannot substitute for an any-paid numerator.
+- **Only any paid employment is primary.** It includes paid supported and paid sheltered work. Competitive-only and sheltered-only results are separate subtypes and cannot substitute for an any-paid numerator.
 - **Education and training are retained but not counted as paid employment.** EET, education, training and unpaid vocational activity are separate registered outcome families because they measure vocational or educational participation rather than labour-market participation. At least 15 included reports use a work-or-education composite.
 - **The unit of analysis is the cohort, not the publication.** Twelve cohorts in this evidence base produced more than one report: the JUMP vocational programme appears five times and the Hong Kong EASY cohort four times. Treating reports as independent would count the same participants repeatedly and narrow every interval.
 - **A twelve-month landmark**, not each cohort's longest follow-up. One cohort's longest is 12 months and another's is 20 years, so pooling the longest available mixes horizons according to publication practice rather than design.
@@ -64,15 +83,20 @@ config/vocabularies.yml      the controlled vocabularies, read by the validator
 config/codebook.md           how to fill in the extraction tables
 config/prompts/              the versioned extraction prompts, hashed into the ledger
 data/inclusion_manifest.csv  one row per screened report, with its cohort mapping
-data/extraction_*.csv        the five linked extraction tables (PILOT ONLY so far)
-data/stage_f_shards/         the 13 Stage F shards, verified and NOT yet merged
+data/extraction_*.csv        the five linked extraction tables, merged; never edited by hand
+data/stage_f_shards/         the 13 immutable Stage F shards the merge is built from
+data/result_corrections.csv  every post-merge correction, with its authority
+data/rob_additions.csv       risk-of-bias appraisals made after the batches ran
+data/author_supplied_counts.csv  the Finnish register series, read only by the D16 sensitivity
 data/batch_ledger.csv        which model, prompt and PDF hashes produced each shard
-data/extraction_provenance.csv  the human-verification ledger. Empty
-scripts/                     idempotent migrations, the folder gate, the shard gate
+data/extraction_provenance.csv  the field-level verification ledger, 6,782 rows
+scripts/                     the merge, idempotent migrations, the folder gate, the shard gate
 R/                           libraries, numbered pipeline scripts, and the runner
-tests/testthat/              tests that encode why each rule exists
+tests/                       tests that encode why each rule exists (R and Python)
 docs/                        handover, analysis plan, deviations, QA report, reconciliation
-results/run_<id>/            tables, diagnostics and a run manifest
+results/run_ee868e185b4b/    the definitive tables, diagnostics and run manifest
+results/provisional_*/       the 23 September pre-freeze fits, kept as the record
+results/design_package/      pools and attrition at every horizon; fits nothing
 ```
 
 Source PDFs, theses and screening material are deliberately **not** in version control. Most of it is copyright and this repository is public.
@@ -90,14 +114,20 @@ cmdstanr::install_cmdstan()
 From the repository root:
 
 ```sh
+git checkout input-freeze-2026-10-01
 Rscript R/01_validate_data.R .                          # validate the extraction tables
-Rscript R/00_run_all.R                                  # full pipeline
-Rscript -e 'testthat::test_dir("tests/testthat")'       # tests
+Rscript tests/testthat.R                                # R tests
+python3 -m unittest tests/test_merge_stage_g.py         # merge tests
+DEFINITIVE_RUN=yes Rscript R/00_run_all.R               # the definitive fits
 ```
+
+The runner refuses to sample unless a mode is set, the worktree is clean and a tag points at
+`HEAD`; the modes are described in [`docs/handover.md`](docs/handover.md). With no mode set,
+`Rscript R/00_run_all.R` validates and stops before sampling.
 
 `R/01_validate_data.R` is also the self-service check for anyone doing extraction. Run it before committing data. It stops on the first violation and names the column, the row and the permitted values.
 
-The pilot run takes about 15 seconds. The **full** fit inventory, including prior grids, cross-validation and 200-replicate simulation scenarios, has not been benchmarked, and no runtime claim is made for it.
+The definitive run fits 23 models and took about three minutes on a laptop. The 200-replicate simulation study in `config/analysis.yml` has not been run and is listed there as deferred.
 
 ## Methods in brief
 

@@ -1,110 +1,108 @@
 # Handover: start here
 
-**Updated 1 October 2026** for the guarantor-requested source adjudications and request closure. See `docs/project_decisions_2026-10-01.md` for the dated answers and verification audit. The provisional fits below remain the 23 September outputs.
+**Rewritten 1 October 2026**, after the inputs were frozen, the definitive models were fitted and independently reviewed, and a manuscript was drafted. It is written for whoever picks this up next, human or model, with no other context.
 
-**Rewritten 23 September 2026**, after the author window closed, the human verification was recorded, and the first provisional Bayesian fits were run. It is written for whoever picks this up next, human or model, with no other context.
-
-Read this file, then `docs/methods_deviations.md` (D13 to D15), then `config/analysis.yml`. Everything else is detail.
+Read this file, then `docs/methods_deviations.md` (D13 to D16), then `config/analysis.yml`. Everything else is detail.
 
 ---
 
 ## Where the project is, in one paragraph
 
-This is a systematic review and Bayesian meta-analysis of the prevalence of any paid employment in people with psychosis, at landmark horizons of 12 months, 24 months, 5 years and 10 years or more (PROSPERO CRD420251008448).
-- **Extraction** is merged: 90 reports, 78 cohorts and 278 results.
-- **Human verification** covers every pool-determining field.
-- **The author window** closed on 27 August 2026, and every prespecified non-response consequence is applied.
-- **PROSPERO version 5.0** was submitted on 23 September 2026.
-
-**Provisional, pre-freeze posteriors now exist** for the two horizons that have at least two cohorts. They are stamped `PROVISIONAL, PRE-FREEZE - NOT FOR CITATION`. They are not definitive, because the gates listed below are still open.
+This is a systematic review and Bayesian meta-analysis of the prevalence of any paid employment in people with psychosis, at landmark horizons of 12 months, 24 months, 5 years and 10 years or more (PROSPERO CRD420251008448). **The analysis is final.** The author window closed on 27 August 2026 and no more data will arrive. The inputs are frozen at the tag `input-freeze-2026-10-01` (90 reports, 78 cohorts, 278 results), the definitive fits are in `results/run_ee868e185b4b/` at the tag `definitive-fit-2026-10-01`, and an independent statistical review found the computation correct and asked for no rerun. A complete manuscript draft exists but is not in this repository. What remains is for the authors: the items under "What is still open".
 
 ---
 
-## The provisional results
+## The definitive results
 
-Source: `results/provisional_8b1dfaa3e539/`, fitted from tag `provisional-fit-2026-09-23b` (commit `768ce61`) on a clean worktree.
+Source: `results/run_ee868e185b4b/`, fitted from `input-freeze-2026-10-01` (commit `50301eb`) on a clean worktree.
 - **Model:** binomial-logit random effects on cohorts, brms 2.23.0 with CmdStan 2.36.0.
 - **Priors:** intercept normal(-1.1, 0.8) and tau half-normal(0, 0.5), unchanged from the SAP.
-- **Diagnostics:** all 28 fits pass (R-hat < 1.01, ESS > 400, no divergences).
+- **Diagnostics:** all 23 posterior fits pass (worst R-hat 1.005, minimum bulk ESS 1,415, no divergences). Six fits at 12 months needed one increase of adapt_delta.
 - **Prior predictive:** passes all six prespecified criteria.
+- **Pools:** identical to the provisional fits of 23 September.
 
-| Horizon | Cohorts (D11.3) | Pooled proportion, posterior median [95% CrI] | New-cohort predictive | tau |
+| Horizon | Cohorts | Cohort results | Pooled, posterior median [95% CrI] | tau |
 |---|---|---|---|---|
-| 12 months | 2: khare2021 287/456, khare2022b 53/107 | 0.53 [0.30, 0.66] | [0.17, 0.78] | 0.43 |
-| 24 months | 0 | no estimate | | |
-| 5 years | 0 | no estimate | | |
-| 10 years or more (observed 120 to 240 months) | 3: bhullar2018 35/65, xu2020 23/62, thomson2023 0/56 | 0.23 [0.09, 0.45] | [0.02, 0.78] | 1.10 |
+| 12 months | 2 | khare2021 287/456, khare2022b 53/107 | 0.53 [0.29, 0.66] | 0.43 |
+| 24 months | 0 | | no estimate | |
+| 5 years | 0 | | no estimate | |
+| 10 years or more | 3 | bhullar2018 35/65, xu2020 23/62, thomson2023 0/56 | 0.23 [0.09, 0.45] | 1.10 |
 
-**How to read them.** This follows the independent statistical review, and the wording matters more than the numbers.
-- **12 months: two cohorts, one investigator group.** Both cohorts are from Pune, from one group, with mixed SMI samples admitted under D13. The observed proportions are 0.50 and 0.63.
-  - The pooled median sits below the raw pooled proportion (0.60). It has been shrunk toward a prior centred on 0.25: pune_private lies above the prior's 95 per cent upper bound, and 37 per cent of the posterior mass lies above the prior's 95th percentile. With k = 2 the lower limit mainly reflects the prior (weak prior: 0.57 [0.13, 0.91]).
-  - **Lead with the two cohort-level exact binomial intervals** (`tables/leave_one_cohort_out.csv`: 0.495 [0.40, 0.59] and 0.629 [0.58, 0.67]), not with the pooled figure.
-  - Admitting the unclear-selection cohort (mayoralvanson2019) moves the estimate to 0.40 [0.22, 0.58]. That shift is as large as the prior's effect and belongs in the text.
-- **10 years or more: the estimate depends on the forensic cohort.** thomson2023 is Carstairs, a high-security forensic cohort with 0 of 56 in paid work at 240 months. It halves the pooled proportion and triples tau.
-  - Without it the estimate is 0.42 [0.24, 0.57], tau 0.38.
-  - Fitted on the other two, the model predicts its 0/56 with a two-sided p of 0.001 (`diagnostics/ppc_loco.csv`).
-  - priorsense flags a prior-data conflict: 67 per cent of the posterior tau mass lies above the prior's 95th percentile.
-  - The pooled figure mixes community and forensic-detention populations and has no single population to generalise to.
-  - The leave-one-cohort-out is **post hoc** (D15, ratified on the guarantor's instruction 1 October 2026) and does not replace the primary.
-- **The predictive intervals are not headlines.** At k = 2 and 3 they are mostly the tau prior.
-- **The frequentist comparators** (`tables/frequentist_comparison.csv`) cannot identify tau at this k. The two approaches do not validate each other.
+Sensitivity and post hoc analyses (`tables/sensitivity_by_horizon.csv`, `tables/leave_one_cohort_out.csv`):
 
-The superseded first run, `results/superseded_provisional_76a8bb06ff87/` (tag `provisional-fit-2026-09-23`), is kept because it is the output that prompted D15.
+| Analysis | Status | Result |
+|---|---|---|
+| 12 months, unclear selection admitted (adds mayoralvanson2019 36/156) | Prespecified | 0.40 [0.22, 0.58], k = 3 |
+| 12 months, missing-outcome bounds | Prespecified | **Not computable.** Neither cohort reports the number alive and eligible. |
+| 10 years or more, missing-outcome bounds | Prespecified | 0.19 and 0.26. Only one of three cohorts could be bounded. |
+| 10 years or more, without thomson2023 | Post hoc, D15 | 0.42 [0.24, 0.57], tau 0.38 |
+| 5 years, interval-aware timing (hakulinen2020 year +5, 552/5,297) | Post hoc, D16 | 0.104 [0.096, 0.113], one cohort's exact interval, not a meta-analysis |
+| 10 years or more, interval-aware timing (adds year +10, 398/3,801) | Post hoc, D16 | 0.20 [0.09, 0.38], k = 4 |
 
----
+**How to read them.** This follows the two independent statistical reviews (23 September and 1 October). The wording matters more than the numbers.
+- **Quote posterior estimates to two decimals.** Independent recomputation agrees on every pooled median within 0.001, but interval limits differ in the third decimal, which is Monte Carlo error.
+- **12 months is two clinics in one city.** Both cohorts are from one research group in Pune, with mixed SMI samples admitted under D13, recruited from people already attending outpatient services. "12 months" is time since enrolment.
+  - **Lead with the two cohort-level exact intervals** (0.495 [0.40, 0.59] and 0.629 [0.58, 0.67]), not the pooled figure.
+  - The pooled median sits below the crude 0.60 because the prior is centred on 0.25. Its lower limit is below both cohorts' own lower limits. tau is its prior. The weak prior gives 0.57 [0.13, 0.91].
+  - The missing-outcome rows in the output are identical to the primary because no cohort could be bounded. That is not robustness: 17 and 29 per cent of entrants were not observed.
+- **10 years or more depends on the forensic cohort.** thomson2023 is Carstairs, recruited in high-security care, with 0 of 56 in paid work at 240 months. It was retained under the population rule as written (guarantor's ruling, 1 October).
+  - Give the pooled figure and the figure without it in adjacent sentences. Do not describe the exclusion as a correction.
+  - The model fitted to the other two predicts its 0/56 with a two-sided p of 0.001.
+  - The tau prior restrains heterogeneity: 67 per cent of posterior tau mass lies above the prior's 95th percentile, and the weak prior gives [0.005, 0.83].
+  - The pooled figure mixes early intervention, adolescent inpatient and forensic cohorts and has no single target population.
+- **D15 and D16 are post hoc**, made after pooled results were seen, and replace nothing. Say so every time either appears.
+  - D16's counts were seen before its rule was written and were not human-verified.
+  - The 5-year figure is one cohort's proportion. Never call it a meta-analysis.
+  - The four-cohort figure is an average over cohorts, not participants. It does not corroborate the three-cohort primary.
+  - The rule can admit annual register data only at the two wide, late bands. The year it could not admit at 12 months, +1, is 720/6,546 (11 per cent), far below the 12-month pool. Show the whole Finnish series.
+- **New-cohort predictive intervals and the frequentist comparators belong in a supplement.** At this k the first are mostly the tau prior, and the second cannot identify tau and validate nothing.
+- **Certainty is very low at both horizons**, with no route to anything higher.
 
-## What changed on 23 September 2026 (commits `c83d9ff` to the handover commit)
-
-1. **The final extraction sheet** (`dissertation_shared_folder/230926/extraction_outcomes_final.xlsx`) was ingested through `data/result_corrections.csv`, a new ledger that the merge applies after D14 under the three-state rule. It is not edited in by hand. The ledger has 58 rows.
-   - The sheet was built from the 13 August commit, so it reverted the 18 August twumasi2026 block. That revert is rejected.
-   - Every other departure from the sheet has its reason in the ledger: `resolved` rather than `none` for author-confirmed conflicts, thomson2023 recorded as 0/56 among the living, `chang2016` FES left unresolved, and vocabulary repairs.
-2. **The merge is rerunnable again.** A dual-cohort note suffix is no longer read as a third value. Two runs produce byte-identical tables.
-3. **The author window is closed** (`docs/data_requests.md`, closure section).
-   - 7 reports replied and 8 did not.
-   - andersen2024 is recoded `unclear` under its prespecified consequence, on every `paid_any` row, 9 months included, and leaves the pool.
-   - mayoralvanson2019 stays out.
-   - The Khare rows stay, with caveats.
-4. **Human verification is recorded** in `data/extraction_provenance.csv`.
-   - The checker is P. Bagri, a review co-author and the MSc reviewer, who is a non-author of every included report. It was a single-reviewer check against the PDFs, before 11 September 2026.
-   - Tiers 0 to 2 are complete at 100 per cent: 5,264 agree, 10 corrected, 7 superseded by governance and 1 disagree.
-   - Tier 5 (risk of bias) is at 0 per cent.
-5. **PROSPERO v5.0** was submitted on 23 September 2026. The Pune pair is adjudicated as distinct cohorts.
-6. **The model pipeline** now does the following:
-   - fits every horizon under D11.3, counted in distinct cohorts;
-   - fits both sensitivity pools, the prior grid, the weak prior, priorsense, the missing-outcome bounds and post hoc leave-one-cohort-out;
-   - uses two-sided posterior predictive p-values and a left-out-cohort predictive check.
-   - The guard has four modes (below). Tests: 186 pass, 0 fail, 0 skip.
+The provisional outputs are kept as the record: `results/provisional_8b1dfaa3e539/` (tag `provisional-fit-2026-09-23b`) and `results/superseded_provisional_76a8bb06ff87/`, the run that prompted D15.
 
 ---
 
-## Gates: what is closed and what is open
+## What changed on 1 October 2026
 
-| Phase 5 gate | State |
-|---|---|
-| PROSPERO v5.0 submitted | **Closed**: 23 September 2026. The returned version number is still to be recorded in `docs/methods_deviations.md`. |
-| Author window closed, replies applied | **Closed** for every report the sheet or the guarantor names. **Closed 1 October 2026:** the guarantor confirmed the remaining 65 requests were sent. The contact workbook records three additional replies: final statuses are 10 `responded`, 70 `no_response`; eight send dates were recovered. No current pool depends on them. |
-| Every pool-determining field human-verified | **Closed** (tiers 0 to 2). It was single-reviewer; say so in the paper. |
-| Overlap audit adjudicated | Pune pair **closed**. The others are open, and none of them touches a current pool. |
-| Merged tables validate, `git diff --check`, clean tree | **Closed** at `provisional-fit-2026-09-23b`. |
-| Model inventory implemented or formally deferred | **Closed**: deferrals with their reasons are in `config/analysis.yml` (`deferred_with_reason`). |
-| Tier 5 risk of bias verified | **Open**, 0 of 1,491. The MSc appraisal assigned tools on different rules (RoB 2 on proportions from trials), so it is not the same check. This is needed before RoB analyses, GRADE or interpretation, but not before the intercept fit. |
-| `sample_status: full` and the freeze tag | **Open.** Set it when the questions below are settled. |
+1. **The guarantor's five rulings** are in `docs/project_decisions_2026-10-01.md`: thomson2023 retained and D15 ratified; the Finnish series staged; mayoralvanson2019 on 156 observed with 157 as the reporting base; all 65 remaining requests recorded as sent (10 responded, 70 did not); risk of bias checked by AI.
+2. **D16** was adopted as a post hoc sensitivity. The code is `interval_aware_rows()` and `interval_aware_data()` in `R/lib_data.R`; it substitutes an admitted observation into its cohort's extracted row and runs `build_primary_pool()`. `data/author_supplied_counts.csv` is a hashed input read only by this analysis.
+3. **Risk of bias.** All 1,491 existing judgements were checked against sources by AI, with 187 corrected. The one pooled result with no appraisal (thomson2023) was appraised and independently checked. The table holds 1,500 rows. The audit is in `docs/rob_verification/`.
+4. **`data/rob_additions.csv`** is a new merge input, for appraisal rows added after the batches ran. The corrections ledger can change a field but cannot add a row.
+5. **`outcome_construct`** is no longer configured as a moderator, which contradicted SAP 9.2.
+6. **The inputs were frozen**, `sample_status` set to `full`, and the definitive run made.
+7. **Tests:** 204 R expectations and 11 merge tests pass, none skipped.
 
 ---
 
-## Open questions for the authorship group (decide before definitive)
+## What is still open
 
-1. **Is a high-security forensic cohort eligible for a prevalence of paid work?** thomson2023 passes every written gate. Whether detained patients belong in this estimand is an eligibility question, not a sensitivity one. The prespecified primary keeps it. D15 was ratified on the guarantor's instruction on 1 October 2026. The cohort was recruited in high-security care but was not wholly detained at follow-up. Retain it under the current broad population rule; a community-only restriction would need a separate amendment. Any such rule would be post hoc and must be labelled so.
-2. **The hakulinen2020 author series.** The author supplied employment counts by year relative to first hospitalisation (−10 to +10, for example year 0 968/6,939 and year +10 398/3,801). The extraction sheet calls them "barred by calendar_end_common". If first hospitalisation is cohort entry, years +1, +2, +5 and +10 are landmark data from about 7,000 people, and would populate the empty 24-month and 5-year horizons. The 1 October source ruling is in `docs/project_decisions_2026-10-01.md`: calendar-year alignment is not an exact anniversary; +1 and +2 cross the current bands. `Authors Contacted.xlsx` supplies all 21 schizophrenia counts, now staged in `data/author_supplied_counts.csv`: +1 720/6546, +2 660/6208, +5 552/5297 and +10 398/3801. +5/+10 are candidates for an explicit interval-aware rule, not admitted rows. No landmark admission has been implemented. It is the largest potential change to any pool.
-3. **mayoralvanson2019's denominator: 156 or 157.** The MSc extraction disagrees with ours. Resolved against Table 3 on 1 October 2026: 156 recorded employment categories, 157 recruited/reporting base. Both baseline and follow-up partitions sum to 156; do not assume the reported suicide explains the missing status. Selection remains unclear.
-4. **The 65 `drafted` requests.** Confirmed sent by the guarantor on 1 October 2026. The contact workbook confirms replies for three; the other 62 carry `no_response` under the closed-window rule. Eight actual send dates are recorded; other dates remain blank.
-5. **The standing questions from Stage F**, still open:
-   - which instrument appraises a single-arm proportion from a trial;
-   - risk of bias for `component_only` fragments;
-   - D12.8 dispersion;
-   - duration thresholds;
-   - vocabulary gaps (FIML, duration outcome, a Southeast Asia region).
-6. **`outcome_construct` is still configured as a confirmatory moderator**, contrary to SAP 9.2. It is moot below 10 cohorts, but fix it before any moderator is reported.
+None of these blocks the analysis. Each is for the authorship group.
+
+**For the manuscript** (the draft lists each as `[TO CONFIRM]`):
+1. Funding statement, ethics statement, contributor roles, declarations of interests, and how the guarantor's own included report (`twumasi2026`, in no pool) was handled.
+2. The PROSPERO version numbers as returned for the two 2026 amendments, to be recorded in `docs/methods_deviations.md` as well.
+3. The full search strings, the screening tool and the number of screeners. None is in this repository.
+4. The certainty-of-evidence ratings, which were drafted from the analysis and have not been made by the review team.
+5. Whether D15, D16 and the AI checking of risk of bias need a further registry amendment. D16 and the AI checking are not registered.
+
+**Scientific loose ends, stated in the draft as limitations:**
+6. **The Pune cohorts' number alive and eligible.** If it can be recovered from khare2021 and khare2022b, the 12-month missing-outcome bounds become computable. That would be a data change after the freeze and needs a new freeze tag and run.
+7. **thomson2023's denominator.** The paper's Table 1 gives 66 consenting participants; the 56 used here is from the author's reply, and the correspondence is not in the project. The paper also reports 8 of 72 in "supported work style placement" with remuneration not stated, so they are not counted as paid work.
+8. **The ayesaarriola2020 reply** (60 or 65 of 197 employed, at 8 to 16 years) is not a landmark result and has not been re-extracted into the tables.
+9. **95 results outside every pool have no risk-of-bias appraisal**, and 410 RoB 2 and ROBINS-I rows have no signalling-question record. Neither is used in any synthesis here.
+10. **Three overlap pairs** in `docs/overlap_audit_queue.md` are unadjudicated. None touches a pool.
+11. **Small data inconsistencies** that touch no pool: `leighton2019b` has `eligibility_status` reading `include (unchanged)`; `hansen2024b` is labelled differently in the manifest and the reports table; `drake2015` has a publication year before the search window; D10.1 still quotes superseded disposition counts.
+12. **The standing Stage F questions**: which instrument appraises a single-arm proportion from a trial; risk of bias for `component_only` fragments; D12.8 dispersion; duration thresholds; vocabulary gaps.
+
+---
+
+## The manuscript
+
+A complete draft for *The Lancet Psychiatry* exists in `manuscript/`, which is gitignored and never committed: an unpublished paper does not belong in a public repository.
+
+- **Every result number is generated.** `manuscript/build/build.R results/run_ee868e185b4b` writes `numbers.csv`, the tables and the figures from the definitive tables. The section files carry `{{keys}}`, and `manuscript/build/assemble.py` refuses to build if a key is missing, then renders `manuscript.docx` and `supplement.docx` with pandoc.
+- **`manuscript/OUTSTANDING.md`** lists everything an author must supply or confirm.
+- The MSc dissertation (September 2026) did a narrative synthesis without pooling, and counts results the SAP bars. Do not quote its counts as the review's.
 
 ---
 
@@ -116,12 +114,17 @@ The interpreters are `/opt/anaconda3/bin/python3` and `Rscript` (R 4.4.2).
 /opt/anaconda3/bin/python3 scripts/merge_stage_g.py          # rebuild merged tables (idempotent; --check to dry-run)
 PROVENANCE_SOURCE_VERSION=<label> /opt/anaconda3/bin/python3 scripts/build_provenance.py
 Rscript R/01_validate_data.R .                                # schema and vocabulary
-Rscript tests/testthat.R                                      # 186 pass
+Rscript tests/testthat.R                                      # 204 pass
+/opt/anaconda3/bin/python3 -m unittest tests/test_merge_stage_g.py   # 11 pass
 /opt/anaconda3/bin/python3 scripts/check_shard.py; /opt/anaconda3/bin/python3 scripts/check_folder.py
 Rscript R/04_design_package.R                                 # pools and attrition, no sampling
 ```
 
-**To make a correction:** add a row to `data/result_corrections.csv` giving table, key, field, old, new, authority, reason, source, date and actor. Then rerun the merge. Never edit a merged table by hand, because the next merge silently undoes it.
+**To reproduce the definitive results:** check out `input-freeze-2026-10-01` and run `DEFINITIVE_RUN=yes Rscript R/00_run_all.R`. The analysis identifier hashes the commit, the configuration and the inputs, so it will be `ee868e185b4b` again.
+
+**To make a correction:** add a row to `data/result_corrections.csv` giving table, key, field, old, new, authority, reason, source, date and actor. Then rerun the merge. Never edit a merged table by hand, because the next merge silently undoes it. The ledger holds one row per table, key and field; a later ruling on the same field replaces the row, and the earlier text stays in git. To add a risk-of-bias row, add it to `data/rob_additions.csv`.
+
+**Any change to an input, the configuration or the code after the freeze needs a new freeze:** commit, create a new tag, run. The order is always commit, then tag, then run. The run directory is named by the new identifier, so the current results are never overwritten.
 
 **Fit modes** (`R/lib_config.R`). Exactly one mode variable may be set; two are refused.
 
@@ -132,14 +135,6 @@ Rscript R/04_design_package.R                                 # pools and attrit
 | provisional | `PROVISIONAL_FIT=pre-freeze Rscript R/00_run_all.R` | clean tree and a tag at HEAD | `results/provisional_<aid>/` |
 | definitive | `DEFINITIVE_RUN=yes Rscript R/00_run_all.R` | `sample_status: full`, clean tree and a tag at HEAD | `results/run_<aid>/` |
 
-**To promote to definitive:**
-1. Settle the open questions above and verify tier 5.
-2. Set `sample_status: "full"` in `config/analysis.yml`.
-3. Commit, create the input-freeze tag, and run with `DEFINITIVE_RUN=yes`.
-4. Have the output statistically reviewed.
-
-The order is always: commit, then tag, then run.
-
 ---
 
 ## Rules that are easy to get wrong
@@ -147,13 +142,15 @@ The order is always: commit, then tag, then run.
 These rules each cost real rework already.
 
 1. **`keep()` in `build_primary_pool` counts `NA` as removed.** Every clause is guarded by `need_cols()`.
-2. **`paid_any` means any paid work.** Sheltered and benefit-remunerated placements are not paid work (SAP 3.1).
+2. **`paid_any` means any current work for wages or salary, and it includes paid supported and paid sheltered work** (SAP 3.1). It excludes education, unpaid training, volunteering, benefits, and any activity whose remuneration cannot be established. A competitive-only or sheltered-only count cannot stand in for it. An earlier version of this file said sheltered placements are not paid work; that was wrong, and the SAP, the codebook and the vocabulary are the authority.
 3. **A reporting base is not an observed denominator**, and a count is never back-calculated from a percentage.
 4. **`conflict_status = unresolved` blocks a result from every synthesis.** `resolved` requires an authority: an author reply or an authorship-group ruling.
-5. **Only time from cohort entry can take a landmark horizon.** `since_onset_mean`, `chronological_age`, `calendar_end_common` and `since_baseline_mean` are all barred.
+5. **Only time from cohort entry can take a landmark horizon.** `since_onset_mean`, `chronological_age`, `calendar_end_common` and `since_baseline_mean` are all barred. D16 is the one, post hoc, labelled exception, and it applies in a sensitivity pool only.
 6. **D11.3 counts distinct cohorts, not rows.**
-7. **A prespecified consequence is applied as written**, including to every row it logically covers. If only andersen2024's 12-month row had been recoded, its 9-month row would have entered the 12-month band.
+7. **A prespecified consequence is applied as written**, including to every row it logically covers.
 8. **The report universe is 90 and it is frozen.** The search closed on 9 June 2026.
+9. **A sensitivity row identical to the primary is not corroboration.** Check why it is identical before describing it.
+10. **Tests of the guard must not read the repository's own status.** They build their own unfinished and full configurations.
 
 ---
 
@@ -163,31 +160,35 @@ These rules each cost real rework already.
 |---|---|
 | `data/extraction_*.csv`, `data/inclusion_manifest.csv`, `data/report_cohort_map.csv` | The merged tables. Output of the merge; never edit them by hand. |
 | `data/result_corrections.csv` | The post-merge corrections ledger, with the authority for every change |
+| `data/rob_additions.csv` | Risk-of-bias rows added after the batches ran |
+| `data/author_supplied_counts.csv` | The Finnish register series; read only by the D16 sensitivity |
+| `data/author_response_reconciliation.csv` | De-identified summaries of the author replies in the contact workbook |
 | `data/stage_g_reconciliation.csv` | Overrides for shard manifest change rows only |
 | `data/extraction_provenance.csv` | Field-level verification ledger, completion by tier |
 | `data/stage_f_shards/` | The immutable Stage F output |
-| `results/provisional_8b1dfaa3e539/` | The current provisional fit |
+| `results/run_ee868e185b4b/` | **The definitive fit** |
+| `results/provisional_8b1dfaa3e539/` | The 23 September provisional fit, kept as the record |
 | `results/design_package/` | Design-only pools and attrition |
-| `docs/methods_deviations.md` | D1 to D15. D13, D14 and D15 were made after the affected results were seen. |
+| `docs/methods_deviations.md` | D1 to D16. D13 to D16 were made after the affected data or results were seen. |
+| `docs/project_decisions_2026-10-01.md` | The guarantor's five rulings and the validation of that record |
+| `docs/rob_verification/` | The risk-of-bias audit |
 | `docs/data_requests.md` | Requests, prespecified consequences, window closure |
 | `docs/overlap_audit_queue.md` | Overlap adjudications |
 | `docs/prospero_amendment_draft.md` | The text submitted as v5.0 |
 | `config/analysis.yml` | Gates, horizons, priors, the sparse-data rule, sensitivities, deferrals |
-| `dissertation_shared_folder/230926/` | The MSc dissertation and the final sheet (gitignored, never commit) |
-
-The MSc dissertation (September 2026) did a narrative synthesis without pooling. Its landmark tables differ from this pipeline's pools in known and explained ways: it counts percentage-only, calendar-end, unresolved-conflict and period-like results that the SAP bars. Do not quote its counts as the review's.
+| `manuscript/` | The draft paper and its build (gitignored, never commit) |
+| `dissertation_shared_folder/` | The MSc dissertation, the final sheet and the source PDFs (gitignored, never commit) |
 
 ---
 
 ## Commit cadence, tags and privacy
 
-Commit per milestone, and push at least daily during active work. Commits are authored as `ricardotwumasi` with no assistant trailer.
+Commit per milestone. Commits are authored as `ricardotwumasi` with no assistant trailer.
 
-Tags pin immutable states, and the record is always committed before its tag. The tags so far:
+Tags pin immutable states, and the record is always committed before its tag:
 - `stage-g-merge`
-- `provisional-fit-2026-09-23` (superseded)
-- `provisional-fit-2026-09-23b`
+- `provisional-fit-2026-09-23` (superseded) and `provisional-fit-2026-09-23b`
+- `input-freeze-2026-10-01`: the frozen inputs, code and configuration
+- `definitive-fit-2026-10-01`: the definitive results
 
-The input-freeze tag is still to come.
-
-Privacy scanning is per commit. Scan the staged index for email addresses (only the corresponding address in the README is permitted) and for any PDF, docx, xlsx, `private/` record, `CLAUDE.md` or internal memo. Before any push, audit every blob in `origin/main..HEAD`. Use non-force pushes and explicit staging only.
+Privacy scanning is per commit. Scan the staged index for email addresses (only the corresponding address in the README is permitted), for local absolute paths, and for any PDF, docx, xlsx, `private/` record, `manuscript/` file, `CLAUDE.md` or internal memo. Before any push, audit every blob in `origin/main..HEAD`. Use non-force pushes and explicit staging only. Recipient names, addresses and correspondence never go in the repository; de-identified summaries of what authors supplied do.
