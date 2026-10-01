@@ -4,14 +4,13 @@ The registered protocol commits to this: "Authors will be asked to provide any r
 not available in published reports." This file is the send-ready set of those requests,
 rewritten from the Stage F shards on 13 August 2026.
 
-**Status: window closed 27 August 2026 (23:59 UK time); closure recorded 23 September 2026.**
+**Status: window closed 27 August 2026 (23:59 UK time); closure recorded 23 September 2026, completed for the remaining 65 requests on 1 October 2026.**
 The drafts below are kept as written. What happened to them is recorded in the closure section
-that follows and, per report, in `data_request_status` in `data/inclusion_manifest.csv`. Sent
-and response dates were not recorded by the team and are left blank rather than reconstructed.
+that follows and, per report, in `data_request_status` in `data/inclusion_manifest.csv`. The original closure lacked sent and response dates. On 1 October 2026, eight send dates were recovered from `Authors Contacted.xlsx`; remaining send dates and unavailable response dates are left blank rather than reconstructed.
 
 ## Closure of the author window (recorded 23 September 2026)
 
-Recorded from two sources only: the guarantor's confirmation on 23 September 2026 that the four
+The original 23 September closure was recorded from two sources: the guarantor's confirmation on 23 September 2026 that the four
 primary-critical requests were sent and drew no reply, and the reply annotations in the final
 extraction sheet (`dissertation_shared_folder/230926/extraction_outcomes_final.xlsx`, not in the
 repository). Every value change follows from `data/result_corrections.csv`, which names the
@@ -19,13 +18,15 @@ authority for each row; no merged table was edited by hand.
 
 | Status | Reports | What changed |
 |---|---|---|
-| **Replied** | `chang2016`, `hakulinen2020`, `hui2026`, `maguire2021`, `majuri2021`, `tarricone2017`, `thomson2023` | `maguire2021` (46.8 per cent confirmed) and `chang2016` FEMP (construct includes study) are `resolved` on author authority. `chang2016` FES stays `unresolved`: the construct is confirmed but the 370 against 374 denominator conflict persists. `hui2026` gains 158/219 from author-corrected counts; its construct stays `unclear`. `thomson2023` gains the author's 72 (56 consented + 16 deceased); the paid-work row is recorded 0/56 among the living. `hakulinen2020` supplied an employment series by year relative to first hospitalisation, held in the row notes and **not** yet admitted to any horizon (see `docs/handover.md`, open questions). `majuri2021` and `tarricone2017` clarifications are annotations only. |
+| **Replied** | `chang2016`, `hakulinen2020`, `hui2026`, `maguire2021`, `majuri2021`, `tarricone2017`, `thomson2023` | `maguire2021` (46.8 per cent confirmed) and `chang2016` FEMP (construct includes study) are `resolved` on author authority. `chang2016` FES stays `unresolved`: the construct is confirmed but the 370 against 374 denominator conflict persists. `hui2026` gains 158/219 from author-corrected counts; its construct stays `unclear`. `thomson2023` gains the author's 72 (56 consented + 16 deceased); the paid-work row is recorded 0/56 among the living. `hakulinen2020` supplied an employment series by year relative to first hospitalisation, staged in `data/author_supplied_counts.csv`. It enters **no primary pool**; years +5 and +10 enter the post hoc interval-aware sensitivity only (`docs/methods_deviations.md`, D16). `majuri2021` and `tarricone2017` clarifications are annotations only. |
 | **No reply** | `andersen2024`, `khare2021`, `khare2022b`, `mayoralvanson2019` (the primary-critical group), `hansen2024`, `benson2022`, `strassnig2017`, `strassnig2018` | The prespecified consequences below are applied exactly as written on 13 August 2026. `andersen2024`: every `paid_any` row built on the NEET item is recoded `unclear` (9-month rows included, or the 9-month row would enter the twelve-month band) and the study leaves the primary pool. `mayoralvanson2019`: stays out, admitted to the named sensitivity analysis only. `khare2021`, `khare2022b`: retained with the caveats stated. `hansen2024`, `strassnig2017` and `strassnig2018` keep their blocks. |
-| **Not recorded** | every other report whose status is still `drafted` in the manifest, and the internal query `REQ-twumasi2026-3` | The team has not confirmed whether these were sent. **Open item for the guarantor.** If they were sent, each becomes `no_response` and the report keeps its extracted state; nothing in any current pool depends on them. `twumasi2026` contributes no primary result either way, under its prespecified consequence. |
+| **Remaining requests sent, confirmation recorded 1 October 2026** | The 65 reports formerly recorded `drafted`, including the internal query for `twumasi2026` | The guarantor confirmed all 65 were sent. The contact workbook subsequently supplied on 1 October records replies for `ayesaarriola2020`, `moncrieff2025` and `solmi2022`; those are `responded` and the other 62 are `no_response` under the closed-window rule. Actual send dates are recorded only when supplied. Confirmation date is not a send date. |
+
+**1 October 2026 update.** The guarantor confirmed the remaining 65 requests were sent and identified `Authors Contacted.xlsx`. Sheet1 documents seven replies and one non-response across eight reports. Four replies were already recorded in the final-extraction annotations; three additional replies, Ayesa-Arriola, Moncrieff and Solmi, now supersede the provisional non-response bookkeeping. The union of both source records is **10 responded, 70 no_response, 8 not_requested and 8 blank dispositions on excluded/off-screening records**. Replies without numerical data remain `responded`, with unresolved data needs stated separately. Eight actual send dates from column E have been recorded, but no response date is inferred. The complete Finnish schizophrenia series has been preserved in `data/author_supplied_counts.csv`; Ayesa-Arriola's category counts and the other reply summaries are in `data/author_response_reconciliation.csv`. Timing and construct barriers remain independent of count availability. The correction ledger records all metadata updates. The source workbook remains unchanged and gitignored.
 
 The MSc dissertation (September 2026, p. 14) reports that the authors of eight reports
 were contacted, with four supplying data, two promising data not received by the cut-off and
-two not replying. That count does not match the table above, which records seven replies. The
+two not replying. That count does not match the table above, which recorded seven replies on 23 September and ten after the 1 October reconciliation. The
 table follows the extraction sheet, which is the more specific record; the difference is
 noted rather than resolved.
 
@@ -53,7 +54,7 @@ frozen primary inputs. The freeze exists so that the primary estimate cannot be 
 the light of what arrives after it; a reply that would change a primary input, arriving after
 closure, is a finding about the review's timing and is reported as one.
 
-**This policy is the default and is awaiting the user's confirmation.** It is written down
+**This policy is the default and was not amended before the window closed.** It is written down
 before the drafts leave so that the rule is not chosen once the content of the late reply is
 known.
 
@@ -236,6 +237,8 @@ Every draft below uses this body. The itemised requests for that group are inser
 ---
 
 # 3. The remaining drafts
+
+**Status at 1 October 2026:** every request in this section was sent, and the window is closed. The outcome of each is in the table at the top of this file. The text below is kept as the record of what was asked.
 
 Grouped by corresponding author or research group. Where one group has several reports, they
 are merged into a single email rather than sent separately.
@@ -1279,7 +1282,9 @@ Request state lives in `data/inclusion_manifest.csv`, in three fields and nowher
 
 **Dates are event metadata, recorded when the team confirms the event.** This file never
 asserts that a message was sent; it says what was drafted. The status of every report is
-`drafted` or `not_requested` until someone confirms otherwise.
+`drafted` or `not_requested` until someone confirms otherwise. That confirmation was given on
+1 October 2026: no report is `drafted` any longer, and the manifest carries 10 `responded`,
+70 `no_response` and 8 `not_requested`.
 
 At closure on 27 August every request identifier must resolve to a response, a non-response or
 a withdrawal, with no identifier left open. A report whose authors decline or do not reply

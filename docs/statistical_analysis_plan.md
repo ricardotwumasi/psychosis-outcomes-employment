@@ -5,6 +5,8 @@
 **Version:** 0.2, 11 August 2026
 **Status:** RATIFIED by the authorship group on 12 August 2026. The employment-selection rule and outcome hierarchy were incorporated at the guarantor's request on 11 August 2026 and ratified with the rest of the document. The corresponding PROSPERO amendment was submitted as version 4.0 on 12 August 2026; version 5.0, carrying the decisions taken during Stage F, is prepared and awaits the guarantor's submission. Definitive extraction has been completed under this plan; **definitive outcome-conditioned fitting remains barred** until the Phase 5 input freeze conditions hold, which include confirmed submission of version 5.0.
 
+**Status note, 1 October 2026.** The plan above is unchanged and is kept as ratified. Since it was written: PROSPERO version 5.0 was submitted on 23 September 2026; the author-response window closed on 27 August 2026; and the inputs were frozen on 1 October 2026 (tag `input-freeze-2026-10-01`), the state from which the definitive models are fitted. Two analyses were added after pooled results had been seen and are labelled post hoc wherever they appear: leave-one-cohort-out (D15) and interval-aware timing (D16), both in `methods_deviations.md`. Neither replaces a prespecified estimate.
+
 Versions 0.1 and deviations D1 to D8 were written before any pooled real-data estimate was examined. The purposive 15-report engineering pilot subsequently produced an unreportable pooled estimate under the superseded design-based rule. The revised population rule in this version is therefore labelled **post-pilot, before definitive extraction and synthesis** in `methods_deviations.md`. The pilot remains non-inferential and its result must not be used to justify an inclusion decision or quoted as a review finding.
 
 ---
@@ -373,6 +375,8 @@ The employment-selection rule in section 2.1 and the outcome hierarchy in sectio
 3. The switch to the JBI prevalence checklist for the primary estimand (section 8).
 4. The confirmatory moderator set (section 9.2).
 5. Whether a directional threshold for the pooled proportion has a policy rationale worth stating (section 10.6).
+
+**Status note, 1 October 2026.** This section is kept as written on 11 August. The document, including items 1 to 4, was ratified on 12 August 2026 (see Status, above). On item 5, no directional threshold was adopted: `reporting.directional_thresholds` in `config/analysis.yml` is empty, so none is reported.
 
 ---
 

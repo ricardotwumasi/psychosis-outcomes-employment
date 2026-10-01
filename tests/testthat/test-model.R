@@ -9,7 +9,10 @@ source(file.path(PROJ, "R", "lib_synthetic.R"))
 source(file.path(PROJ, "R", "03_fit_prevalence.R"))
 source(file.path(PROJ, "R", "06_frequentist_compare.R"))
 
-cfg <- test_cfg()
+# The guard is tested against an explicitly unfinished configuration and an
+# explicitly full one, never against whatever config/analysis.yml says today:
+# the repository's own status changed at the input freeze and the gates did not.
+cfg <- within(test_cfg(), sample_status <- "DEFINITIVE EXTRACTION IN PROGRESS - NOT FOR INFERENCE")
 full_cfg <- within(cfg, sample_status <- "full")
 no_mode <- c(ENGINEERING_FIT = "", PROVISIONAL_FIT = "", DEFINITIVE_RUN = "",
              SYNTHETIC_DATA = "")

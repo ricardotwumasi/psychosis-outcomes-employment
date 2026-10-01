@@ -121,8 +121,17 @@ RESULT_CORRECTIONS = "data/result_corrections.csv"
 CORRECTABLE = {
     "extraction_outcomes": "result_id",
     "extraction_cohorts": "cohort_id",
+    "extraction_rob": "rob_assessment_id",
     "inclusion_manifest": "report_id",
 }
+
+# Risk-of-bias appraisals made after the batches ran, for results the shards
+# left unappraised. The ledger above corrects a field of an existing row and
+# cannot add one, and a row typed into the merged table would have no recorded
+# origin. Each row here is a whole appraisal row in the columns of
+# extraction_rob.csv. They are rebuilt from this file on every run, before the
+# corrections ledger, exactly as shard rows are.
+ROB_ADDITIONS = "data/rob_additions.csv"
 
 # --- D14 completion -----------------------------------------------------------
 #
@@ -283,6 +292,19 @@ def apply_manifest_changes(manifest, changes, faults, log):
     by_id = {r["report_id"]: r for r in manifest}
     applied = noop = 0
 
+    # A durable post-merge correction may supersede a shard's new value.
+    # Accept only the exact, authorised chain shard.new -> correction.new;
+    # arbitrary third values still fail. The correction pass validates the
+    # complete ledger before anything is written.
+    corrected = {}
+    if os.path.exists(RESULT_CORRECTIONS):
+        _, corrections = read(RESULT_CORRECTIONS)
+        counts = Counter((r["table"], r["key"], r["field"]) for r in corrections)
+        corrected = {(r["key"], r["field"]): r for r in corrections
+                     if r["table"] == "inclusion_manifest"
+                     and counts[(r["table"], r["key"], r["field"])] == 1
+                     and r.get("authority", "").strip()}
+
     # The report_id rename must run first: later change rows for the same
     # report are keyed on the new identifier.
     ordered = ([c for c in changes if c["field"] == "report_id"] +
@@ -329,6 +351,12 @@ def apply_manifest_changes(manifest, changes, faults, log):
         if cur == new:
             noop += 1
             log.append("noop    %s %-22s %-22s already %r" % (c["_batch"], rid, field, new))
+        elif ((rid, field) in corrected
+              and corrected[(rid, field)]["old"] == new
+              and corrected[(rid, field)]["new"] == cur):
+            noop += 1
+            log.append("noop    %s %-22s %-22s superseded by authorised correction"
+                       % (c["_batch"], rid, field))
         elif cur == old:
             row[field] = new
             if field == "report_id":
@@ -453,6 +481,36 @@ def apply_d14(outcomes, faults, log):
                    % (rid, row["n_employed"], row["n_outcome_observed"], len(comps)))
 
 
+def apply_rob_additions(fields, rob, outcomes, shard_keys, faults, log):
+    """Rebuild the post-batch appraisal rows from their input file.
+
+    Idempotent: rows carrying an addition's key are dropped and re-appended, so
+    a rerun leaves one copy. An addition may not reuse a shard's key or name a
+    result that does not exist.
+    """
+    if not os.path.exists(ROB_ADDITIONS):
+        return rob, 0
+    add_fields, rows = read(ROB_ADDITIONS)
+    if add_fields != fields:
+        faults.append("rob_additions: columns differ from extraction_rob.csv")
+        return rob, 0
+    results = {r["result_id"] for r in outcomes}
+    seen = Counter(r["rob_assessment_id"] for r in rows)
+    for r in rows:
+        key = r["rob_assessment_id"]
+        if seen[key] > 1:
+            faults.append("rob_additions: %s appears %d times" % (key, seen[key]))
+        if key in shard_keys:
+            faults.append("rob_additions: %s is already a shard row; correct it "
+                          "through the ledger instead" % key)
+        if r["result_id"] not in results:
+            faults.append("rob_additions: %s names result %r, absent from the "
+                          "merged outcomes" % (key, r["result_id"]))
+    rob = [r for r in rob if r["rob_assessment_id"] not in seen] + rows
+    log.append("robadd  %d appraisal row(s) from %s" % (len(rows), ROB_ADDITIONS))
+    return rob, len(rows)
+
+
 def apply_result_corrections(tables, faults, log):
     """Apply the post-merge corrections ledger to the merged tables in place."""
     if not os.path.exists(RESULT_CORRECTIONS):
@@ -548,6 +606,14 @@ def main(argv):
     else:
         print("  asserted: %d pilot + %d shard + %d new D14 = %d"
               % (n_pilot, n_shard, n_new, n_out))
+
+    rob_fields, rob = results["extraction_rob"]
+    rob, n_added = apply_rob_additions(
+        rob_fields, rob, results["extraction_outcomes"][1],
+        {r["rob_assessment_id"] for _, r in load_shard_table("extraction_rob")},
+        faults, log)
+    results["extraction_rob"] = (rob_fields, rob)
+    print("post-batch appraisal rows: %d" % n_added)
 
     tables = dict(results)
     tables["inclusion_manifest"] = (man_fields, manifest)

@@ -37,6 +37,11 @@ inputs:
   # hashes of both the source PDFs and the produced shard. Frozen once a batch
   # is marked complete, so a row can be traced to the exact inputs that made it.
   batch_ledger: {path: data/batch_ledger.csv, required: false}
+  # Counts an author supplied that are timed by an interval of elapsed follow-up
+  # rather than one scalar. Read ONLY by the post hoc interval-aware sensitivity
+  # (D16); no primary pool sees it. Listed here so it is hashed into the
+  # analysis identifier like every other input.
+  author_supplied: {path: data/author_supplied_counts.csv, required: false}
 
 # --- provenance --------------------------------------------------------------
 # Every output table carries this label so a number cannot be lifted from a CSV
@@ -49,7 +54,17 @@ inputs:
 # of every pool-determining field is complete, final validation passes, and a
 # clean tagged release pins data, code, config, prompts, environment and PDF
 # hashes. Until then it says so.
-sample_status: "DEFINITIVE EXTRACTION IN PROGRESS - NOT FOR INFERENCE"
+#
+# Set to `full` on 1 October 2026, on the guarantor's instruction to make this
+# the final version. How each condition stands, so the label is not read as
+# more than it is:
+#   - search complete, universe frozen at 90 reports, SAP v0.2 ratified,
+#     PROSPERO v5.0 submitted 23 September 2026;
+#   - author-response window closed 27 August 2026, every request resolved;
+#   - every pool-determining field human-verified, by ONE reviewer;
+#   - risk-of-bias judgements verified by AI, not by a second human;
+#   - validation passes, and the tag input-freeze-2026-10-01 pins the inputs.
+sample_status: "full"
 
 # --- the primary prevalence pool ---------------------------------------------
 # The gate is EMPLOYMENT-RELATED SELECTION, not parent study design. See
@@ -175,11 +190,11 @@ moderators:
     kind: categorical
     tier: confirmatory
     reference: high
-  outcome_construct:
-    label: "Employment construct"
-    kind: categorical
-    tier: confirmatory
-    reference: paid_any
+  # outcome_construct was listed here as a confirmatory moderator until
+  # 1 October 2026. That contradicted SAP section 9.2: constructs are nested,
+  # overlapping outcomes often measured in the same participants, so they are
+  # analysed as separate outcome families and never as a study-level moderator.
+  # The entry was never fitted (no moderator is reportable below 10 cohorts).
   mean_age:
     label: "Mean age (per 10 years)"
     kind: continuous
@@ -414,6 +429,15 @@ sensitivity:
     # reported. Rows missing_outcome_worst/best in
     # tables/sensitivity_by_horizon.csv
     missing_outcome_bounds: true
+    # POST HOC, deviation D16, adopted 1 October 2026 after the provisional
+    # results were seen. An observation in inputs.author_supplied is admitted to
+    # a horizon only when its whole elapsed-time interval lies inside that
+    # horizon's band; no band is widened. It is substituted into its cohort's
+    # extracted row and passes through build_primary_pool(), so every other gate
+    # still applies. Runs at every horizon it reaches, including one whose
+    # primary pool is empty, and never changes a primary pool. Rows
+    # interval_aware_timing in tables/sensitivity_by_horizon.csv
+    interval_aware_timing: true
 
   # DEFERRED, WITH A REASON. No code runs these, with one exception stated in
   # its own entry: leave_one_cohort_out runs POST HOC under deviation D15, and

@@ -53,5 +53,9 @@ DEFINITIVE_EXTRACTION_PLAN_REVIEW.md
 POST_STAGE_F_PLAN_REVIEW_2026-08-13.md
 EXECUTION_PLAN_2026-08-13.md
 
+# The manuscript draft. Unpublished, and it carries author details that are not
+# public yet. The result tables it is built from are under results/.
+manuscript/
+
 # Engineering fits run on synthetic data and are never results.
 results/engineering_*/

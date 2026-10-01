@@ -38,6 +38,7 @@ read_extraction <- function(cfg) {
     rob      = rd("rob"),
     manifest = rd("manifest"),
     report_cohort_map = rd("report_cohort_map"),
+    author_supplied = rd("author_supplied"),
     shas = vapply(names(cfg$inputs), function(k)
       sha256_file(file.path(cfg$.root, cfg$inputs[[k]]$path)), character(1))
   )
@@ -928,6 +929,95 @@ build_sensitivity_pools <- function(dat, cfg, horizon = cfg$horizons$primary) {
                       cohorts = sort(unique(pool$data$cohort_id)))
   }
   out
+}
+
+# --- interval-aware timing (POST HOC, deviation D16) -------------------------
+
+INTERVAL_AWARE_LABEL <- paste0(
+  "POST HOC (D16): author-supplied observations admitted where the whole ",
+  "elapsed-time interval lies inside the horizon band; does not replace the ",
+  "prespecified primary")
+
+#' Author-supplied interval observations that may take a horizon.
+#'
+#' NOT PRESPECIFIED. An observation timed by an interval of elapsed follow-up,
+#' rather than by one scalar, takes a horizon only when its WHOLE interval lies
+#' inside that horizon's band. An interval that crosses a band edge is refused,
+#' because some of its participants were then measured outside the band, and no
+#' band is widened to admit one.
+#'
+#' Where several of one cohort's intervals fit a band, the one nearest the
+#' landmark is taken. Two adjacent intervals can both touch the landmark (48 to
+#' 60 and 60 to 72 months at a 60-month landmark); that tie follows
+#' horizons.tie_break, as a scalar tie does, so under longer_horizon the later
+#' interval wins: the first in which every participant has reached the landmark.
+#'
+#' @return the admitted rows of `supplied`, at most one per cohort.
+interval_aware_rows <- function(supplied, cfg, horizon) {
+  if (is.null(supplied) || !nrow(supplied)) return(NULL)
+  b <- cfg$horizons$bands[[horizon]]
+  lo <- supplied$elapsed_months_lower_approx
+  hi <- supplied$elapsed_months_upper_approx
+  ok <- !is.na(lo) & !is.na(hi) & lo >= b$min_months & hi <= b$max_months &
+    !is.na(supplied$n_employed) & !is.na(supplied$n_outcome_observed)
+  d <- supplied[ok, , drop = FALSE]
+  if (!nrow(d)) return(NULL)
+  lmk <- b$landmark_months
+  dist <- pmax(d$elapsed_months_lower_approx - lmk, lmk - d$elapsed_months_upper_approx, 0)
+  later <- if (identical(cfg$horizons$tie_break, "shorter_horizon")) 1 else -1
+  d <- d[order(d$cohort_id, dist, later * d$elapsed_months_lower_approx), , drop = FALSE]
+  d[!duplicated(d$cohort_id), , drop = FALSE]
+}
+
+#' The extraction with each admitted interval observation substituted in.
+#'
+#' The observation replaces the counts and timing of its cohort's own extracted
+#' whole-cohort result of the same measure, and the caller passes the returned
+#' tables to build_primary_pool(). Every gate other than timing is therefore
+#' applied by the one function that applies them to everything else, and an
+#' observation from a cohort that fails a gate is removed there, in the log.
+#'
+#' @return list(dat, added), or NULL when nothing is admitted at this horizon.
+interval_aware_data <- function(dat, cfg, horizon) {
+  add <- interval_aware_rows(dat$author_supplied, cfg, horizon)
+  if (is.null(add)) return(NULL)
+  o <- dat$outcomes
+  clash <- intersect(add$cohort_id, o$cohort_id[!is.na(o$horizon) & o$horizon == horizon])
+  if (length(clash)) {
+    stop("interval-aware timing at ", horizon, ": ", paste(clash, collapse = ", "),
+         " already has an extracted result at this horizon. An author-supplied ",
+         "observation must not stand beside it; resolve which is used first.",
+         call. = FALSE)
+  }
+  new <- list()
+  for (i in seq_len(nrow(add))) {
+    ref <- which(o$report_id == add$report_id[i] & o$cohort_id == add$cohort_id[i] &
+                   o$arm_id == "cohort" & o$result_role == "reported" &
+                   o$ascertainment == add$ascertainment[i])
+    if (length(ref) != 1L) {
+      stop("interval-aware timing: ", add$report_id[i], " / ", add$cohort_id[i],
+           " has ", length(ref), " extracted whole-cohort results of the same ",
+           "measure to take its gates from; exactly one is needed.", call. = FALSE)
+    }
+    row <- o[ref, , drop = FALSE]
+    row$result_id <- sprintf("%s_authorseries_y%+d", row$result_id,
+                             as.integer(add$relative_calendar_year[i]))
+    row$n_employed <- as.integer(add$n_employed[i])
+    row$n_outcome_observed <- as.integer(add$n_outcome_observed[i])
+    # The lower bound: every participant has at least this much follow-up. The
+    # interval itself is carried in `added` and reported beside the estimate.
+    row$followup_months <- add$elapsed_months_lower_approx[i]
+    row$followup_years <- row$followup_months / 12
+    row$horizon <- horizon
+    row$p_obs <- row$n_employed / row$n_outcome_observed
+    # These described the reference row's own timepoint, not this one.
+    for (f in intersect(c("n_assessed", "n_alive_eligible", "prop_unobserved"), names(row))) {
+      row[[f]] <- NA
+    }
+    new[[i]] <- row
+  }
+  dat$outcomes <- rbind(o, do.call(rbind, new))
+  list(dat = dat, added = add)
 }
 
 #' Choose one result per cohort under the prespecified order.

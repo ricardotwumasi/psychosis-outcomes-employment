@@ -123,6 +123,20 @@ main <- function() {
         identical_to_primary = identical(sort(unique(d$cohort_id)), sort(s$cohorts)),
         cohorts = paste(s$cohorts, collapse = ";"), stringsAsFactors = FALSE)
     }
+
+    # Interval-aware timing, POST HOC (D16): the same pool builder, with any
+    # admitted author-supplied observation substituted in.
+    ia <- if (isTRUE(cfg$sensitivity$implemented_model_sensitivities$interval_aware_timing))
+      interval_aware_data(dat, cfg, h)
+    if (!is.null(ia)) {
+      ip <- build_primary_pool(ia$dat, cfg, horizon = h)$data
+      ic <- sort(unique(ip$cohort_id))
+      sens_rows[[paste(h, "interval_aware_timing")]] <- data.frame(
+        horizon = h, analysis = "interval_aware_timing", label = INTERVAL_AWARE_LABEL,
+        n_results = nrow(ip), n_cohorts = length(ic),
+        identical_to_primary = identical(sort(unique(d$cohort_id)), ic),
+        cohorts = paste(ic, collapse = ";"), stringsAsFactors = FALSE)
+    }
   }
 
   write_out(do.call(rbind, pool_rows), "pool_by_horizon.csv", cfg)

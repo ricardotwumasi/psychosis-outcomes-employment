@@ -645,3 +645,61 @@ test_that("a derivation resting on a disputed component is rejected, because sum
   d$outcomes$conflict_note[d$outcomes$result_id == "part_a"] <- "printed total disagrees"
   expect_error(validate_extraction(d, cfg), "unresolved")
 })
+
+# --- interval-aware timing (POST HOC, deviation D16) -------------------------
+
+supplied_fixture <- function(lower, upper = lower + 12, cohort = "coh_b", report = "beta2021") {
+  data.frame(report_id = report, cohort_id = cohort,
+             relative_calendar_year = as.integer(lower / 12),
+             n_employed = 50L, n_outcome_observed = 300L,
+             ascertainment = "point_prevalence",
+             elapsed_months_lower_approx = lower, elapsed_months_upper_approx = upper,
+             stringsAsFactors = FALSE)
+}
+
+test_that("an interval that crosses a band edge is refused, because some of its participants were measured outside the band and a relabelled row would claim a timing the source does not give", {
+  s <- supplied_fixture(c(-12, 0, 12, 24, 36, 72))
+  for (h in names(cfg$horizons$bands)) expect_null(interval_aware_rows(s, cfg, h))
+})
+
+test_that("an interval lying wholly inside a band is admitted to that band only, so no band is widened to take it", {
+  s <- supplied_fixture(c(60, 120))
+  expect_equal(interval_aware_rows(s, cfg, "t60m")$elapsed_months_lower_approx, 60)
+  expect_equal(interval_aware_rows(s, cfg, "t120m")$elapsed_months_lower_approx, 120)
+  expect_null(interval_aware_rows(s, cfg, "t12m"))
+  expect_null(interval_aware_rows(s, cfg, "t24m"))
+})
+
+test_that("of two adjacent intervals touching the landmark the later is taken, following the prespecified tie rule, so the choice between them was not made by looking at their counts", {
+  s <- supplied_fixture(c(48, 60, 108, 120))
+  expect_equal(interval_aware_rows(s, cfg, "t60m")$elapsed_months_lower_approx, 60)
+  expect_equal(interval_aware_rows(s, cfg, "t120m")$elapsed_months_lower_approx, 120)
+})
+
+test_that("author-supplied interval counts never reach a primary pool, because the rule admitting them was adopted after results were seen and is a sensitivity only", {
+  d <- derive_columns(fixture(), cfg)
+  with <- d; with$author_supplied <- supplied_fixture(60)
+  for (h in names(cfg$horizons$bands)) {
+    expect_identical(build_primary_pool(with, cfg, horizon = h)$data,
+                     build_primary_pool(d, cfg, horizon = h)$data)
+  }
+})
+
+test_that("an admitted interval observation enters the sensitivity pool with the author's counts, and still has to pass every other pool gate", {
+  d <- derive_columns(fixture(), cfg)
+  d$author_supplied <- supplied_fixture(60)
+  ia <- interval_aware_data(d, cfg, "t60m")
+  p <- build_primary_pool(ia$dat, cfg, horizon = "t60m")$data
+  expect_equal(p$cohort_id, "coh_b")
+  expect_equal(c(p$n_employed, p$n_outcome_observed), c(50L, 300L))
+  # the same observation from a cohort selected on employment is removed
+  d$cohorts$employment_selection_status[d$cohorts$cohort_id == "coh_b"] <- "known"
+  ia <- interval_aware_data(d, cfg, "t60m")
+  expect_equal(nrow(build_primary_pool(ia$dat, cfg, horizon = "t60m")$data), 0L)
+})
+
+test_that("an interval observation is refused where its cohort already has an extracted result at that horizon, because two results from one cohort would be chosen between after the fact", {
+  d <- derive_columns(fixture(), cfg)
+  d$author_supplied <- supplied_fixture(9, 18)
+  expect_error(interval_aware_data(d, cfg, "t12m"), "already has an extracted result")
+})

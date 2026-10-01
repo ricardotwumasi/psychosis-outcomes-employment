@@ -1,5 +1,7 @@
 # Handover: start here
 
+**Updated 1 October 2026** for the guarantor-requested source adjudications and request closure. See `docs/project_decisions_2026-10-01.md` for the dated answers and verification audit. The provisional fits below remain the 23 September outputs.
+
 **Rewritten 23 September 2026**, after the author window closed, the human verification was recorded, and the first provisional Bayesian fits were run. It is written for whoever picks this up next, human or model, with no other context.
 
 Read this file, then `docs/methods_deviations.md` (D13 to D15), then `config/analysis.yml`. Everything else is detail.
@@ -43,7 +45,7 @@ Source: `results/provisional_8b1dfaa3e539/`, fitted from tag `provisional-fit-20
   - Fitted on the other two, the model predicts its 0/56 with a two-sided p of 0.001 (`diagnostics/ppc_loco.csv`).
   - priorsense flags a prior-data conflict: 67 per cent of the posterior tau mass lies above the prior's 95th percentile.
   - The pooled figure mixes community and forensic-detention populations and has no single population to generalise to.
-  - The leave-one-cohort-out is **post hoc** (D15, not yet ratified) and does not replace the primary.
+  - The leave-one-cohort-out is **post hoc** (D15, ratified on the guarantor's instruction 1 October 2026) and does not replace the primary.
 - **The predictive intervals are not headlines.** At k = 2 and 3 they are mostly the tau prior.
 - **The frequentist comparators** (`tables/frequentist_comparison.csv`) cannot identify tau at this k. The two approaches do not validate each other.
 
@@ -80,7 +82,7 @@ The superseded first run, `results/superseded_provisional_76a8bb06ff87/` (tag `p
 | Phase 5 gate | State |
 |---|---|
 | PROSPERO v5.0 submitted | **Closed**: 23 September 2026. The returned version number is still to be recorded in `docs/methods_deviations.md`. |
-| Author window closed, replies applied | **Closed** for every report the sheet or the guarantor names. **Open:** 65 reports are still `drafted` in the manifest, and whether those were sent is unknown. No current pool depends on them. |
+| Author window closed, replies applied | **Closed** for every report the sheet or the guarantor names. **Closed 1 October 2026:** the guarantor confirmed the remaining 65 requests were sent. The contact workbook records three additional replies: final statuses are 10 `responded`, 70 `no_response`; eight send dates were recovered. No current pool depends on them. |
 | Every pool-determining field human-verified | **Closed** (tiers 0 to 2). It was single-reviewer; say so in the paper. |
 | Overlap audit adjudicated | Pune pair **closed**. The others are open, and none of them touches a current pool. |
 | Merged tables validate, `git diff --check`, clean tree | **Closed** at `provisional-fit-2026-09-23b`. |
@@ -92,10 +94,10 @@ The superseded first run, `results/superseded_provisional_76a8bb06ff87/` (tag `p
 
 ## Open questions for the authorship group (decide before definitive)
 
-1. **Is a high-security forensic cohort eligible for a prevalence of paid work?** thomson2023 passes every written gate. Whether detained patients belong in this estimand is an eligibility question, not a sensitivity one. The prespecified primary keeps it. Ratify D15, and decide whether a population rule is needed. Any such rule would be post hoc and must be labelled so.
-2. **The hakulinen2020 author series.** The author supplied employment counts by year relative to first hospitalisation (−10 to +10, for example year 0 968/6,939 and year +10 398/3,801). The extraction sheet calls them "barred by calendar_end_common". If first hospitalisation is cohort entry, years +1, +2, +5 and +10 are landmark data from about 7,000 people, and would populate the empty 24-month and 5-year horizons. This needs a documented ruling, and new rows through `data/result_corrections.csv` if admitted. It is the largest potential change to any pool.
-3. **mayoralvanson2019's denominator: 156 or 157.** The MSc extraction disagrees with ours. Resolve it against the PDF before the unclear-selection sensitivity analysis is reported.
-4. **The 65 `drafted` requests.** Were they sent? If so, record `no_response`.
+1. **Is a high-security forensic cohort eligible for a prevalence of paid work?** thomson2023 passes every written gate. Whether detained patients belong in this estimand is an eligibility question, not a sensitivity one. The prespecified primary keeps it. D15 was ratified on the guarantor's instruction on 1 October 2026. The cohort was recruited in high-security care but was not wholly detained at follow-up. Retain it under the current broad population rule; a community-only restriction would need a separate amendment. Any such rule would be post hoc and must be labelled so.
+2. **The hakulinen2020 author series.** The author supplied employment counts by year relative to first hospitalisation (−10 to +10, for example year 0 968/6,939 and year +10 398/3,801). The extraction sheet calls them "barred by calendar_end_common". If first hospitalisation is cohort entry, years +1, +2, +5 and +10 are landmark data from about 7,000 people, and would populate the empty 24-month and 5-year horizons. The 1 October source ruling is in `docs/project_decisions_2026-10-01.md`: calendar-year alignment is not an exact anniversary; +1 and +2 cross the current bands. `Authors Contacted.xlsx` supplies all 21 schizophrenia counts, now staged in `data/author_supplied_counts.csv`: +1 720/6546, +2 660/6208, +5 552/5297 and +10 398/3801. +5/+10 are candidates for an explicit interval-aware rule, not admitted rows. No landmark admission has been implemented. It is the largest potential change to any pool.
+3. **mayoralvanson2019's denominator: 156 or 157.** The MSc extraction disagrees with ours. Resolved against Table 3 on 1 October 2026: 156 recorded employment categories, 157 recruited/reporting base. Both baseline and follow-up partitions sum to 156; do not assume the reported suicide explains the missing status. Selection remains unclear.
+4. **The 65 `drafted` requests.** Confirmed sent by the guarantor on 1 October 2026. The contact workbook confirms replies for three; the other 62 carry `no_response` under the closed-window rule. Eight actual send dates are recorded; other dates remain blank.
 5. **The standing questions from Stage F**, still open:
    - which instrument appraises a single-arm proportion from a trial;
    - risk of bias for `component_only` fragments;

@@ -28,6 +28,10 @@
 # D15) also runs at every horizon the model reaches, with a prior against
 # posterior table. The leave-one-cohort-out rows carry that label in their own
 # column, and neither addition replaces the prespecified primary.
+#
+# Since 1 October 2026 a POST HOC interval-aware timing sensitivity (deviation
+# D16) runs at every horizon an author-supplied interval observation can take.
+# It is a row of sensitivity_by_horizon.csv and changes no primary pool.
 # =============================================================================
 
 `%||%` <- function(a, b) if (is.null(a)) b else a
@@ -184,6 +188,33 @@ main <- function() {
       message(sprintf("  estimate %.3f [%.3f, %.3f]%s", r$estimate, r$interval_lo,
                       r$interval_hi, if (isTRUE(r$small_k)) "  (small k)" else ""))
     }
+    ## interval-aware timing: POST HOC, deviation D16. It sits above the `next`
+    ## below because it can reach a horizon whose primary pool is empty, and it
+    ## takes the same D11.3 route as any pool.
+    ia <- if (isTRUE(cfg$sensitivity$implemented_model_sensitivities$interval_aware_timing))
+      interval_aware_data(dat, cfg, h)
+    if (!is.null(ia)) {
+      iv <- fit_prevalence(build_primary_pool(ia$dat, cfg, horizon = h), cfg, cache_dir,
+                           horizon = h, analysis = "interval_aware_timing")
+      if (identical(iv$status, "ok")) keep_fit(iv)
+      row <- pooled_row(iv, cfg)
+      row <- cbind(row[c("horizon", "horizon_label", "analysis")],
+                   label = INTERVAL_AWARE_LABEL, identical_to_primary = FALSE,
+                   n_cohorts_bounded = NA_integer_,
+                   row[setdiff(names(row), c("horizon", "horizon_label", "analysis"))],
+                   stringsAsFactors = FALSE)
+      added <- paste(sprintf("%s year %+d, %d/%d, %g to %g months", ia$added$report_id,
+                             ia$added$relative_calendar_year, ia$added$n_employed,
+                             ia$added$n_outcome_observed, ia$added$elapsed_months_lower_approx,
+                             ia$added$elapsed_months_upper_approx), collapse = "; ")
+      admitted <- ia$added$cohort_id %in% iv$data$cohort_id
+      row$note <- paste0(if (all(admitted)) "added: " else "offered but removed by a pool gate: ",
+                         added, if (nzchar(row$note)) paste0("; ", row$note) else "")
+      sens_rows[[paste(h, "interval_aware_timing")]] <- row
+      message(sprintf("  interval-aware timing (post hoc, D16): k = %d cohorts, %s",
+                      row$k_cohorts, row$method))
+    }
+
     if (identical(res$status, "no_estimate")) note_skip(paste0("prevalence_", h), res$reason)
     if (identical(res$status, "exact_binomial")) {
       note_skip(paste0("leave_one_cohort_out_", h),

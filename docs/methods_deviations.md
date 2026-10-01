@@ -302,7 +302,7 @@ The discrepancy survived the pilot because `carstairs_1992`, the only `smi_mixed
 
 **Rationale.** The prespecified document governs, and the implementation was wrong relative to it. The clarification also removes a real ambiguity in the registered wording: read literally, the "or" branch offered a route into the primary pool that the pool could never honour, since the primary estimand admits only whole recruited cohorts. Stating which branch does what removes that contradiction rather than relaxing a criterion.
 
-**Direction and transparency.** This change **admits** evidence rather than excluding it, and it was made after the affected result was seen. That is the harder direction to defend, so the sequence is recorded plainly: the conflict was surfaced by the F04 extraction, put to the authorship group with the affected result named, and ratified. `khare2022b`'s 53 of 107 at 12 months enters the primary pool subject to every other gate and to independent human verification, which has not yet been done. No other prespecified rule was relaxed, and no result already excluded on any other ground was revisited.
+**Direction and transparency.** This change **admits** evidence rather than excluding it, and it was made after the affected result was seen. That is the harder direction to defend, so the sequence is recorded plainly: the conflict was surfaced by the F04 extraction, put to the authorship group with the affected result named, and ratified. `khare2022b`'s 53 of 107 at 12 months enters the primary pool subject to every other gate and to independent human verification, which had not been done when this was written and was completed before 11 September 2026 (single reviewer; see `data/extraction_provenance.csv`). No other prespecified rule was relaxed, and no result already excluded on any other ground was revisited.
 
 ---
 
@@ -328,18 +328,59 @@ The discrepancy survived the pilot because `carstairs_1992`, the only `smi_mixed
 
 ## D15. Post hoc leave-one-cohort-out at the long-term horizon
 
-**Date:** 23 September 2026. **After the provisional, pre-freeze fits of 23 September 2026 were seen. Not yet ratified by the authorship group.** This is the first deviation in this log made after a pooled real-data estimate was examined, and it is labelled accordingly.
+**Date:** 23 September 2026. **After the provisional, pre-freeze fits of 23 September 2026 were seen. Ratified on the guarantor's explicit instruction on 1 October 2026.** This is the first deviation in this log made after a pooled real-data estimate was examined, and it is labelled accordingly.
 
 **Issue.** Once the author window closed, the `t120m` pool held three cohorts. One of them, `thomson2023` (Carstairs, a high-security forensic hospital cohort), contributes 0 employed of 56 living participants observed at 240 months. It entered only because the author's reply supplied the missing denominator, and it passes every prespecified gate. In the provisional fit this one zero-event cohort roughly halved the pooled proportion and tripled tau. priorsense flagged prior-data conflict: the posterior median of tau, 1.1, sits in the top 3 per cent of the half-normal(0, 0.5) prior. The new-cohort posterior predictive interval excluded the cohort even though it was in the fit. An independent statistical review recommended reporting each cohort's influence.
 
-**Ruling (proposed).**
+**Ruling (ratified 1 October 2026).**
 - Where a horizon's primary pool holds three or more cohorts, the model is refitted dropping each cohort in turn.
 - At two cohorts, the two cohort-level exact binomial intervals are reported instead of a refit.
 - Every such output is labelled **post hoc**, cites this entry, and **does not replace the prespecified primary estimate**, which is still the one reported first.
 
-The eligibility question that the influence exposes is a question for the authorship group, not for a sensitivity analysis: should a population detained in high-security care be pooled with community cohorts for a prevalence of paid work? Leave-one-cohort-out was already named in `config/analysis.yml` as the planned cross-validation, deferred as uninformative at k = 2 or 3. What is new here is running it for influence at k = 3, after an estimate was seen.
+**Ratification record.** The guarantor explicitly requested "Ratify D15" on 1 October 2026. This ratifies the influence analysis as written; it does not establish that a separate authorship-group meeting occurred, amend population eligibility, or retrospectively make the analysis prespecified. The source paper describes a cohort recruited in high-security care whose survivors later occupied several settings, including the community. It is not a cohort entirely detained in high-security care at the employment assessment. Retain it under the current broad population rule, and disclose the applicability problem. A community-specific population restriction would be a separate post hoc amendment applied across the entire review universe. See `docs/project_decisions_2026-10-01.md`.
+
+The eligibility question that the influence exposes is not one a sensitivity analysis can answer: should a population recruited in high-security care be pooled with community cohorts for a prevalence of paid work? It was put to the guarantor and answered on 1 October 2026, as recorded above: the cohort stays in, under the population rule as written. Leave-one-cohort-out was already named in `config/analysis.yml` as the planned cross-validation, deferred as uninformative at k = 2 or 3. What is new here is running it for influence at k = 3, after an estimate was seen.
 
 **Direction and transparency.** The primary pool, the priors and the gates are unchanged. Nothing is excluded. The analysis adds information and removes none, and a reader can see the primary estimate and each cohort's influence side by side.
+
+---
+
+## D16. Post hoc interval-aware timing sensitivity
+
+**Date:** 1 October 2026. **After the provisional, pre-freeze fits of 23 September 2026 were seen, and after the counts it admits were seen. Adopted on the guarantor's decision of 1 October 2026 as a sensitivity analysis only.** It is not registered and is disclosed here and in the report.
+
+**Issue.** The author of `hakulinen2020` supplied employment counts for the Finnish schizophrenia cohort (`fi_registers_scz`) for each calendar year relative to the year of first hospitalisation. First hospitalisation is a legitimate cohort entry event, but employment is measured in the last week of a calendar year, so "year +5" is not a five-year anniversary: it is an observation taken between about 60 and 72 months after entry, depending on when in the year each person was first hospitalised. The schema admits a landmark only for a scalar elapsed follow-up from baseline, so none of the series can enter a pool as extracted, and typing 60 into `followup_months` would claim a precision the source does not have. See `docs/project_decisions_2026-10-01.md`, section 2.
+
+**Ruling.**
+- An observation timed by an interval of elapsed follow-up may take a horizon **only when its whole interval lies inside that horizon's prespecified band**. An interval that crosses a band edge is refused. No band is widened.
+- Where several of one cohort's intervals fit one band, the interval nearest the landmark is taken. Two adjacent intervals can both touch the landmark; that tie follows `horizons.tie_break` (`longer_horizon`), as a scalar tie does under D11.1, so the later interval is taken: the first in which every participant has reached the landmark.
+- The admitted observation is substituted into its cohort's own extracted row and passed through `build_primary_pool()`, so every other gate (selection, arm type, construct, ascertainment, diagnosis, conflict status) applies unchanged. D11.3 then routes the pool as it routes any pool.
+- It runs as the sensitivity analysis `interval_aware_timing`. **It changes no primary pool and does not replace any primary estimate.**
+
+**What it admits.** Applied to the 21 years of the series in `data/author_supplied_counts.csv`:
+
+| Year | Elapsed months | Outcome |
+|---|---|---|
+| −10 to 0 | before entry, or 0 to 12 | No band contains it |
+| +1 | 12 to 24 | Crosses the 12-month band (9 to 18) |
+| +2 | 24 to 36 | Crosses the 24-month band (18 to 30) |
+| +3 | 36 to 48 | Lies between bands |
+| +4 | 48 to 60 | Inside the 5-year band; not taken, because +5 is at the landmark and the tie goes to the later interval |
+| **+5** | 60 to 72 | **Admitted to the 5-year band: 552/5,297** |
+| +6 to +8 | 72 to 108 | Crosses the 5-year band (48 to 78), or lies between bands |
+| +9 | 108 to 120 | Inside the long-term band; not taken, for the same reason as +4 |
+| **+10** | 120 to 132 | **Admitted to the long-term band: 398/3,801** |
+
+So the sensitivity pool holds one cohort at 5 years, which D11.3 reports as that cohort's exact binomial interval and not as a meta-analysis, and four cohorts at 10 years or more. Nothing is added at 12 or 24 months.
+
+**What a reader should know.**
+- The rule and its tie-break were written after the counts were seen. The tie-break was not chosen from the counts: it is the existing rule for a scalar tie, and at both bands it selects the year the guarantor's ruling had already named. The alternative years are stated above so the choice can be checked: +4 is 595/5,588 and +9 is 423/4,117.
+- The counts are a transcription of the author's reply, held in a contact workbook that is not in this repository. All 21 denominators match the published Table 1. The counts have not been through the tier 0 to 2 human verification that the primary pools have.
+- The denominator falls from 6,939 at entry to 5,297 and 3,801. The series reflects whoever had register data in that year. The fall is not loss to follow-up in the usual sense and must not be described as such without separating death, emigration and calendar coverage.
+- **Overlap.** Three other Finnish cohorts in the review could share participants with a national register of first hospitalisations: `nfbc1966`, `helsinki_eps` and `fi_birth_1987`. None of them is in the 5-year or long-term pool, primary or sensitivity, so no participant is counted twice in this analysis. The other members of the long-term sensitivity pool are from Canada, China and Scotland.
+- At 10 years or more the Finnish cohort has 3,801 participants against 183 in the other three cohorts together. In a random-effects model each cohort is one draw from the distribution of cohort proportions, so it does not dominate the pooled estimate by size, but the estimate is still one of four cohorts.
+
+**Direction and transparency.** This change **admits** evidence, after results were seen, which is the direction that most needs disclosure. It is confined to a labelled sensitivity for that reason. The primary pools, priors, bands and gates are unchanged.
 
 ---
 
