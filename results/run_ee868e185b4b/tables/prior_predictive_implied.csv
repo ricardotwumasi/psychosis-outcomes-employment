@@ -1,0 +1,5 @@
+"quantity","value","sample_status","result_status"
+"pooled_proportion_prior_median",0.249066907327757,"full","definitive"
+"pooled_proportion_prior_lo",0.066523718882471,"full","definitive"
+"pooled_proportion_prior_hi",0.618895836267171,"full","definitive"
+"tau_prior_median",0.330554,"full","definitive"
