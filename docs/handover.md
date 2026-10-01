@@ -41,9 +41,10 @@ Sensitivity and post hoc analyses (`tables/sensitivity_by_horizon.csv`, `tables/
 
 **How to read them.** This follows the two independent statistical reviews (23 September and 1 October). The wording matters more than the numbers.
 - **Quote posterior estimates to two decimals.** Independent recomputation agrees on every pooled median within 0.001, but interval limits differ in the third decimal, which is Monte Carlo error.
-- **12 months is two clinics in one city.** Both cohorts are from one research group in Pune, with mixed SMI samples admitted under D13, recruited from people already attending outpatient services. "12 months" is time since enrolment.
+- **12 months is three clinics in two neighbouring districts, from one research group.** The private cohort (khare2021) was recruited at one hospital in Pune and one in Ahmednagar, the public cohort (khare2022b) at one hospital in Pune. Both are mixed SMI samples of people already attending outpatient services. An earlier version of this file said "both from Pune"; that was wrong.
+  - **Both cohorts qualify only under D13.** Neither has an extractable diagnostic subgroup (`subgroup_extractable` is `unclear` and `no`), so under the pre-D13 reading the 12-month pool would be empty. D13 was made after the public cohort's result had been seen. Say so wherever the 12-month result is reported. "12 months" is time since enrolment.
   - **Lead with the two cohort-level exact intervals** (0.495 [0.40, 0.59] and 0.629 [0.58, 0.67]), not the pooled figure.
-  - The pooled median sits below the crude 0.60 because the prior is centred on 0.25. Its lower limit is below both cohorts' own lower limits. tau is its prior. The weak prior gives 0.57 [0.13, 0.91].
+  - The pooled median sits below the crude 0.60 mainly because the prior is centred on 0.25, and partly because a random-effects model weights the two cohorts more equally than their sizes (the weak prior and the frequentist comparator both give about 0.57). Its lower limit is below both cohorts' own lower limits. tau is its prior. The weak prior gives 0.57 [0.13, 0.91].
   - The missing-outcome rows in the output are identical to the primary because no cohort could be bounded. That is not robustness: 17 and 29 per cent of entrants were not observed.
 - **10 years or more depends on the forensic cohort.** thomson2023 is Carstairs, recruited in high-security care, with 0 of 56 in paid work at 240 months. It was retained under the population rule as written (guarantor's ruling, 1 October).
   - Give the pooled figure and the figure without it in adjacent sentences. Do not describe the exclusion as a correction.
@@ -57,6 +58,7 @@ Sensitivity and post hoc analyses (`tables/sensitivity_by_horizon.csv`, `tables/
   - The rule can admit annual register data only at the two wide, late bands. The year it could not admit at 12 months, +1, is 720/6,546 (11 per cent), far below the 12-month pool. Show the whole Finnish series.
 - **New-cohort predictive intervals and the frequentist comparators belong in a supplement.** At this k the first are mostly the tau prior, and the second cannot identify tau and validate nothing.
 - **Certainty is very low at both horizons**, with no route to anything higher.
+- **Do not write "no dependable benchmark exists".** The search covers reports from 2016, and 70 of 80 author requests went unanswered. Write "we found none".
 
 The provisional outputs are kept as the record: `results/provisional_8b1dfaa3e539/` (tag `provisional-fit-2026-09-23b`) and `results/superseded_provisional_76a8bb06ff87/`, the run that prompted D15.
 
@@ -100,6 +102,7 @@ None of these blocks the analysis. Each is for the authorship group.
 
 A complete draft for *The Lancet Psychiatry* exists in `manuscript/`, which is gitignored and never committed: an unpublished paper does not belong in a public repository.
 
+- **A second statistical review read the assembled draft against the result tables** on 1 October. It confirmed every quoted estimate and asked for thirteen corrections of description, all applied.
 - **Every result number is generated.** `manuscript/build/build.R results/run_ee868e185b4b` writes `numbers.csv`, the tables and the figures from the definitive tables. The section files carry `{{keys}}`, and `manuscript/build/assemble.py` refuses to build if a key is missing, then renders `manuscript.docx` and `supplement.docx` with pandoc.
 - **`manuscript/OUTSTANDING.md`** lists everything an author must supply or confirm.
 - The MSc dissertation (September 2026) did a narrative synthesis without pooling, and counts results the SAP bars. Do not quote its counts as the review's.

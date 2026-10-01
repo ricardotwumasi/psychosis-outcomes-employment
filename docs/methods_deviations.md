@@ -304,6 +304,8 @@ The discrepancy survived the pilot because `carstairs_1992`, the only `smi_mixed
 
 **Direction and transparency.** This change **admits** evidence rather than excluding it, and it was made after the affected result was seen. That is the harder direction to defend, so the sequence is recorded plainly: the conflict was surfaced by the F04 extraction, put to the authorship group with the affected result named, and ratified. `khare2022b`'s 53 of 107 at 12 months enters the primary pool subject to every other gate and to independent human verification, which had not been done when this was written and was completed before 11 September 2026 (single reviewer; see `data/extraction_provenance.csv`). No other prespecified rule was relaxed, and no result already excluded on any other ground was revisited.
 
+**Note added 1 October 2026, after the definitive fit.** `khare2022b` is not the only cohort that depends on this clarification. The other cohort in the 12-month pool, `khare2021` (`pune_private`; 59.3 per cent with a qualifying diagnosis, `subgroup_extractable` recorded as `unclear`), also qualifies only because the 50 per cent rule is sufficient on its own. Under the earlier implementation the 12-month primary pool would hold no cohort. The clarification was made after `khare2022b`'s result had been seen; the report says so wherever the 12-month result appears.
+
 ---
 
 ## D14. Partition sums across mutually exclusive subgroups

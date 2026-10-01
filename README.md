@@ -27,13 +27,13 @@ those report it at a landmark from cohort entry. Read every figure below with
 
 | Horizon | Cohorts | What the data show |
 |---|---|---|
-| 12 months | 2 | 287/456 (62.9%) and 53/107 (49.5%), both from one research group in Pune. Pooled posterior median 53% (95% CrI 29 to 66), drawn below the crude 60% by the prior. |
+| 12 months | 2 | 287/456 (62.9%) and 53/107 (49.5%), both from one research group in Maharashtra, India (hospitals in Pune and Ahmednagar). Pooled posterior median 53% (95% CrI 29 to 66), drawn below the crude 60% mainly by the prior. |
 | 24 months | 0 | No estimate. |
 | 5 years | 0 | No estimate. Post hoc (D16): one Finnish register cohort, 552/5,297 (10.4%), which is one cohort's proportion and not a meta-analysis. |
 | 10 years or more | 3 | 35/65, 23/62 and 0/56. Pooled 23% (9 to 45). Post hoc (D15): 42% (24 to 57) without the forensic cohort. Post hoc (D16): 20% (9 to 38) with the Finnish cohort added. |
 
 Neither pooled figure is a prevalence for people with psychosis in general. The 12-month pool
-is two clinics in one city. The long-term pool mixes early intervention, adolescent inpatient
+is three clinics in two neighbouring districts, reported by one research group, and both cohorts qualify only under D13. The long-term pool mixes early intervention, adolescent inpatient
 and high-security forensic cohorts and has no single target population. The certainty of both
 is very low.
 
